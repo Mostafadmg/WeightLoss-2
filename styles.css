@@ -2022,8 +2022,8 @@ details.accordion:hover {
 details.accordion summary {
   cursor: pointer;
   user-select: none;
-  padding: 18px 20px;
-  font-size: 14px;
+  padding: 20px 24px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text);
   list-style: none;
@@ -2033,7 +2033,11 @@ details.accordion summary {
 }
 
 details.accordion summary:hover {
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(99, 102, 241, 0.02) 100%
+  );
 }
 
 details.accordion summary::-webkit-details-marker {
@@ -2071,7 +2075,7 @@ details.accordion[open] summary::after {
 }
 
 .accordion-body {
-  padding: 20px 20px 24px;
+  padding: 24px;
   border-top: 1px solid rgba(99, 102, 241, 0.1);
   background: var(--bg-card);
 }
@@ -2260,8 +2264,8 @@ details.accordion[open] summary::after {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 10px;
-  padding: 24px;
-  margin-bottom: 20px;
+  padding: 28px;
+  margin-bottom: 24px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
@@ -2275,12 +2279,12 @@ details.accordion[open] summary::after {
 .protocol-title {
   display: flex;
   align-items: center;
-  gap: 14px;
-  font-size: 15.5px;
+  gap: 16px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 18px;
   border-bottom: 2px solid rgba(99, 102, 241, 0.1);
 }
 
@@ -2321,10 +2325,10 @@ details.accordion[open] summary::after {
 }
 
 .protocol-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 10px;
+  line-height: 1.75;
+  margin-bottom: 14px;
 }
 
 .protocol-text:last-child {
@@ -2387,56 +2391,62 @@ details.accordion[open] summary::after {
 
 .protocol-table th,
 .protocol-table td {
-  padding: 16px 18px;
+  padding: 20px 24px;
   text-align: left;
   border-bottom: 1px solid rgba(99, 102, 241, 0.08);
-  font-size: 13.5px;
-  line-height: 1.65;
+  font-size: 14.5px;
+  line-height: 1.8;
   vertical-align: top;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .protocol-table th {
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(99, 102, 241, 0.04) 100%
+  );
   font-weight: 700;
-  font-size: 11px;
+  font-size: 11.5px;
   text-transform: uppercase;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.8px;
   color: var(--accent);
   border-bottom: 2px solid rgba(99, 102, 241, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
   white-space: normal;
+  padding: 18px 24px;
 }
 
 /* Column-specific styling for 5-column tables */
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(1),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(1) {
-  width: 18%;
+  width: 20%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(2),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(2) {
-  width: 13%;
-  text-align: center;
+  width: 14%;
+  text-align: left;
+  padding-left: 16px;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(3),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(3) {
-  width: 10%;
+  width: 11%;
   text-align: center;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(4),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(4) {
-  width: 28%;
+  width: 27%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(5),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(5) {
-  width: 31%;
+  width: 28%;
 }
 
 /* Column-specific styling for 2-column tables (Table 1) */
@@ -2477,10 +2487,11 @@ details.accordion[open] summary::after {
 }
 
 .protocol-table td:first-child strong {
-  font-size: 14px;
+  font-size: 15px;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   color: var(--text);
+  line-height: 1.4;
 }
 
 /* Decision outcomes styling */
@@ -2488,52 +2499,55 @@ details.accordion[open] summary::after {
   color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border-radius: 6px;
-  font-size: 10.5px;
-  letter-spacing: 0.7px;
+  font-size: 11.5px;
+  letter-spacing: 0.8px;
   box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
+  margin: 3px 0;
 }
 
 .protocol-table .decision-prescribe {
   color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   border-radius: 6px;
-  font-size: 10.5px;
-  letter-spacing: 0.7px;
+  font-size: 11.5px;
+  letter-spacing: 0.8px;
   box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
+  margin: 3px 0;
 }
 
 .protocol-table .decision-clinical {
   color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 6px 12px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   border-radius: 6px;
-  font-size: 10.5px;
-  letter-spacing: 0.7px;
+  font-size: 11.5px;
+  letter-spacing: 0.8px;
   box-shadow: 0 2px 4px rgba(234, 88, 12, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
+  margin: 3px 0;
 }
 
 /* Checklist styling */
 .protocol-table .checklist-item {
   display: flex;
   align-items: flex-start;
-  margin: 6px 0;
-  line-height: 1.55;
+  margin: 8px 0;
+  line-height: 1.7;
   padding-left: 2px;
-  font-size: 13px;
+  font-size: 13.5px;
 }
 
 .protocol-table .checklist-item::before {
@@ -2549,15 +2563,15 @@ details.accordion[open] summary::after {
 /* Timeframe column styling */
 .protocol-table td:nth-child(2) {
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 /* Macro badge styling */
 .protocol-table .tag {
-  font-size: 11px;
-  padding: 6px 12px;
+  font-size: 12px;
+  padding: 7px 14px;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   white-space: nowrap;
 }
@@ -2585,45 +2599,69 @@ details.accordion[open] summary::after {
 @media (max-width: 1600px) {
   .protocol-table th,
   .protocol-table td {
-    padding: 15px 16px;
+    padding: 18px 20px;
+    font-size: 14px;
+  }
+  
+  .protocol-table th {
+    padding: 16px 20px;
+  }
+
+  .protocol-table .checklist-item {
     font-size: 13px;
   }
   
-  .protocol-table .checklist-item {
-    font-size: 12.5px;
+  .protocol-table td:first-child strong {
+    font-size: 14.5px;
   }
 }
 
 @media (max-width: 1400px) {
   .protocol-table th,
   .protocol-table td {
-    padding: 14px 15px;
-    font-size: 12.5px;
+    padding: 16px 18px;
+    font-size: 13.5px;
   }
   
+  .protocol-table th {
+    padding: 15px 18px;
+  }
+
   .protocol-table .decision-reject,
   .protocol-table .decision-prescribe,
   .protocol-table .decision-clinical {
-    padding: 5px 10px;
-    font-size: 10px;
+    padding: 7px 14px;
+    font-size: 11px;
+  }
+  
+  .protocol-table td:first-child strong {
+    font-size: 14px;
   }
 }
 
 @media (max-width: 1200px) {
   .protocol-table th,
   .protocol-table td {
-    padding: 12px 14px;
-    font-size: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  
+  .protocol-table th {
+    padding: 14px 16px;
   }
 
   .protocol-table .checklist-item {
-    margin: 5px 0;
-    font-size: 11.5px;
+    margin: 6px 0;
+    font-size: 12.5px;
+  }
+
+  .protocol-table .tag {
+    font-size: 11px;
+    padding: 6px 12px;
   }
   
-  .protocol-table .tag {
-    font-size: 10.5px;
-    padding: 5px 10px;
+  .protocol-table td:first-child strong {
+    font-size: 13.5px;
   }
 }
 
@@ -2633,45 +2671,45 @@ details.accordion[open] summary::after {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  
+
   .protocol-table {
-    min-width: 900px;
+    min-width: 1000px;
     display: table;
   }
-  
+
   .protocol-table th,
   .protocol-table td {
-    padding: 12px;
-    font-size: 11.5px;
+    padding: 14px 16px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 768px) {
   .protocol-table {
-    min-width: 800px;
+    min-width: 900px;
   }
-  
+
   .protocol-table th,
   .protocol-table td {
-    padding: 10px;
-    font-size: 11px;
+    padding: 12px 14px;
+    font-size: 12px;
   }
 
   .protocol-table .checklist-item {
-    font-size: 10.5px;
-    margin: 4px 0;
+    font-size: 11.5px;
+    margin: 5px 0;
   }
 
   .protocol-table .decision-reject,
   .protocol-table .decision-prescribe,
   .protocol-table .decision-clinical {
-    padding: 4px 8px;
-    font-size: 9px;
+    padding: 6px 12px;
+    font-size: 10px;
   }
-  
+
   .protocol-table .tag {
-    font-size: 9.5px;
-    padding: 4px 8px;
+    font-size: 10px;
+    padding: 5px 10px;
   }
 }
 
@@ -2719,8 +2757,8 @@ details.accordion[open] summary::after {
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
   border-radius: 10px;
-  padding: 18px 20px;
-  margin: 20px 0;
+  padding: 22px 26px;
+  margin: 24px 0;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.2s ease;
 }
@@ -2731,7 +2769,11 @@ details.accordion[open] summary::after {
 
 .info-card.warning,
 .info-card.orange {
-  background: linear-gradient(135deg, var(--warning-bg) 0%, rgba(245, 158, 11, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--warning-bg) 0%,
+    rgba(245, 158, 11, 0.05) 100%
+  );
   border-color: rgba(245, 158, 11, 0.25);
   border-left-color: var(--warning);
   border-left-width: 5px;
@@ -2769,17 +2811,17 @@ details.accordion[open] summary::after {
 }
 
 .info-card-title {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 800;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: var(--text);
   letter-spacing: -0.01em;
 }
 
 .info-card-text {
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.65;
+  line-height: 1.75;
 }
 
 /* Quick Actions */
@@ -3079,20 +3121,24 @@ details.accordion[open] summary::after {
 
 .dose-table th,
 .dose-table td {
-  padding: 16px 18px;
+  padding: 20px 24px;
   text-align: left;
   border-bottom: 1px solid rgba(99, 102, 241, 0.08);
-  font-size: 13.5px;
-  line-height: 1.65;
+  font-size: 14.5px;
+  line-height: 1.8;
   vertical-align: top;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 
 .dose-table th {
-  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(99, 102, 241, 0.08) 0%,
+    rgba(99, 102, 241, 0.04) 100%
+  );
   font-weight: 700;
-  font-size: 11px;
+  font-size: 11.5px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--accent);
@@ -3102,6 +3148,7 @@ details.accordion[open] summary::after {
   top: 0;
   z-index: 10;
   white-space: normal;
+  padding: 18px 24px;
 }
 
 .dose-table th:last-child {
@@ -3139,48 +3186,61 @@ details.accordion[open] summary::after {
 .dose-table td strong {
   color: var(--text);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 /* Responsive dose tables */
 @media (max-width: 1600px) {
   .dose-table th,
   .dose-table td {
-    padding: 15px 16px;
-    font-size: 13px;
+    padding: 18px 20px;
+    font-size: 14px;
+  }
+  
+  .dose-table th {
+    padding: 16px 20px;
   }
 }
 
 @media (max-width: 1400px) {
   .dose-table th,
   .dose-table td {
-    padding: 14px 15px;
-    font-size: 12.5px;
+    padding: 16px 18px;
+    font-size: 13.5px;
   }
   
+  .dose-table th {
+    padding: 15px 18px;
+  }
+
   .dose-table td strong {
-    font-size: 13px;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 1200px) {
   .dose-table th,
   .dose-table td {
-    padding: 12px 14px;
-    font-size: 12px;
+    padding: 14px 16px;
+    font-size: 13px;
   }
   
+  .dose-table th {
+    padding: 14px 16px;
+  }
+
   .dose-table td strong {
-    font-size: 12.5px;
+    font-size: 13.5px;
   }
 }
 
 @media (max-width: 992px) {
   .dose-table {
-    min-width: 800px;
+    min-width: 900px;
     display: table;
   }
-  
+
   .dose-table th,
   .dose-table td {
     padding: 12px;
@@ -3190,17 +3250,21 @@ details.accordion[open] summary::after {
 
 @media (max-width: 768px) {
   .dose-table {
-    min-width: 700px;
+    min-width: 800px;
   }
-  
+
   .dose-table th,
   .dose-table td {
-    padding: 10px;
-    font-size: 11px;
+    padding: 12px 14px;
+    font-size: 12px;
   }
   
+  .dose-table th {
+    padding: 12px 14px;
+  }
+
   .dose-table td strong {
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
 }
 
@@ -3308,24 +3372,28 @@ details.accordion[open] summary::after {
 @media (max-width: 1600px) {
   .protocol-card,
   .info-card {
-    padding: 24px;
+    padding: 26px;
+  }
+
+  .protocol-title {
+    font-size: 16.5px;
   }
   
-  .protocol-title {
-    font-size: 16px;
+  .protocol-text {
+    font-size: 13.5px;
   }
 }
 
 @media (max-width: 1400px) {
   .protocol-card,
   .info-card {
-    padding: 20px;
+    padding: 24px;
   }
-  
+
   .protocol-title {
-    font-size: 15px;
+    font-size: 16px;
   }
-  
+
   .protocol-text {
     font-size: 13.5px;
   }
@@ -3336,94 +3404,103 @@ details.accordion[open] summary::after {
     padding: 20px;
   }
   
+  .protocol-card,
+  .info-card {
+    padding: 22px;
+  }
+
   .protocol-card {
-    margin-bottom: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .protocol-title {
+    font-size: 15.5px;
   }
 }
 
 @media (max-width: 992px) {
   .content {
-    padding: 16px;
-  }
-  
-  .protocol-card,
-  .info-card {
     padding: 18px;
   }
-  
+
+  .protocol-card,
+  .info-card {
+    padding: 20px;
+  }
+
   .protocol-title {
-    font-size: 14px;
+    font-size: 15px;
   }
-  
+
   .accordion summary {
-    font-size: 13.5px;
-    padding: 14px 18px;
+    font-size: 14.5px;
+    padding: 18px 20px;
   }
-  
+
   .accordion-body {
-    padding: 16px;
+    padding: 20px;
   }
 }
 
 @media (max-width: 768px) {
   .content {
-    padding: 12px;
-  }
-  
-  .protocol-card,
-  .info-card {
     padding: 16px;
   }
-  
+
+  .protocol-card,
+  .info-card {
+    padding: 18px;
+  }
+
   .protocol-title {
-    font-size: 13px;
+    font-size: 14.5px;
   }
-  
+
   .protocol-text {
-    font-size: 12.5px;
+    font-size: 13px;
   }
-  
+
   .accordion summary {
-    font-size: 13px;
-    padding: 12px 16px;
+    font-size: 14px;
+    padding: 16px 18px;
   }
-  
+
   .accordion-body {
-    padding: 14px;
+    padding: 18px;
   }
-  
+
   .info-card-title {
-    font-size: 13px;
+    font-size: 13.5px;
   }
-  
+
   .info-card-text {
-    font-size: 12.5px;
+    font-size: 13px;
   }
 }
 
 @media (max-width: 480px) {
   .content {
-    padding: 10px;
-  }
-  
-  .protocol-card,
-  .info-card {
     padding: 14px;
   }
-  
+
+  .protocol-card,
+  .info-card {
+    padding: 16px;
+  }
+
   .protocol-title {
     font-size: 12.5px;
   }
-  
+
   .protocol-text {
     font-size: 12px;
   }
-  
+
   .accordion summary {
     font-size: 12px;
     padding: 10px 14px;
   }
-  
+
   .table-wrapper {
     margin: 16px 0;
   }
