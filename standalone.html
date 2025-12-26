@@ -2365,31 +2365,72 @@ details.accordion[open] summary::after {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 16px 0;
+  margin: 20px 0;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .protocol-table th,
 .protocol-table td {
-  padding: 12px 16px;
+  padding: 16px 18px;
   text-align: left;
   border-bottom: 1px solid var(--border);
-  font-size: 13px;
+  font-size: 13.5px;
+  line-height: 1.6;
 }
 
 .protocol-table th {
-  background: var(--bg-elevated);
+  background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
   font-weight: 700;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Column-specific styling */
+.protocol-table th:nth-child(1),
+.protocol-table td:nth-child(1) {
+  background: rgba(99, 102, 241, 0.03);
+  font-weight: 600;
   color: var(--text);
+}
+
+.protocol-table th:nth-child(2),
+.protocol-table td:nth-child(2) {
+  background: rgba(6, 182, 212, 0.03);
+  text-align: center;
+  width: 120px;
+}
+
+.protocol-table th:nth-child(3),
+.protocol-table td:nth-child(3) {
+  background: rgba(245, 158, 11, 0.03);
+  text-align: center;
+  width: 110px;
+}
+
+.protocol-table th:nth-child(4),
+.protocol-table td:nth-child(4) {
+  background: rgba(168, 85, 247, 0.03);
+  width: 220px;
+}
+
+.protocol-table th:nth-child(5),
+.protocol-table td:nth-child(5) {
+  background: rgba(34, 197, 94, 0.03);
+  width: 200px;
 }
 
 .protocol-table td {
   color: var(--text-secondary);
+  vertical-align: top;
 }
 
 .protocol-table tr:last-child td {
@@ -2397,7 +2438,54 @@ details.accordion[open] summary::after {
 }
 
 .protocol-table tr:hover td {
-  background: var(--accent-bg);
+  filter: brightness(1.1);
+  transition: var(--transition);
+}
+
+/* Decision outcomes styling */
+.protocol-table .decision-reject {
+  color: var(--danger);
+  font-weight: 700;
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--danger-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--danger);
+}
+
+.protocol-table .decision-prescribe {
+  color: var(--success);
+  font-weight: 700;
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--success-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--success);
+}
+
+.protocol-table .decision-clinical {
+  color: var(--warning);
+  font-weight: 700;
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--warning-bg);
+  border-radius: 6px;
+  border-left: 3px solid var(--warning);
+}
+
+/* Checklist styling */
+.protocol-table .checklist-item {
+  display: flex;
+  align-items: flex-start;
+  margin: 6px 0;
+}
+
+.protocol-table .checklist-item::before {
+  content: "✓";
+  color: var(--accent);
+  font-weight: bold;
+  margin-right: 8px;
+  flex-shrink: 0;
 }
 
 /* Tags */
@@ -5310,46 +5398,46 @@ const ContentManager = {
                   <th>After Patient Response</th>
                 </tr>
                 <tr>
-                  <td><strong>Bariatric Surgery</strong><br>• RYGB<br>• Sleeve Gastrectomy<br>• Gastric Band<br>• BPD/DS<br>• Mini Gastric Bypass<br>• Gastric balloon</td>
-                  <td>&lt;12 months</td>
-                  <td><a href="#macro-1" class="tag blue">Macro 1</a></td>
-                  <td>• Check SCR for surgery date<br>• If timing unclear → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
-                  <td><strong>Reject</strong> if &lt;12 months<br><br><strong>Prescribe</strong> if ≥12 months</td>
+                  <td><strong>🏥 Bariatric Surgery</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">RYGB • Sleeve • Gastric Band • BPD/DS • Mini Bypass • Gastric balloon</span></td>
+                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;12 months</span></td>
+                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
+                  <td><div class=\"checklist-item\">Check SCR for surgery date</div><div class=\"checklist-item\">If timing unclear → hold + email</div><div class=\"checklist-item\">Add tag: <span class=\"tag orange\">Pending Customer Response</span></div></td>
+                  <td><span class=\"decision-reject\">REJECT</span> if &lt;12 months<br><br><span class=\"decision-prescribe\">PRESCRIBE</span> if ≥12 months</td>
                 </tr>
                 <tr>
-                  <td><strong>Cholecystectomy</strong><br>(gallbladder removal)</td>
-                  <td>&lt;12 months</td>
-                  <td><a href="#macro-1" class="tag blue">Macro 1</a></td>
-                  <td>• Check SCR for surgery date<br>• If timing unclear → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
-                  <td><strong>Reject</strong> if &lt;12 months<br><br><strong>Prescribe</strong> if ≥12 months</td>
+                  <td><strong>🏥 Cholecystectomy</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">(gallbladder removal)</span></td>
+                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;12 months</span></td>
+                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
+                  <td><div class=\"checklist-item\">Check SCR for surgery date</div><div class=\"checklist-item\">If timing unclear → hold + email</div><div class=\"checklist-item\">Add tag: <span class=\"tag orange\">Pending Customer Response</span></div></td>
+                  <td><span class=\"decision-reject\">REJECT</span> if &lt;12 months<br><br><span class=\"decision-prescribe\">PRESCRIBE</span> if ≥12 months</td>
                 </tr>
                 <tr>
-                  <td><strong>Insulin</strong></td>
-                  <td>&lt;3 months<br><strong>OR</strong><br>On repeat list</td>
-                  <td><a href="#macro-1" class="tag blue">Macro 1</a></td>
-                  <td>• Check acute meds (last 3 months)<br>• Check repeat medication list<br>• If on repeat list → <strong>reject immediately</strong><br>• If timing unclear → hold + email</td>
-                  <td><strong>Reject</strong> if prescribed within 3 months or on repeat list</td>
+                  <td><strong>💉 Insulin</strong></td>
+                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;3 months</span><br><strong style=\"color: var(--danger);\">OR</strong><br><span style=\"font-weight: 700; color: var(--danger);\">On repeat list</span></td>
+                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
+                  <td><div class=\"checklist-item\">Check acute meds (last 3 months)</div><div class=\"checklist-item\">Check repeat medication list</div><div class=\"checklist-item\">If on repeat list → <strong>reject immediately</strong></div><div class=\"checklist-item\">If timing unclear → hold + email</div></td>
+                  <td><span class=\"decision-reject\">REJECT</span> if prescribed within 3 months or on repeat list</td>
                 </tr>
                 <tr>
-                  <td><strong>Oral diabetic meds</strong><br>• Sulfonylureas<br>• SGLT2 inhibitors<br>• DPP-4 inhibitors<br>• Thiazolidinediones</td>
-                  <td>&lt;3 months<br><strong>OR</strong><br>On repeat list</td>
-                  <td><a href="#macro-1" class="tag blue">Macro 1</a></td>
-                  <td>• Check acute meds (last 3 months)<br>• Check repeat medication list<br>• If on repeat list → <strong>reject immediately</strong><br>• If timing unclear → hold + email</td>
-                  <td><strong>Reject</strong> if prescribed within 3 months or on repeat list</td>
+                  <td><strong>💊 Oral Diabetic Meds</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">Sulfonylureas • SGLT2 inhibitors • DPP-4 inhibitors • Thiazolidinediones</span></td>
+                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;3 months</span><br><strong style=\"color: var(--danger);\">OR</strong><br><span style=\"font-weight: 700; color: var(--danger);\">On repeat list</span></td>
+                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
+                  <td><div class=\"checklist-item\">Check acute meds (last 3 months)</div><div class=\"checklist-item\">Check repeat medication list</div><div class=\"checklist-item\">If on repeat list → <strong>reject immediately</strong></div><div class=\"checklist-item\">If timing unclear → hold + email</div></td>
+                  <td><span class=\"decision-reject\">REJECT</span> if prescribed within 3 months or on repeat list</td>
                 </tr>
                 <tr>
-                  <td><strong>Narrow Therapeutic Index meds</strong><br>• Amiodarone<br>• Carbamazepine<br>• Ciclosporin<br>• Clozapine<br>• Digoxin<br>• Lithium<br>• Warfarin<br>• Others (see full list)</td>
-                  <td>&lt;3 months<br><strong>OR</strong><br>On repeat list</td>
-                  <td><a href="#macro-1" class="tag blue">Macro 1</a></td>
-                  <td>• Check acute meds (last 3 months)<br>• Check repeat medication list<br>• If on repeat list → <strong>reject immediately</strong><br>• If timing unclear → hold + email</td>
-                  <td><strong>Reject</strong> if prescribed within 3 months or on repeat list</td>
+                  <td><strong>⚠️ Narrow Therapeutic Index Meds</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">Amiodarone • Carbamazepine • Ciclosporin • Clozapine • Digoxin • Lithium • Warfarin • Others</span></td>
+                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;3 months</span><br><strong style=\"color: var(--danger);\">OR</strong><br><span style=\"font-weight: 700; color: var(--danger);\">On repeat list</span></td>
+                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
+                  <td><div class=\"checklist-item\">Check acute meds (last 3 months)</div><div class=\"checklist-item\">Check repeat medication list</div><div class=\"checklist-item\">If on repeat list → <strong>reject immediately</strong></div><div class=\"checklist-item\">If timing unclear → hold + email</div></td>
+                  <td><span class=\"decision-reject\">REJECT</span> if prescribed within 3 months or on repeat list</td>
                 </tr>
                 <tr>
-                  <td><strong>Orlistat</strong><br>• Alli<br>• Xenical</td>
-                  <td>&lt;1 month</td>
-                  <td><a href="#macro-1" class="tag blue">Macro 1</a></td>
-                  <td>• Check SCR for recent Orlistat<br>• If timing unclear → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
-                  <td><strong>Reject</strong> if &lt;1 month<br><br>Concurrent use contraindicated</td>
+                  <td><strong>💊 Orlistat</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">Alli • Xenical</span></td>
+                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;1 month</span></td>
+                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
+                  <td><div class=\"checklist-item\">Check SCR for recent Orlistat</div><div class=\"checklist-item\">If timing unclear → hold + email</div><div class=\"checklist-item\">Add tag: <span class=\"tag orange\">Pending Customer Response</span></div></td>
+                  <td><span class=\"decision-reject\">REJECT</span> if &lt;1 month<br><br><em style=\"color: var(--text-muted); font-size: 0.9em;\">Concurrent use contraindicated</em></td>
                 </tr>
               </table>
               <div class="info-card warning" style="margin-top: 12px;">
@@ -5372,32 +5460,32 @@ const ContentManager = {
                   <th>After Patient Response</th>
                 </tr>
                 <tr>
-                  <td><strong>Cholelithiasis</strong><br>(gallstones)</td>
+                  <td><strong>🩺 Cholelithiasis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(gallstones)</span></td>
                   <td><a href="#macro-2" class="tag blue">Macro 2</a></td>
-                  <td>• Check SCR for cholecystectomy evidence<br>• If no evidence → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR for cholecystectomy evidence</div><div class="checklist-item">If no evidence → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if patient had cholecystectomy (gallbladder removal surgery)</td>
-                  <td><strong>Reject</strong> if no cholecystectomy<br><br><strong>Prescribe</strong> if cholecystectomy confirmed</td>
+                  <td><span class="decision-reject">REJECT</span> if no cholecystectomy<br><br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</td>
                 </tr>
                 <tr>
-                  <td><strong>Cholecystitis</strong><br>(gallbladder inflammation)</td>
+                  <td><strong>🩺 Cholecystitis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(gallbladder inflammation)</span></td>
                   <td><a href="#macro-2" class="tag blue">Macro 2</a></td>
-                  <td>• Check SCR for cholecystectomy evidence<br>• If no evidence → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR for cholecystectomy evidence</div><div class="checklist-item">If no evidence → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if patient had cholecystectomy (gallbladder removal surgery)</td>
-                  <td><strong>Reject</strong> if no cholecystectomy<br><br><strong>Prescribe</strong> if cholecystectomy confirmed</td>
+                  <td><span class="decision-reject">REJECT</span> if no cholecystectomy<br><br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</td>
                 </tr>
                 <tr>
-                  <td><strong>Heart Failure (HF)</strong></td>
+                  <td><strong>❤️ Heart Failure (HF)</strong></td>
                   <td><a href="#macro-4" class="tag blue">Macro 4</a></td>
-                  <td>• Check SCR for HF stage<br>• If stage unclear → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR for HF stage</div><div class="checklist-item">If stage unclear → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request latest cardiology letter stating:<br>• HF stage, OR<br>• Confirmation if fit for GLP-1</td>
-                  <td><strong>Reject</strong> if Stage IV<br><br><strong>Prescribe</strong> if Stage I, II, or III</td>
+                  <td><span class="decision-reject">REJECT</span> if Stage IV<br><br><span class="decision-prescribe">PRESCRIBE</span> if Stage I, II, or III</td>
                 </tr>
                 <tr>
-                  <td><strong>Chronic Kidney Disease (CKD)</strong></td>
+                  <td><strong>🫘 Chronic Kidney Disease (CKD)</strong></td>
                   <td><a href="#macro-5" class="tag blue">Macro 5</a></td>
-                  <td>• Check SCR for eGFR or CKD stage<br>• If eGFR/stage unclear → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR for eGFR or CKD stage</div><div class="checklist-item">If eGFR/stage unclear → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request:<br>• Most recent eGFR result, OR<br>• Latest specialist letter with CKD details</td>
-                  <td><strong>Reject</strong> if eGFR &lt;30 or Stage 4/5<br><br><strong>Prescribe</strong> if eGFR ≥30 or Stage 1/2/3</td>
+                  <td><span class="decision-reject">REJECT</span> if eGFR &lt;30 or Stage 4/5<br><br><span class="decision-prescribe">PRESCRIBE</span> if eGFR ≥30 or Stage 1/2/3</td>
                 </tr>
               </table>
             </div>
@@ -5411,53 +5499,53 @@ const ContentManager = {
               <table class="protocol-table">
                 <tr><th>Condition</th><th>Macro</th><th>Before Emailing</th><th>Information to Request</th><th>After Patient Response</th></tr>
                 <tr>
-                  <td><strong>Any cancer diagnosis</strong><br>(excluding MEN2 or medullary thyroid cancer)</td>
+                  <td><strong>🎗️ Any Cancer Diagnosis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(excluding MEN2 or medullary thyroid cancer)</span></td>
                   <td><a href="#macro-3" class="tag blue">Macro 3</a></td>
-                  <td>• Check SCR for cancer type and timeline<br>• Always require patient input<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR for cancer type and timeline</div><div class="checklist-item">Always require patient input</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if:<br>• Currently under oncology care?<br>• Cancer in remission?<br>• Request discharge/latest oncology letter</td>
-                  <td><strong>Reject</strong> if active cancer/undergoing treatment<br><br><strong>Clinical decision</strong> if in remission (review oncology letter)</td>
+                  <td><span class="decision-reject">REJECT</span> if active cancer/undergoing treatment<br><br><span class="decision-clinical">CLINICAL DECISION</span> if in remission (review oncology letter)</td>
                 </tr>
                 <tr>
-                  <td><strong>Pregnancy</strong></td>
+                  <td><strong>🤰 Pregnancy</strong></td>
                   <td><a href="#macro-6" class="tag blue">Macro 6</a></td>
-                  <td>• Always require confirmation<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Always require confirmation</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if currently:<br>• Pregnant?<br>• Breastfeeding?<br>• Trying to conceive?</td>
-                  <td><strong>Reject</strong> if pregnant, breastfeeding, or trying to conceive<br><br><strong>Prescribe</strong> if none of the above</td>
+                  <td><span class="decision-reject">REJECT</span> if pregnant, breastfeeding, or trying to conceive<br><br><span class="decision-prescribe">PRESCRIBE</span> if none of the above</td>
                 </tr>
                 <tr>
-                  <td><strong>Dementia / Cognitive Impairment</strong></td>
+                  <td><strong>🧠 Dementia / Cognitive Impairment</strong></td>
                   <td><a href="#macro-7" class="tag blue">Macro 7</a></td>
-                  <td>• Always require patient/carer input<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Always require patient/carer input</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask:<br>• Safe to use medication at home?<br>• Support available?<br>• Ability to self-administer?</td>
-                  <td><strong>Clinical decision</strong> based on:<br>• Patient's ability to take medication safely<br>• Support network around patient</td>
+                  <td><span class="decision-clinical">CLINICAL DECISION</span> based on:<br>• Patient's ability to take medication safely<br>• Support network around patient</td>
                 </tr>
                 <tr>
-                  <td><strong>Chronic Malabsorption</strong></td>
+                  <td><strong>🫃 Chronic Malabsorption</strong></td>
                   <td><a href="#macro-8" class="tag blue">Macro 8</a></td>
-                  <td>• Always require confirmation<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Always require confirmation</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if patient has formal diagnosis of chronic malabsorption</td>
-                  <td><strong>Reject</strong> if formal diagnosis confirmed<br><br><strong>Prescribe</strong> if no formal diagnosis</td>
+                  <td><span class="decision-reject">REJECT</span> if formal diagnosis confirmed<br><br><span class="decision-prescribe">PRESCRIBE</span> if no formal diagnosis</td>
                 </tr>
                 <tr>
-                  <td><strong>Depression or Anxiety</strong><br><br><span style="font-size: 0.9em; color: #e74c3c;">Contraindication: acutely mentally unwell</span></td>
+                  <td><strong>😔 Depression or Anxiety</strong><br><br><span style="font-size: 0.85em; color: var(--danger); font-weight: 600;">⚠️ Contraindication: acutely mentally unwell</span></td>
                   <td><a href="#macro-9" class="tag blue">Macro 9</a></td>
-                  <td>• Check SCR entry date<br>• Check antidepressant start/dose change dates<br>• If &lt;3 months → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">Check antidepressant start/dose change dates</div><div class="checklist-item">If &lt;3 months → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request confirmation of:<br>• When condition added to SCR<br>• Any new antidepressants or dose changes in last 3 months</td>
-                  <td><strong>Reject</strong> if entry &lt;3 months old<br>OR new antidepressant/dose increase in last 3 months<br><br><strong>Prescribe</strong> if ≥3 months</td>
+                  <td><span class="decision-reject">REJECT</span> if entry &lt;3 months old OR new antidepressant/dose increase in last 3 months<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥3 months</td>
                 </tr>
                 <tr>
-                  <td><strong>Active Suicidal Ideation</strong></td>
+                  <td><strong>⚠️ Active Suicidal Ideation</strong></td>
                   <td><a href="#macro-9" class="tag blue">Macro 9</a></td>
-                  <td>• Check SCR entry date<br>• If &lt;12 months → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">If &lt;12 months → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request confirmation of when suicidal ideation was added to SCR</td>
-                  <td><strong>Reject</strong> if &lt;12 months<br><br><strong>Prescribe</strong> if ≥12 months</td>
+                  <td><span class="decision-reject">REJECT</span> if &lt;12 months<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</td>
                 </tr>
                 <tr>
-                  <td><strong>Current Alcohol Abuse or Dependence</strong></td>
+                  <td><strong>🍺 Current Alcohol Abuse or Dependence</strong></td>
                   <td><a href="#macro-10" class="tag blue">Macro 10</a></td>
-                  <td>• Check SCR entry date<br>• If &lt;12 months or "current" → hold + email<br>• Add tag: <span class="tag orange">Pending Customer Response</span></td>
+                  <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">If &lt;12 months or "current" → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request confirmation of:<br>• When alcohol abuse was added to SCR<br>• Current alcohol use status</td>
-                  <td><strong>Reject</strong> if &lt;12 months or current abuse<br><br><strong>Prescribe</strong> if ≥12 months and no current abuse</td>
+                  <td><span class="decision-reject">REJECT</span> if &lt;12 months or current abuse<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months and no current abuse</td>
                 </tr>
               </table>
 
