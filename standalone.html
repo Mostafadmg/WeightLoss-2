@@ -2023,21 +2023,34 @@ mark.find-highlight.find-highlight--active-local {
 
 details.accordion {
   margin-top: 14px;
-  background: var(--bg-elevated);
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+details.accordion:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 details.accordion summary {
   cursor: pointer;
   user-select: none;
-  padding: 14px 16px;
-  font-size: 13px;
-  font-weight: 800;
+  padding: 18px 20px;
+  font-size: 14px;
+  font-weight: 700;
   color: var(--text);
   list-style: none;
   position: relative;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.04) 0%, transparent 100%);
+  transition: all 0.2s ease;
+}
+
+details.accordion summary:hover {
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.02) 100%);
 }
 
 details.accordion summary::-webkit-details-marker {
@@ -2047,26 +2060,37 @@ details.accordion summary::-webkit-details-marker {
 details.accordion summary::after {
   content: "+";
   position: absolute;
-  right: 14px;
+  right: 18px;
   top: 50%;
   transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+  transition: all 0.3s ease;
+}
+
+details.accordion summary:hover::after {
+  box-shadow: 0 3px 8px rgba(99, 102, 241, 0.4);
+  transform: translateY(-50%) scale(1.05);
 }
 
 details.accordion[open] summary::after {
   content: "–";
+  background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+  box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
 }
 
 .accordion-body {
-  padding: 14px 16px 16px;
-  border-top: 1px solid var(--border);
+  padding: 20px 20px 24px;
+  border-top: 1px solid rgba(99, 102, 241, 0.1);
+  background: var(--bg-card);
 }
 
 .scr-questions-grid {
@@ -2252,36 +2276,39 @@ details.accordion[open] summary::after {
 .protocol-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-bottom: 16px;
-  transition: var(--transition);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .protocol-card:hover {
-  border-color: rgba(99, 102, 241, 0.45);
-  box-shadow: var(--shadow);
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
 }
 
 .protocol-title {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 15px;
+  gap: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   letter-spacing: -0.01em;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(99, 102, 241, 0.1);
 }
 
 .protocol-title .icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .protocol-title .icon.blue {
@@ -2564,7 +2591,7 @@ details.accordion[open] summary::after {
   .protocol-table {
     font-size: 13px;
   }
-  
+
   .protocol-table th,
   .protocol-table td {
     padding: 16px 16px;
@@ -2580,7 +2607,7 @@ details.accordion[open] summary::after {
   .protocol-table td {
     padding: 14px 14px;
   }
-  
+
   .protocol-table .checklist-item {
     margin: 6px 0;
   }
@@ -2604,7 +2631,7 @@ details.accordion[open] summary::after {
     font-size: 11px;
     margin: 5px 0;
   }
-  
+
   .protocol-table .decision-reject,
   .protocol-table .decision-prescribe,
   .protocol-table .decision-clinical {
@@ -2662,60 +2689,71 @@ details.accordion[open] summary::after {
 
 /* Info Cards */
 .info-card {
-  background: var(--bg-elevated);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin: 16px 0;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin: 20px 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+}
+
+.info-card:hover {
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08), 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .info-card.warning,
 .info-card.orange {
-  background: var(--warning-bg);
-  border-color: rgba(245, 158, 11, 0.35);
+  background: linear-gradient(135deg, var(--warning-bg) 0%, rgba(245, 158, 11, 0.05) 100%);
+  border-color: rgba(245, 158, 11, 0.25);
   border-left-color: var(--warning);
+  border-left-width: 5px;
 }
 
 .info-card.danger,
 .info-card.red {
-  background: var(--danger-bg);
-  border-color: rgba(239, 68, 68, 0.35);
+  background: linear-gradient(135deg, var(--danger-bg) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border-color: rgba(239, 68, 68, 0.25);
   border-left-color: var(--danger);
+  border-left-width: 5px;
 }
 
 .info-card.success,
 .info-card.green {
-  background: var(--success-bg);
-  border-color: rgba(34, 197, 94, 0.35);
+  background: linear-gradient(135deg, var(--success-bg) 0%, rgba(34, 197, 94, 0.05) 100%);
+  border-color: rgba(34, 197, 94, 0.25);
   border-left-color: var(--success);
+  border-left-width: 5px;
 }
 
 .info-card.blue,
 .info-card.cyan {
-  background: var(--cyan-bg);
-  border-color: rgba(6, 182, 212, 0.35);
+  background: linear-gradient(135deg, var(--cyan-bg) 0%, rgba(6, 182, 212, 0.05) 100%);
+  border-color: rgba(6, 182, 212, 0.25);
   border-left-color: var(--cyan);
+  border-left-width: 5px;
 }
 
 .info-card.purple {
-  background: var(--purple-bg);
-  border-color: rgba(168, 85, 247, 0.35);
+  background: linear-gradient(135deg, var(--purple-bg) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border-color: rgba(168, 85, 247, 0.25);
   border-left-color: var(--purple);
+  border-left-width: 5px;
 }
 
 .info-card-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   color: var(--text);
   letter-spacing: -0.01em;
 }
 
 .info-card-text {
-  font-size: 13px;
+  font-size: 13.5px;
   color: var(--text-secondary);
-  line-height: 1.55;
+  line-height: 1.65;
 }
 
 /* Quick Actions */
@@ -3004,28 +3042,39 @@ details.accordion[open] summary::after {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 12px 0;
-  font-size: 13px;
+  margin: 24px 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  table-layout: auto;
+  background: var(--bg-card);
 }
 
 .dose-table th,
 .dose-table td {
-  padding: 12px 16px;
+  padding: 18px 20px;
   text-align: left;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+  font-size: 14px;
+  line-height: 1.7;
+  vertical-align: top;
+  word-wrap: break-word;
 }
 
 .dose-table th {
-  background: var(--bg-elevated);
-  font-weight: 600;
-  color: var(--text);
-  font-size: 11px;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+  font-weight: 700;
+  font-size: 11.5px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  border-right: 1px solid var(--border);
+  letter-spacing: 0.8px;
+  color: var(--accent);
+  border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+  border-right: 1px solid rgba(99, 102, 241, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  white-space: nowrap;
 }
 
 .dose-table th:last-child {
@@ -3033,9 +3082,9 @@ details.accordion[open] summary::after {
 }
 
 .dose-table td {
-  color: var(--text-secondary);
-  border-right: 1px solid var(--border);
+  color: var(--text);
   background: var(--bg-card);
+  border-right: 1px solid rgba(99, 102, 241, 0.06);
 }
 
 .dose-table td:last-child {
@@ -3046,17 +3095,62 @@ details.accordion[open] summary::after {
   border-bottom: none;
 }
 
-.dose-table tr:nth-child(even) td {
-  background: var(--bg-elevated);
+.dose-table tbody tr {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
 }
 
-.dose-table tr:hover td {
-  background: var(--accent-bg);
+.dose-table tbody tr:nth-child(even) {
+  background: rgba(99, 102, 241, 0.01);
+}
+
+.dose-table tbody tr:hover {
+  border-left-color: var(--accent);
+  background: rgba(99, 102, 241, 0.02);
 }
 
 .dose-table td strong {
   color: var(--text);
   font-weight: 600;
+  font-size: 14.5px;
+}
+
+/* Responsive dose tables */
+@media (max-width: 1400px) {
+  .dose-table {
+    font-size: 13px;
+  }
+  
+  .dose-table th,
+  .dose-table td {
+    padding: 16px 16px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .dose-table {
+    font-size: 12.5px;
+  }
+
+  .dose-table th,
+  .dose-table td {
+    padding: 14px 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dose-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  .dose-table th,
+  .dose-table td {
+    padding: 12px;
+    font-size: 11.5px;
+  }
 }
 
 /* Info Cards: unified styles live earlier in the file */
@@ -5437,7 +5531,7 @@ const ContentManager = {
           </div>
           <div class="protocol-text">If the scraping tool flags a keyword, open SCR and decide between: <strong>absolute contraindication</strong> (reject) vs <strong>needs further information</strong> (email + hold) vs <strong>escalate</strong> if uncertain.</div>
 
-          <details class="accordion" open>
+          <details class="accordion">
             <summary>Absolute contraindications — reject immediately</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 1:</strong> If any of these conditions are present, <strong>reject the prescription immediately</strong>. No further information needed.</div>

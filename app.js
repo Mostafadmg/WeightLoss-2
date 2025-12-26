@@ -1977,7 +1977,7 @@ const ContentManager = {
           </div>
           <div class="protocol-text">If the scraping tool flags a keyword, open SCR and decide between: <strong>absolute contraindication</strong> (reject) vs <strong>needs further information</strong> (email + hold) vs <strong>escalate</strong> if uncertain.</div>
 
-          <details class="accordion" open>
+          <details class="accordion">
             <summary>Absolute contraindications — reject immediately</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 1:</strong> If any of these conditions are present, <strong>reject the prescription immediately</strong>. No further information needed.</div>
