@@ -2391,11 +2391,11 @@ details.accordion[open] summary::after {
 
 .protocol-table th,
 .protocol-table td {
-  padding: 20px 24px;
+  padding: 24px 28px;
   text-align: left;
   border-bottom: 1px solid rgba(99, 102, 241, 0.08);
   font-size: 14.5px;
-  line-height: 1.8;
+  line-height: 2;
   vertical-align: top;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -2417,36 +2417,35 @@ details.accordion[open] summary::after {
   top: 0;
   z-index: 10;
   white-space: normal;
-  padding: 18px 24px;
+  padding: 20px 28px;
 }
 
 /* Column-specific styling for 5-column tables */
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(1),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(1) {
-  width: 20%;
+  width: 18%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(2),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(2) {
-  width: 14%;
+  width: 12%;
   text-align: left;
-  padding-left: 16px;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(3),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(3) {
-  width: 11%;
+  width: 10%;
   text-align: center;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(4),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(4) {
-  width: 27%;
+  width: 30%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(5),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(5) {
-  width: 28%;
+  width: 30%;
 }
 
 /* Column-specific styling for 2-column tables (Table 1) */
@@ -2489,7 +2488,7 @@ details.accordion[open] summary::after {
 .protocol-table td:first-child strong {
   font-size: 15px;
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   color: var(--text);
   line-height: 1.4;
 }
@@ -2507,7 +2506,7 @@ details.accordion[open] summary::after {
   box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
-  margin: 3px 0;
+  margin: 5px 0;
 }
 
 .protocol-table .decision-prescribe {
@@ -2522,7 +2521,7 @@ details.accordion[open] summary::after {
   box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
-  margin: 3px 0;
+  margin: 5px 0;
 }
 
 .protocol-table .decision-clinical {
@@ -2537,15 +2536,15 @@ details.accordion[open] summary::after {
   box-shadow: 0 2px 4px rgba(234, 88, 12, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
-  margin: 3px 0;
+  margin: 5px 0;
 }
 
 /* Checklist styling */
 .protocol-table .checklist-item {
   display: flex;
   align-items: flex-start;
-  margin: 8px 0;
-  line-height: 1.7;
+  margin: 10px 0;
+  line-height: 1.8;
   padding-left: 2px;
   font-size: 13.5px;
 }
@@ -2602,7 +2601,7 @@ details.accordion[open] summary::after {
     padding: 18px 20px;
     font-size: 14px;
   }
-  
+
   .protocol-table th {
     padding: 16px 20px;
   }
@@ -2610,7 +2609,7 @@ details.accordion[open] summary::after {
   .protocol-table .checklist-item {
     font-size: 13px;
   }
-  
+
   .protocol-table td:first-child strong {
     font-size: 14.5px;
   }
@@ -2622,7 +2621,7 @@ details.accordion[open] summary::after {
     padding: 16px 18px;
     font-size: 13.5px;
   }
-  
+
   .protocol-table th {
     padding: 15px 18px;
   }
@@ -2633,7 +2632,7 @@ details.accordion[open] summary::after {
     padding: 7px 14px;
     font-size: 11px;
   }
-  
+
   .protocol-table td:first-child strong {
     font-size: 14px;
   }
@@ -2645,7 +2644,7 @@ details.accordion[open] summary::after {
     padding: 14px 16px;
     font-size: 13px;
   }
-  
+
   .protocol-table th {
     padding: 14px 16px;
   }
@@ -2659,7 +2658,7 @@ details.accordion[open] summary::after {
     font-size: 11px;
     padding: 6px 12px;
   }
-  
+
   .protocol-table td:first-child strong {
     font-size: 13.5px;
   }
@@ -2673,7 +2672,7 @@ details.accordion[open] summary::after {
   }
 
   .protocol-table {
-    min-width: 1000px;
+    min-width: 1100px;
     display: table;
   }
 
@@ -2686,7 +2685,7 @@ details.accordion[open] summary::after {
 
 @media (max-width: 768px) {
   .protocol-table {
-    min-width: 900px;
+    min-width: 1000px;
   }
 
   .protocol-table th,
@@ -2723,6 +2722,14 @@ details.accordion[open] summary::after {
   font-weight: 600;
   line-height: 1.4;
   white-space: nowrap;
+  margin: 3px 0;
+}
+
+/* Tags inside table cells need extra spacing */
+.protocol-table .tag,
+.dose-table .tag {
+  margin: 4px 0;
+  display: inline-block;
 }
 
 .tag.orange {
@@ -3121,11 +3128,11 @@ details.accordion[open] summary::after {
 
 .dose-table th,
 .dose-table td {
-  padding: 20px 24px;
+  padding: 24px 28px;
   text-align: left;
   border-bottom: 1px solid rgba(99, 102, 241, 0.08);
   font-size: 14.5px;
-  line-height: 1.8;
+  line-height: 2;
   vertical-align: top;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -3148,7 +3155,7 @@ details.accordion[open] summary::after {
   top: 0;
   z-index: 10;
   white-space: normal;
-  padding: 18px 24px;
+  padding: 20px 28px;
 }
 
 .dose-table th:last-child {
@@ -3197,7 +3204,7 @@ details.accordion[open] summary::after {
     padding: 18px 20px;
     font-size: 14px;
   }
-  
+
   .dose-table th {
     padding: 16px 20px;
   }
@@ -3209,7 +3216,7 @@ details.accordion[open] summary::after {
     padding: 16px 18px;
     font-size: 13.5px;
   }
-  
+
   .dose-table th {
     padding: 15px 18px;
   }
@@ -3225,7 +3232,7 @@ details.accordion[open] summary::after {
     padding: 14px 16px;
     font-size: 13px;
   }
-  
+
   .dose-table th {
     padding: 14px 16px;
   }
@@ -3237,7 +3244,7 @@ details.accordion[open] summary::after {
 
 @media (max-width: 992px) {
   .dose-table {
-    min-width: 900px;
+    min-width: 1000px;
     display: table;
   }
 
@@ -3250,7 +3257,7 @@ details.accordion[open] summary::after {
 
 @media (max-width: 768px) {
   .dose-table {
-    min-width: 800px;
+    min-width: 900px;
   }
 
   .dose-table th,
@@ -3258,7 +3265,7 @@ details.accordion[open] summary::after {
     padding: 12px 14px;
     font-size: 12px;
   }
-  
+
   .dose-table th {
     padding: 12px 14px;
   }
@@ -3378,7 +3385,7 @@ details.accordion[open] summary::after {
   .protocol-title {
     font-size: 16.5px;
   }
-  
+
   .protocol-text {
     font-size: 13.5px;
   }
@@ -3403,7 +3410,7 @@ details.accordion[open] summary::after {
   .content {
     padding: 20px;
   }
-  
+
   .protocol-card,
   .info-card {
     padding: 22px;
@@ -3412,7 +3419,7 @@ details.accordion[open] summary::after {
   .protocol-card {
     margin-bottom: 20px;
   }
-  
+
   .protocol-title {
     font-size: 15.5px;
   }
