@@ -1953,8 +1953,9 @@ const ContentManager = {
           <details class="accordion">
             <summary>SCR not available / limited — what to do</summary>
             <div class="accordion-body">
-              <table class="protocol-table">
-                <tr><th style="width: 35%;">Scenario</th><th>Prescriber action</th></tr>
+              <div class="table-wrapper">
+                <table class="protocol-table">
+                  <tr><th style="width: 35%;">Scenario</th><th>Prescriber action</th></tr>
                 <tr><td><strong>SCR available</strong></td><td>Proceed with SCR review, document outcome, and act accordingly.</td></tr>
                 <tr><td><strong>SCR not available</strong></td><td>Document “SCR unavailable”. Proceed based on questionnaire/standard SOP. <strong>Do not</strong> hold the order. <strong>Do not</strong> email patient purely due to missing SCR.</td></tr>
                 <tr><td><strong>SCR available but limited</strong></td><td>Document “SCR checked but limited”. Proceed per standard SOP. Do not hold unless specific information is required about a condition/medication.</td></tr>
@@ -1981,7 +1982,8 @@ const ContentManager = {
             <summary>Absolute contraindications — reject immediately</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 1:</strong> If any of these conditions are present, <strong>reject the prescription immediately</strong>. No further information needed.</div>
-              <table class="protocol-table">
+              <div class="table-wrapper">
+                <table class="protocol-table">
                 <tr><th>Condition</th><th>Action</th></tr>
                 <tr><td><strong>🫀 Pancreatitis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Including acute or chronic pancreatic insufficiency</span></td><td><span class="decision-reject">REJECT</span></td></tr>
                 <tr><td><strong>🍽️ Eating Disorders</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">• Anorexia nervosa<br>• Bulimia nervosa<br>• Binge Eating Disorder (BED)<br>• Avoidant/Restrictive Food Intake Disorder (ARFID)</span></td><td><span class="decision-reject">REJECT</span></td></tr>
@@ -1999,6 +2001,7 @@ const ContentManager = {
                 <tr><td><strong>💉 Insulin</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">On repeat medication list</span></td><td><span class="decision-reject">REJECT</span></td></tr>
                 <tr><td><strong>🦋 Thyroid Disease</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">For <strong>Nevolat</strong> prescriptions ONLY</span></td><td><span class="decision-reject">REJECT</span></td></tr>
               </table>
+              </div>
 
               <div class="protocol-section-title" style="margin-top: 20px;">Oral diabetic medications (reject if on repeat list)</div>
               <div class="scr-two-col">
@@ -2063,7 +2066,8 @@ const ContentManager = {
             <summary>Table 2: Time-sensitive conditions — workflow with macros</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 2:</strong> When timing information is needed, use appropriate macro. Reject when timing falls within contraindication window.</div>
-              <table class="protocol-table">
+              <div class="table-wrapper">
+                <table class="protocol-table">
                 <tr>
                   <th>Condition</th>
                   <th>Timeframe</th>
@@ -2125,7 +2129,8 @@ const ContentManager = {
             <summary>Table 3: Clinical details needed — macros & decision pathway</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 3:</strong> When clinical details are needed to make a prescribing decision.</div>
-              <table class="protocol-table">
+              <div class="table-wrapper">
+                <table class="protocol-table">
                 <tr>
                   <th>Condition</th>
                   <th>Macro</th>
@@ -2162,6 +2167,7 @@ const ContentManager = {
                   <td><span class="decision-reject">REJECT</span> if eGFR &lt;30 or Stage 4/5<br><br><span class="decision-prescribe">PRESCRIBE</span> if eGFR ≥30 or Stage 1/2/3</td>
                 </tr>
               </table>
+              </div>
             </div>
           </details>
 
@@ -2169,8 +2175,8 @@ const ContentManager = {
             <summary>Conditions requiring patient assessment (Macros 3 / 6 / 7 / 8 / 9 / 10)</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 4:</strong> Additional conditions that require gathering information from the patient to determine safety and prescribing decision.</div>
-
-              <table class="protocol-table">
+              <div class="table-wrapper">
+                <table class="protocol-table">
                 <tr><th>Condition</th><th>Macro</th><th>Before Emailing</th><th>Information to Request</th><th>After Patient Response</th></tr>
                 <tr>
                   <td><strong>🎗️ Any Cancer Diagnosis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(excluding MEN2 or medullary thyroid cancer)</span></td>
@@ -2222,6 +2228,7 @@ const ContentManager = {
                   <td><span class="decision-reject">REJECT</span> if &lt;12 months or current abuse<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months and no current abuse</td>
                 </tr>
               </table>
+              </div>
 
               <div class="protocol-section-title" style="margin-top: 20px;">Cancer assessment (Macro 3)</div>
               <div class="protocol-text">For any cancer diagnosis (excluding MEN2 or medullary thyroid cancer), ask the patient:</div>
@@ -2511,47 +2518,51 @@ const ContentManager = {
         </div>
         <div class="protocol-section">
           <div class="protocol-section-title">Starting Treatment (New Patients)</div>
-          <table class="dose-table">
-            <tr>
-              <th>Patient Type</th>
-              <th>Minimum BMI</th>
-              <th>Maximum BMI</th>
-            </tr>
-            <tr>
-              <td><strong>Without comorbidities</strong></td>
-              <td>30 kg/m²</td>
-              <td rowspan="3">60 kg/m²</td>
-            </tr>
-            <tr>
-              <td><strong>With comorbidities</strong> (prediabetes, diabetes, heart disease, high BP, high cholesterol, sleep apnoea)</td>
-              <td>27 kg/m²</td>
-            </tr>
-            <tr>
-              <td><strong>BAME patients</strong></td>
-              <td>27.5 kg/m²</td>
-            </tr>
-          </table>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Patient Type</th>
+                <th>Minimum BMI</th>
+                <th>Maximum BMI</th>
+              </tr>
+              <tr>
+                <td><strong>Without comorbidities</strong></td>
+                <td>30 kg/m²</td>
+                <td rowspan="3">60 kg/m²</td>
+              </tr>
+              <tr>
+                <td><strong>With comorbidities</strong> (prediabetes, diabetes, heart disease, high BP, high cholesterol, sleep apnoea)</td>
+                <td>27 kg/m²</td>
+              </tr>
+              <tr>
+                <td><strong>BAME patients</strong></td>
+                <td>27.5 kg/m²</td>
+              </tr>
+            </table>
+          </div>
         </div>
         <div class="protocol-section">
           <div class="protocol-section-title">Repeat Patients (Minimum BMI 21)</div>
-          <table class="dose-table">
-            <tr>
-              <th>Gap Since Last Order</th>
-              <th>Minimum BMI</th>
-            </tr>
-            <tr>
-              <td>&lt;6 months gap</td>
-              <td><strong>21 kg/m²</strong></td>
-            </tr>
-            <tr>
-              <td>6–12 months gap</td>
-              <td><strong>25 kg/m²</strong></td>
-            </tr>
-            <tr>
-              <td>&gt;12 months gap</td>
-              <td><strong>Must meet licence threshold</strong> (27-30 kg/m²)</td>
-            </tr>
-          </table>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Gap Since Last Order</th>
+                <th>Minimum BMI</th>
+              </tr>
+              <tr>
+                <td>&lt;6 months gap</td>
+                <td><strong>21 kg/m²</strong></td>
+              </tr>
+              <tr>
+                <td>6–12 months gap</td>
+                <td><strong>25 kg/m²</strong></td>
+              </tr>
+              <tr>
+                <td>&gt;12 months gap</td>
+                <td><strong>Must meet licence threshold</strong> (27-30 kg/m²)</td>
+              </tr>
+            </table>
+          </div>
         </div>
         <div class="info-card green" style="margin-top: 16px;">
           <div class="info-card-title">If Unsure About Patient's BMI</div>
@@ -2665,28 +2676,30 @@ const ContentManager = {
         <div class="protocol-text">
           Valid Previous Use Evidence must include <strong>all four</strong> of the following:
         </div>
-        <table class="dose-table">
-          <tr>
-            <th>Requirement</th>
-            <th>Details</th>
-          </tr>
-          <tr>
-            <td><strong>1. Patient Name/Email</strong></td>
-            <td>Full name (not nickname) OR patient's email address</td>
-          </tr>
-          <tr>
-            <td><strong>2. Medication & Dose</strong></td>
-            <td>Specific medication name and dosage prescribed</td>
-          </tr>
-          <tr>
-            <td><strong>3. Date</strong></td>
-            <td>Order date, prescription date, OR dispatch date</td>
-          </tr>
-          <tr>
-            <td><strong>4. From Regulated Body</strong></td>
-            <td>Must be from a legitimate healthcare provider/pharmacy</td>
-          </tr>
-        </table>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th>Requirement</th>
+              <th>Details</th>
+            </tr>
+            <tr>
+              <td><strong>1. Patient Name/Email</strong></td>
+              <td>Full name (not nickname) OR patient's email address</td>
+            </tr>
+            <tr>
+              <td><strong>2. Medication & Dose</strong></td>
+              <td>Specific medication name and dosage prescribed</td>
+            </tr>
+            <tr>
+              <td><strong>3. Date</strong></td>
+              <td>Order date, prescription date, OR dispatch date</td>
+            </tr>
+            <tr>
+              <td><strong>4. From Regulated Body</strong></td>
+              <td>Must be from a legitimate healthcare provider/pharmacy</td>
+            </tr>
+          </table>
+        </div>
         <div class="info-card red" style="margin-top: 16px;">
           <div class="info-card-title">⚠️ Order Confirmation is NOT Acceptable</div>
           <div class="info-card-text">
@@ -2785,20 +2798,22 @@ const ContentManager = {
         <div class="protocol-text">
           Titration schedules differ by medication:
         </div>
-        <table class="dose-table">
-          <tr>
-            <th>Medication</th>
-            <th>Titration Schedule</th>
-          </tr>
-          <tr>
-            <td><strong>Mounjaro & Wegovy</strong></td>
-            <td>Titrate up <strong>each month</strong></td>
-          </tr>
-          <tr>
-            <td><strong>Nevolat</strong></td>
-            <td><strong>Weekly titration</strong>, 0.6mg increments, maximum 3mg</td>
-          </tr>
-        </table>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th>Medication</th>
+              <th>Titration Schedule</th>
+            </tr>
+            <tr>
+              <td><strong>Mounjaro & Wegovy</strong></td>
+              <td>Titrate up <strong>each month</strong></td>
+            </tr>
+            <tr>
+              <td><strong>Nevolat</strong></td>
+              <td><strong>Weekly titration</strong>, 0.6mg increments, maximum 3mg</td>
+            </tr>
+          </table>
+        </div>
         <div class="info-card blue" style="margin-top: 16px;">
           <div class="info-card-title">Nevolat Pen Label Instruction</div>
           <div class="info-card-text">
@@ -2870,50 +2885,52 @@ const ContentManager = {
         <div class="protocol-text">
           <strong>How to use this table:</strong> Find the gap length since patient's last dose in the left column, then see the maximum dose they can restart on in the right columns.
         </div>
-        <table class="dose-table">
-          <tr>
-            <th>Gap Length</th>
-            <th>Action Required</th>
-            <th>Max Restart Dose</th>
-          </tr>
-          <tr>
-            <td><strong>≤8 weeks</strong></td>
-            <td>May titrate up to next dose level</td>
-            <td>N/A (normal progression)</td>
-          </tr>
-          <tr>
-            <td><strong>&gt;8 to ≤12 weeks</strong></td>
-            <td>Continue last tolerated dose, up to maximum shown</td>
-            <td>
-              Wegovy 1mg<br>
-              Mounjaro 10mg<br>
-              Nevolat 1.8mg
-            </td>
-          </tr>
-          <tr>
-            <td><strong>&gt;12 to ≤24 weeks</strong></td>
-            <td>Restart one dose lower than last tolerated</td>
-            <td>
-              Wegovy 1mg<br>
-              Mounjaro 5mg<br>
-              Nevolat 1.2mg
-            </td>
-          </tr>
-          <tr>
-            <td><strong>&gt;24 weeks</strong></td>
-            <td>Restart at lowest dose (if BMI ≥25)</td>
-            <td>
-              Wegovy 0.25mg<br>
-              Mounjaro 2.5mg<br>
-              Nevolat 0.6mg
-            </td>
-          </tr>
-          <tr>
-            <td><strong>&gt;12 months</strong></td>
-            <td>Restart at lowest dose, must meet new patient criteria</td>
-            <td>Starter doses only</td>
-          </tr>
-        </table>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th>Gap Length</th>
+              <th>Action Required</th>
+              <th>Max Restart Dose</th>
+            </tr>
+            <tr>
+              <td><strong>≤8 weeks</strong></td>
+              <td>May titrate up to next dose level</td>
+              <td>N/A (normal progression)</td>
+            </tr>
+            <tr>
+              <td><strong>&gt;8 to ≤12 weeks</strong></td>
+              <td>Continue last tolerated dose, up to maximum shown</td>
+              <td>
+                Wegovy 1mg<br>
+                Mounjaro 10mg<br>
+                Nevolat 1.8mg
+              </td>
+            </tr>
+            <tr>
+              <td><strong>&gt;12 to ≤24 weeks</strong></td>
+              <td>Restart one dose lower than last tolerated</td>
+              <td>
+                Wegovy 1mg<br>
+                Mounjaro 5mg<br>
+                Nevolat 1.2mg
+              </td>
+            </tr>
+            <tr>
+              <td><strong>&gt;24 weeks</strong></td>
+              <td>Restart at lowest dose (if BMI ≥25)</td>
+              <td>
+                Wegovy 0.25mg<br>
+                Mounjaro 2.5mg<br>
+                Nevolat 0.6mg
+              </td>
+            </tr>
+            <tr>
+              <td><strong>&gt;12 months</strong></td>
+              <td>Restart at lowest dose, must meet new patient criteria</td>
+              <td>Starter doses only</td>
+            </tr>
+          </table>
+        </div>
         <div class="protocol-section" style="margin-top: 16px;">
           <div class="protocol-section-title">If Dose Doesn't Meet Gap Criteria</div>
           <div class="protocol-text">
@@ -2999,12 +3016,13 @@ const ContentManager = {
         <div class="protocol-text">
           <strong>How to use this table:</strong> Review patient's answers to the weight gain questionnaire. Use this table to determine appropriate action based on their responses.
         </div>
-        <table class="dose-table">
-          <tr>
-            <th style="width: 25%;">Question</th>
-            <th style="width: 35%;">When to Approve</th>
-            <th style="width: 40%;">Additional Actions / Guidance</th>
-          </tr>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th style="width: 25%;">Question</th>
+              <th style="width: 35%;">When to Approve</th>
+              <th style="width: 40%;">Additional Actions / Guidance</th>
+            </tr>
           <tr>
             <td><strong>Difficulties injecting?</strong></td>
             <td>Approve if <strong>minor pain</strong> at injection site</td>
@@ -3092,24 +3110,26 @@ const ContentManager = {
         <div class="protocol-text">
           <strong>How to use this table:</strong> Check order type against maximum allowed weight loss. System automatically adds tag when threshold exceeded.
         </div>
-        <table class="dose-table">
-          <tr>
-            <th>Order Type</th>
-            <th>Maximum Weight Loss Allowed</th>
-          </tr>
-          <tr>
-            <td>Single pen order</td>
-            <td><strong>10%</strong></td>
-          </tr>
-          <tr>
-            <td>2 pen bundle</td>
-            <td><strong>15%</strong></td>
-          </tr>
-          <tr>
-            <td>3 pen bundle</td>
-            <td><strong>20%</strong></td>
-          </tr>
-        </table>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th>Order Type</th>
+              <th>Maximum Weight Loss Allowed</th>
+            </tr>
+            <tr>
+              <td>Single pen order</td>
+              <td><strong>10%</strong></td>
+            </tr>
+            <tr>
+              <td>2 pen bundle</td>
+              <td><strong>15%</strong></td>
+            </tr>
+            <tr>
+              <td>3 pen bundle</td>
+              <td><strong>20%</strong></td>
+            </tr>
+          </table>
+        </div>
         <div class="protocol-text">
           System adds <span class="tag red">Weight loss between orders exceeds threshold</span> tag. Order is placed on hold until patient responds.
         </div>
@@ -3127,12 +3147,13 @@ const ContentManager = {
         <div class="protocol-text">
           <strong>How to use this table:</strong> Review patient's answers to the weight loss questionnaire and follow guidance below for each response.
         </div>
-        <table class="dose-table">
-          <tr>
-            <th style="width: 30%;">Question</th>
-            <th style="width: 35%;">When to Approve</th>
-            <th style="width: 35%;">Additional Actions / Guidance</th>
-          </tr>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th style="width: 30%;">Question</th>
+              <th style="width: 35%;">When to Approve</th>
+              <th style="width: 35%;">Additional Actions / Guidance</th>
+            </tr>
           <tr>
             <td><strong>Side effects? (nausea, vomiting, diarrhoea)</strong></td>
             <td>Approve if <strong>mild</strong> side effects</td>
@@ -3234,20 +3255,22 @@ const ContentManager = {
         <div class="divider"></div>
         <div class="protocol-section">
           <div class="protocol-section-title">Switching Workflows by Medication Type</div>
-          <table class="dose-table">
-            <tr>
-              <th>Switch Type</th>
-              <th>Side Effects Question?</th>
-            </tr>
-            <tr>
-              <td><strong>Mounjaro → Wegovy</strong></td>
-              <td>✅ Built-in question in consultation</td>
-            </tr>
-            <tr>
-              <td><strong>Any other switch</strong></td>
-              <td>❌ Manually check using macro in Switching SOP</td>
-            </tr>
-          </table>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Switch Type</th>
+                <th>Side Effects Question?</th>
+              </tr>
+              <tr>
+                <td><strong>Mounjaro → Wegovy</strong></td>
+                <td>✅ Built-in question in consultation</td>
+              </tr>
+              <tr>
+                <td><strong>Any other switch</strong></td>
+                <td>❌ Manually check using macro in Switching SOP</td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -3266,26 +3289,28 @@ const ContentManager = {
         <div class="protocol-text">
           <strong>How to use this table:</strong> Check which medication patient is switching TO, then advise on contraception requirements.
         </div>
-        <table class="dose-table">
-          <tr>
-            <th>Medication</th>
-            <th>Contraception Advice for Oral Contraceptive Users</th>
-          </tr>
-          <tr>
-            <td><strong>Wegovy</strong> (Semaglutide)</td>
-            <td>No additional barrier contraception needed with oral contraceptives</td>
-          </tr>
-          <tr>
-            <td><strong>Mounjaro</strong> (Tirzepatide)</td>
-            <td>
-              <strong>Must use barrier method</strong> (e.g., condoms) alongside oral contraceptives for:<br>
-              • <strong>4 weeks after starting</strong> Mounjaro, AND<br>
-              • <strong>4 weeks after each dose increase</strong><br>
-              <br>
-              Reason: Mounjaro impacts oral contraceptive bioavailability. Alternatively, switch to IUD or implant.
-            </td>
-          </tr>
-        </table>
+        <div class="table-wrapper">
+          <table class="dose-table">
+            <tr>
+              <th>Medication</th>
+              <th>Contraception Advice for Oral Contraceptive Users</th>
+            </tr>
+            <tr>
+              <td><strong>Wegovy</strong> (Semaglutide)</td>
+              <td>No additional barrier contraception needed with oral contraceptives</td>
+            </tr>
+            <tr>
+              <td><strong>Mounjaro</strong> (Tirzepatide)</td>
+              <td>
+                <strong>Must use barrier method</strong> (e.g., condoms) alongside oral contraceptives for:<br>
+                • <strong>4 weeks after starting</strong> Mounjaro, AND<br>
+                • <strong>4 weeks after each dose increase</strong><br>
+                <br>
+                Reason: Mounjaro impacts oral contraceptive bioavailability. Alternatively, switch to IUD or implant.
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
 
       <div class="protocol-card">
@@ -3392,24 +3417,26 @@ const ContentManager = {
         </div>
         <div class="protocol-section">
           <div class="protocol-section-title">Timeline & Actions</div>
-          <table class="dose-table">
-            <tr>
-              <th>Treatment Period</th>
-              <th>Prescriber Action</th>
-            </tr>
-            <tr>
-              <td><strong>Months 6-9</strong></td>
-              <td>May still prescribe even if review incomplete</td>
-            </tr>
-            <tr>
-              <td><strong>Month 9 onwards</strong></td>
-              <td>If review still not completed → <strong>place order on hold</strong> until questionnaire completed</td>
-            </tr>
-            <tr>
-              <td><strong>Subsequent reviews</strong> (12, 18 months)</td>
-              <td>Optional if patient can continue treatment</td>
-            </tr>
-          </table>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Treatment Period</th>
+                <th>Prescriber Action</th>
+              </tr>
+              <tr>
+                <td><strong>Months 6-9</strong></td>
+                <td>May still prescribe even if review incomplete</td>
+              </tr>
+              <tr>
+                <td><strong>Month 9 onwards</strong></td>
+                <td>If review still not completed → <strong>place order on hold</strong> until questionnaire completed</td>
+              </tr>
+              <tr>
+                <td><strong>Subsequent reviews</strong> (12, 18 months)</td>
+                <td>Optional if patient can continue treatment</td>
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -4270,13 +4297,13 @@ const ContentManager = {
             </div>
             Action Tags — Require Your Action
           </div>
-
-          <table class="dose-table">
-            <tr>
-              <th style="width: 25%;">Tag</th>
-              <th style="width: 35%;">What It Means</th>
-              <th style="width: 40%;">Action Required</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th style="width: 25%;">Tag</th>
+                <th style="width: 35%;">What It Means</th>
+                <th style="width: 40%;">Action Required</th>
+              </tr>
             <tr>
               <td><span class="tag orange">Pending Customer Response</span></td>
               <td>Patient has been emailed for additional information</td>
@@ -4322,7 +4349,8 @@ const ContentManager = {
               <td>Patient has gap >8 weeks since last dose</td>
               <td>Use Gap Adjustment Table in Titration Guide to determine safe restart dose.</td>
             </tr>
-          </table>
+            </table>
+          </div>
         </div>
 
         <div class="protocol-card" style="margin-top: 20px;">
@@ -4336,11 +4364,12 @@ const ContentManager = {
             System Tags — Informational Only
           </div>
 
-          <table class="dose-table">
-            <tr>
-              <th style="width: 30%;">Tag</th>
-              <th>What It Means</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th style="width: 30%;">Tag</th>
+                <th>What It Means</th>
+              </tr>
             <tr>
               <td><span class="tag green">Completed six month review</span></td>
               <td>Patient has completed the 6-month review questionnaire</td>
@@ -4417,12 +4446,13 @@ const ContentManager = {
             <strong>Assessment Rule:</strong> Requirements depend on the patient's <strong>current BMI</strong>. Check their BMI first, then verify appropriate evidence.
           </div>
 
-          <table class="dose-table" style="margin-top: 16px;">
-            <tr>
-              <th style="width: 20%;">Current BMI</th>
-              <th style="width: 40%;">Required Evidence</th>
-              <th style="width: 40%;">Action if Evidence Missing/Fails</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table" style="margin-top: 16px;">
+              <tr>
+                <th style="width: 20%;">Current BMI</th>
+                <th style="width: 40%;">Required Evidence</th>
+                <th style="width: 40%;">Action if Evidence Missing/Fails</th>
+              </tr>
             <tr>
               <td><strong style="color: var(--success);">BMI ≥27</strong><br><span style="font-size: 12px; color: var(--text-secondary);">(Above licence threshold)</span></td>
               <td>
@@ -4447,7 +4477,8 @@ const ContentManager = {
                 <span style="font-size: 12px; color: var(--accent);">Use email template: <em>Clinical: Evidence of starting BMI</em></span>
               </td>
             </tr>
-          </table>
+            </table>
+          </div>
         </div>
 
         <div class="protocol-card" style="margin-top: 20px;">
@@ -4541,11 +4572,12 @@ const ContentManager = {
 
           <div style="margin-top: 16px;">
             <strong style="display: block; margin-bottom: 12px;">Photo Must Show:</strong>
-            <table class="dose-table">
-              <tr>
-                <th style="width: 30%;">Requirement</th>
-                <th style="width: 70%;">Details</th>
-              </tr>
+            <div class="table-wrapper">
+              <table class="dose-table">
+                <tr>
+                  <th style="width: 30%;">Requirement</th>
+                  <th style="width: 70%;">Details</th>
+                </tr>
               <tr>
                 <td><strong>Full Body on Scales</strong></td>
                 <td>Patient must be standing on weighing scales with full body visible</td>
@@ -4566,7 +4598,8 @@ const ContentManager = {
                 <td><strong>BMI ≥27 Verified</strong></td>
                 <td>Calculate BMI from visible weight and stated height — must be ≥27</td>
               </tr>
-            </table>
+              </table>
+            </div>
           </div>
 
           <div class="info-card orange" style="margin-top: 20px;">
@@ -4678,13 +4711,13 @@ const ContentManager = {
             </div>
             BMI Eligibility Thresholds
           </div>
-
-          <table class="dose-table">
-            <tr>
-              <th>Patient Characteristics</th>
-              <th>BMI Threshold</th>
-              <th>Notes</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Patient Characteristics</th>
+                <th>BMI Threshold</th>
+                <th>Notes</th>
+              </tr>
             <tr>
               <td><strong>Standard Eligibility</strong><br><span style="color: var(--text-secondary); font-size: 12px;">White ethnicity, no comorbidities</span></td>
               <td><strong>≥30 kg/m²</strong></td>
@@ -4706,6 +4739,7 @@ const ContentManager = {
               <td>Must provide proof of supply + previous BMI photo showing BMI ≥27</td>
             </tr>
           </table>
+          </div>
         </div>
 
         <div class="protocol-card" style="margin-top: 20px;">
@@ -4768,12 +4802,13 @@ const ContentManager = {
             <div class="info-card-text">If patient does not meet these requirements, reject consultation with appropriate reason.</div>
           </div>
 
-          <table class="dose-table">
-            <tr>
-              <th>Question</th>
-              <th>Required Answer</th>
-              <th>If Incorrect</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Question</th>
+                <th>Required Answer</th>
+                <th>If Incorrect</th>
+              </tr>
             <tr>
               <td>Are you aged 18 to 74 years old?</td>
               <td><strong style="color: var(--success);">Yes</strong></td>
@@ -4795,6 +4830,7 @@ const ContentManager = {
               <td>If Yes → Nevolat NOT shown on CTP (only Mounjaro/Wegovy available)</td>
             </tr>
           </table>
+          </div>
         </div>
 
         <div class="protocol-card" style="margin-top: 20px;">
@@ -4939,9 +4975,10 @@ const ContentManager = {
             Use the <strong>"Step"</strong> to find appropriate doses when switching medications or managing tolerability. These represent the most suitable dose for expected tolerance, side effects, and weight loss outcomes.
           </div>
 
-          <table class="dose-table">
-            <tr>
-              <th style="width: 12%; background: var(--bg-elevated);">Step</th>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th style="width: 12%; background: var(--bg-elevated);">Step</th>
               <th style="width: 22%; background: rgba(99, 102, 241, 0.1);">
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
                   <strong style="color: var(--accent);">Mounjaro</strong>
@@ -5050,9 +5087,10 @@ const ContentManager = {
             <strong>How to use:</strong> Find the patient's last step in the left column, then look across to find the appropriate restart dose based on gap length since last dose.
           </div>
 
-          <table class="dose-table">
-            <tr>
-              <th style="width: 15%; background: var(--bg-elevated);">Last Step</th>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th style="width: 15%; background: var(--bg-elevated);">Last Step</th>
               <th style="width: 21.25%; background: rgba(34, 197, 94, 0.1);"><strong style="color: var(--success);">≤4 weeks</strong><br><span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Short gap</span></th>
               <th style="width: 21.25%; background: rgba(245, 158, 11, 0.1);"><strong style="color: var(--warning);">&gt;4 to ≤8 weeks</strong><br><span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Medium gap</span></th>
               <th style="width: 21.25%; background: rgba(239, 68, 68, 0.1);"><strong style="color: var(--danger);">&gt;8 to ≤12 weeks</strong><br><span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Long gap</span></th>
@@ -5115,6 +5153,7 @@ const ContentManager = {
               <td style="background: rgba(168, 85, 247, 0.05);"><strong style="color: var(--purple);">Step 1B</strong> ↓↓↓↓↓↓</td>
             </tr>
           </table>
+          </div>
 
           <div class="info-card orange" style="margin-top: 16px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -5161,12 +5200,12 @@ const ContentManager = {
             </div>
             Manual Rejection Reasons
           </div>
-
-          <table class="dose-table">
-            <tr>
-              <th>Reason</th>
-              <th>When to Use</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Reason</th>
+                <th>When to Use</th>
+              </tr>
             <tr>
               <td><strong>Medical Reason</strong></td>
               <td>GP letter or patient informs us of medical information which is a contraindication. If identified via SCR check → use "SCR Check Fail"</td>
@@ -5279,11 +5318,12 @@ const ContentManager = {
 
           <div class="protocol-section">
             <div class="protocol-section-title">Self Cancellation Flow - Zendesk Ticket Status</div>
-            <table class="dose-table">
-              <tr>
-                <th>Reason</th>
-                <th>Ticket Status</th>
-              </tr>
+            <div class="table-wrapper">
+              <table class="dose-table">
+                <tr>
+                  <th>Reason</th>
+                  <th>Ticket Status</th>
+                </tr>
               <tr>
                 <td>BY_PATIENT_CHANGED_MIND</td>
                 <td>Automatically closed</td>
@@ -5312,7 +5352,8 @@ const ContentManager = {
                 <td>OTHER</td>
                 <td>Ticket to Customer Care, may be triaged to Clinical</td>
               </tr>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -5329,12 +5370,13 @@ const ContentManager = {
 
           <div class="protocol-text" style="margin-bottom: 16px;">When patients change their comorbidity answer between consultations:</div>
 
-          <table class="dose-table">
-            <tr>
-              <th>Change</th>
-              <th>Starting BMI</th>
-              <th>Action</th>
-            </tr>
+          <div class="table-wrapper">
+            <table class="dose-table">
+              <tr>
+                <th>Change</th>
+                <th>Starting BMI</th>
+                <th>Action</th>
+              </tr>
             <tr>
               <td><strong>Yes → No</strong></td>
               <td>&lt;30</td>
@@ -5350,16 +5392,19 @@ const ContentManager = {
               <td>&gt;30 by default</td>
               <td>Review remaining consultation answers for relevant clinical details. Otherwise no further action</td>
             </tr>
-          </table>
+            </table>
+          </div>
+          </div>
 
           <div class="protocol-section" style="margin-top: 16px;">
             <div class="protocol-section-title">Multiple Submissions - GLP1 Consultation</div>
-            <table class="dose-table">
-              <tr>
-                <th>Change</th>
-                <th>Initial Answer</th>
-                <th>Action</th>
-              </tr>
+            <div class="table-wrapper">
+              <table class="dose-table">
+                <tr>
+                  <th>Change</th>
+                  <th>Initial Answer</th>
+                  <th>Action</th>
+                </tr>
               <tr>
                 <td><strong>No → Yes</strong> (eating disorder or Type 1 diabetes)</td>
                 <td>Yes</td>
@@ -5370,7 +5415,8 @@ const ContentManager = {
                 <td>N/A</td>
                 <td>No action required. This flag tracks data entry errors. Base prescribing decision on BMI value submitted.</td>
               </tr>
-            </table>
+              </table>
+            </div>
           </div>
         </div>
       </div>

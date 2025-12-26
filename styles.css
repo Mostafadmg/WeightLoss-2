@@ -2380,78 +2380,74 @@ details.accordion[open] summary::after {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
-  table-layout: auto;
+  table-layout: fixed;
   background: var(--bg-card);
+  display: table;
 }
 
 .protocol-table th,
 .protocol-table td {
-  padding: 18px 20px;
+  padding: 16px 18px;
   text-align: left;
   border-bottom: 1px solid rgba(99, 102, 241, 0.08);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13.5px;
+  line-height: 1.65;
   vertical-align: top;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .protocol-table th {
   background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.7px;
   color: var(--accent);
   border-bottom: 2px solid rgba(99, 102, 241, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* Column-specific styling for 5-column tables */
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(1),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(1) {
-  width: 20%;
-  min-width: 180px;
+  width: 18%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(2),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(2) {
-  width: 14%;
-  min-width: 120px;
+  width: 13%;
   text-align: center;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(3),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(3) {
-  width: 11%;
-  min-width: 100px;
+  width: 10%;
   text-align: center;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(4),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(4) {
-  width: 27%;
-  min-width: 260px;
+  width: 28%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(5),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(5) {
-  width: 28%;
-  min-width: 260px;
+  width: 31%;
 }
 
 /* Column-specific styling for 2-column tables (Table 1) */
 .protocol-table tr:has(th:nth-child(2):last-child) th:nth-child(1),
 .protocol-table tr:has(th:nth-child(2):last-child) ~ tr td:nth-child(1) {
-  width: 78%;
+  width: 75%;
 }
 
 .protocol-table tr:has(th:nth-child(2):last-child) th:nth-child(2),
 .protocol-table tr:has(th:nth-child(2):last-child) ~ tr td:nth-child(2) {
-  width: 22%;
-  min-width: 140px;
+  width: 25%;
   text-align: center;
 }
 
@@ -2481,7 +2477,7 @@ details.accordion[open] summary::after {
 }
 
 .protocol-table td:first-child strong {
-  font-size: 14.5px;
+  font-size: 14px;
   display: block;
   margin-bottom: 4px;
   color: var(--text);
@@ -2492,11 +2488,11 @@ details.accordion[open] summary::after {
   color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border-radius: 6px;
-  font-size: 11px;
-  letter-spacing: 0.8px;
+  font-size: 10.5px;
+  letter-spacing: 0.7px;
   box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
@@ -2506,11 +2502,11 @@ details.accordion[open] summary::after {
   color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   border-radius: 6px;
-  font-size: 11px;
-  letter-spacing: 0.8px;
+  font-size: 10.5px;
+  letter-spacing: 0.7px;
   box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
@@ -2520,11 +2516,11 @@ details.accordion[open] summary::after {
   color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   border-radius: 6px;
-  font-size: 11px;
-  letter-spacing: 0.8px;
+  font-size: 10.5px;
+  letter-spacing: 0.7px;
   box-shadow: 0 2px 4px rgba(234, 88, 12, 0.3);
   text-transform: uppercase;
   white-space: nowrap;
@@ -2534,34 +2530,36 @@ details.accordion[open] summary::after {
 .protocol-table .checklist-item {
   display: flex;
   align-items: flex-start;
-  margin: 8px 0;
-  line-height: 1.6;
-  padding-left: 4px;
+  margin: 6px 0;
+  line-height: 1.55;
+  padding-left: 2px;
+  font-size: 13px;
 }
 
 .protocol-table .checklist-item::before {
   content: "✓";
   color: var(--accent);
   font-weight: bold;
-  margin-right: 10px;
+  margin-right: 8px;
   flex-shrink: 0;
-  font-size: 15px;
+  font-size: 14px;
   margin-top: 1px;
 }
 
 /* Timeframe column styling */
 .protocol-table td:nth-child(2) {
   font-weight: 600;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 /* Macro badge styling */
 .protocol-table .tag {
-  font-size: 11.5px;
-  padding: 6px 14px;
+  font-size: 11px;
+  padding: 6px 12px;
   font-weight: 700;
   letter-spacing: 0.3px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  white-space: nowrap;
 }
 
 /* Table row zebra striping for better readability */
@@ -2569,53 +2567,113 @@ details.accordion[open] summary::after {
   background: rgba(99, 102, 241, 0.01);
 }
 
-/* Responsive table design */
-@media (max-width: 1400px) {
-  .protocol-table {
-    font-size: 13px;
-  }
+/* Wrapper for responsive tables */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 20px 0;
+  border-radius: 10px;
+}
 
+.table-wrapper .protocol-table,
+.table-wrapper .dose-table {
+  margin: 0;
+}
+
+/* Responsive table design */
+@media (max-width: 1600px) {
   .protocol-table th,
   .protocol-table td {
-    padding: 16px 16px;
+    padding: 15px 16px;
+    font-size: 13px;
+  }
+  
+  .protocol-table .checklist-item {
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .protocol-table th,
+  .protocol-table td {
+    padding: 14px 15px;
+    font-size: 12.5px;
+  }
+  
+  .protocol-table .decision-reject,
+  .protocol-table .decision-prescribe,
+  .protocol-table .decision-clinical {
+    padding: 5px 10px;
+    font-size: 10px;
   }
 }
 
 @media (max-width: 1200px) {
-  .protocol-table {
-    font-size: 12.5px;
-  }
-
   .protocol-table th,
   .protocol-table td {
-    padding: 14px 14px;
+    padding: 12px 14px;
+    font-size: 12px;
   }
 
   .protocol-table .checklist-item {
-    margin: 6px 0;
+    margin: 5px 0;
+    font-size: 11.5px;
+  }
+  
+  .protocol-table .tag {
+    font-size: 10.5px;
+    padding: 5px 10px;
   }
 }
 
-@media (max-width: 768px) {
-  .protocol-table {
-    display: block;
+@media (max-width: 992px) {
+  /* Enable horizontal scroll on smaller screens */
+  .accordion-body {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
   }
-
+  
+  .protocol-table {
+    min-width: 900px;
+    display: table;
+  }
+  
   .protocol-table th,
   .protocol-table td {
     padding: 12px;
     font-size: 11.5px;
   }
+}
+
+@media (max-width: 768px) {
+  .protocol-table {
+    min-width: 800px;
+  }
+  
+  .protocol-table th,
+  .protocol-table td {
+    padding: 10px;
+    font-size: 11px;
+  }
 
   .protocol-table .checklist-item {
-    font-size: 11px;
-    margin: 5px 0;
+    font-size: 10.5px;
+    margin: 4px 0;
   }
 
   .protocol-table .decision-reject,
+  .protocol-table .decision-prescribe,
+  .protocol-table .decision-clinical {
+    padding: 4px 8px;
+    font-size: 9px;
+  }
+  
+  .protocol-table .tag {
+    font-size: 9.5px;
+    padding: 4px 8px;
+  }
+}
   .protocol-table .decision-prescribe,
   .protocol-table .decision-clinical {
     padding: 6px 12px;
@@ -3030,25 +3088,26 @@ details.accordion[open] summary::after {
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
-  table-layout: auto;
+  table-layout: fixed;
   background: var(--bg-card);
 }
 
 .dose-table th,
 .dose-table td {
-  padding: 18px 20px;
+  padding: 16px 18px;
   text-align: left;
   border-bottom: 1px solid rgba(99, 102, 241, 0.08);
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13.5px;
+  line-height: 1.65;
   vertical-align: top;
   word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .dose-table th {
   background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
   font-weight: 700;
-  font-size: 11.5px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--accent);
@@ -3057,7 +3116,7 @@ details.accordion[open] summary::after {
   position: sticky;
   top: 0;
   z-index: 10;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .dose-table th:last-child {
@@ -3095,43 +3154,67 @@ details.accordion[open] summary::after {
 .dose-table td strong {
   color: var(--text);
   font-weight: 600;
-  font-size: 14.5px;
+  font-size: 14px;
 }
 
 /* Responsive dose tables */
-@media (max-width: 1400px) {
-  .dose-table {
-    font-size: 13px;
-  }
-  
+@media (max-width: 1600px) {
   .dose-table th,
   .dose-table td {
-    padding: 16px 16px;
+    padding: 15px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .dose-table th,
+  .dose-table td {
+    padding: 14px 15px;
+    font-size: 12.5px;
+  }
+  
+  .dose-table td strong {
+    font-size: 13px;
   }
 }
 
 @media (max-width: 1200px) {
-  .dose-table {
-    font-size: 12.5px;
-  }
-
   .dose-table th,
   .dose-table td {
-    padding: 14px 14px;
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+  
+  .dose-table td strong {
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 992px) {
+  .dose-table {
+    min-width: 800px;
+    display: table;
+  }
+  
+  .dose-table th,
+  .dose-table td {
+    padding: 12px;
+    font-size: 11.5px;
   }
 }
 
 @media (max-width: 768px) {
   .dose-table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    border-radius: 8px;
+    min-width: 700px;
   }
-
+  
   .dose-table th,
   .dose-table td {
-    padding: 12px;
+    padding: 10px;
+    font-size: 11px;
+  }
+  
+  .dose-table td strong {
     font-size: 11.5px;
   }
 }
