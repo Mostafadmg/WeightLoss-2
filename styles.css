@@ -2348,165 +2348,224 @@ details.accordion[open] summary::after {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 20px 0;
+  margin: 24px 0;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: var(--shadow);
-  table-layout: fixed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06);
+  table-layout: auto;
+  background: var(--bg-card);
 }
 
 .protocol-table th,
 .protocol-table td {
-  padding: 16px 18px;
+  padding: 18px 20px;
   text-align: left;
-  border-bottom: 1px solid var(--border);
-  font-size: 13.5px;
-  line-height: 1.6;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.08);
+  font-size: 14px;
+  line-height: 1.7;
   vertical-align: top;
   word-wrap: break-word;
 }
 
 .protocol-table th {
-  background: linear-gradient(180deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
   font-weight: 700;
-  font-size: 11px;
+  font-size: 11.5px;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.8px;
   color: var(--accent);
-  border-bottom: 2px solid var(--border);
+  border-bottom: 2px solid rgba(99, 102, 241, 0.2);
   position: sticky;
   top: 0;
   z-index: 10;
+  white-space: nowrap;
 }
 
 /* Column-specific styling for 5-column tables */
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(1),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(1) {
-  background: rgba(99, 102, 241, 0.03);
-  font-weight: 600;
-  color: var(--text);
-  width: 22%;
+  width: 20%;
+  min-width: 180px;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(2),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(2) {
-  background: rgba(6, 182, 212, 0.03);
+  width: 14%;
+  min-width: 120px;
   text-align: center;
-  width: 12%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(3),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(3) {
-  background: rgba(245, 158, 11, 0.03);
+  width: 11%;
+  min-width: 100px;
   text-align: center;
-  width: 10%;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(4),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(4) {
-  background: rgba(168, 85, 247, 0.03);
-  width: 28%;
+  width: 27%;
+  min-width: 260px;
 }
 
 .protocol-table tr:has(th:nth-child(5)) th:nth-child(5),
 .protocol-table tr:has(th:nth-child(5)) ~ tr td:nth-child(5) {
-  background: rgba(34, 197, 94, 0.03);
   width: 28%;
+  min-width: 260px;
 }
 
 /* Column-specific styling for 2-column tables (Table 1) */
 .protocol-table tr:has(th:nth-child(2):last-child) th:nth-child(1),
 .protocol-table tr:has(th:nth-child(2):last-child) ~ tr td:nth-child(1) {
-  background: rgba(99, 102, 241, 0.03);
-  font-weight: 600;
-  color: var(--text);
-  width: 80%;
+  width: 78%;
 }
 
 .protocol-table tr:has(th:nth-child(2):last-child) th:nth-child(2),
 .protocol-table tr:has(th:nth-child(2):last-child) ~ tr td:nth-child(2) {
-  background: rgba(239, 68, 68, 0.03);
+  width: 22%;
+  min-width: 140px;
   text-align: center;
-  width: 20%;
 }
 
 .protocol-table td {
-  color: var(--text-secondary);
+  color: var(--text);
+  background: var(--bg-card);
+}
+
+.protocol-table tbody tr {
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.protocol-table tbody tr:hover {
+  border-left-color: var(--accent);
+  background: rgba(99, 102, 241, 0.02);
 }
 
 .protocol-table tr:last-child td {
   border-bottom: none;
 }
 
-.protocol-table tr:hover td {
-  filter: brightness(1.1);
-  transition: var(--transition);
+/* Condition column styling */
+.protocol-table td:first-child {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.protocol-table td:first-child strong {
+  font-size: 14.5px;
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text);
 }
 
 /* Decision outcomes styling */
 .protocol-table .decision-reject {
-  color: var(--danger);
+  color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 6px 12px;
-  background: var(--danger-bg);
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
   border-radius: 6px;
-  border-left: 3px solid var(--danger);
   font-size: 11px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .protocol-table .decision-prescribe {
-  color: var(--success);
+  color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 6px 12px;
-  background: var(--success-bg);
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   border-radius: 6px;
-  border-left: 3px solid var(--success);
   font-size: 11px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 4px rgba(22, 163, 74, 0.3);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .protocol-table .decision-clinical {
-  color: var(--warning);
+  color: #ffffff;
   font-weight: 700;
   display: inline-block;
-  padding: 6px 12px;
-  background: var(--warning-bg);
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
   border-radius: 6px;
-  border-left: 3px solid var(--warning);
   font-size: 11px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  box-shadow: 0 2px 4px rgba(234, 88, 12, 0.3);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 /* Checklist styling */
 .protocol-table .checklist-item {
   display: flex;
   align-items: flex-start;
-  margin: 6px 0;
-  line-height: 1.5;
+  margin: 8px 0;
+  line-height: 1.6;
+  padding-left: 4px;
 }
 
 .protocol-table .checklist-item::before {
   content: "✓";
   color: var(--accent);
   font-weight: bold;
-  margin-right: 8px;
+  margin-right: 10px;
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: 15px;
+  margin-top: 1px;
+}
+
+/* Timeframe column styling */
+.protocol-table td:nth-child(2) {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+
+/* Macro badge styling */
+.protocol-table .tag {
+  font-size: 11.5px;
+  padding: 6px 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+/* Table row zebra striping for better readability */
+.protocol-table tbody tr:nth-child(even) {
+  background: rgba(99, 102, 241, 0.01);
 }
 
 /* Responsive table design */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .protocol-table {
-    font-size: 12px;
+    font-size: 13px;
   }
   
   .protocol-table th,
   .protocol-table td {
-    padding: 12px 14px;
+    padding: 16px 16px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .protocol-table {
+    font-size: 12.5px;
+  }
+
+  .protocol-table th,
+  .protocol-table td {
+    padding: 14px 14px;
+  }
+  
+  .protocol-table .checklist-item {
+    margin: 6px 0;
   }
 }
 
@@ -2515,14 +2574,32 @@ details.accordion[open] summary::after {
     display: block;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+  }
+
+  .protocol-table th,
+  .protocol-table td {
+    padding: 12px;
+    font-size: 11.5px;
+  }
+
+  .protocol-table .checklist-item {
+    font-size: 11px;
+    margin: 5px 0;
   }
   
-  .protocol-table th,
+  .protocol-table .decision-reject,
+  .protocol-table .decision-prescribe,
+  .protocol-table .decision-clinical {
+    padding: 6px 12px;
+    font-size: 10px;
+  }
+}
   .protocol-table td {
     padding: 10px 12px;
     font-size: 11.5px;
   }
-  
+
   .protocol-table .checklist-item {
     font-size: 11px;
   }

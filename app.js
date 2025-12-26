@@ -1982,7 +1982,7 @@ const ContentManager = {
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 1:</strong> If any of these conditions are present, <strong>reject the prescription immediately</strong>. No further information needed.</div>
               <table class="protocol-table">
-                <tr><th>Condition</th><th style="width: 140px;">Action</th></tr>
+                <tr><th>Condition</th><th>Action</th></tr>
                 <tr><td><strong>🫀 Pancreatitis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Including acute or chronic pancreatic insufficiency</span></td><td><span class="decision-reject">REJECT</span></td></tr>
                 <tr><td><strong>🍽️ Eating Disorders</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">• Anorexia nervosa<br>• Bulimia nervosa<br>• Binge Eating Disorder (BED)<br>• Avoidant/Restrictive Food Intake Disorder (ARFID)</span></td><td><span class="decision-reject">REJECT</span></td></tr>
                 <tr><td><strong>💉 Type 1 Diabetes</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Aka Insulin-dependent diabetes mellitus (IDDM)</span></td><td><span class="decision-reject">REJECT</span></td></tr>
@@ -2066,8 +2066,8 @@ const ContentManager = {
               <table class="protocol-table">
                 <tr>
                   <th>Condition</th>
-                  <th style="width: 110px;">Timeframe</th>
-                  <th style="width: 110px;">Macro</th>
+                  <th>Timeframe</th>
+                  <th>Macro</th>
                   <th>Before Emailing</th>
                   <th>After Patient Response</th>
                 </tr>
@@ -2128,9 +2128,9 @@ const ContentManager = {
               <table class="protocol-table">
                 <tr>
                   <th>Condition</th>
-                  <th style="width: 110px;">Macro</th>
+                  <th>Macro</th>
                   <th>Before Emailing</th>
-                  <th style="width: 160px;">Information to Request</th>
+                  <th>Information to Request</th>
                   <th>After Patient Response</th>
                 </tr>
                 <tr>
