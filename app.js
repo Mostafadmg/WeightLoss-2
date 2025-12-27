@@ -7,11 +7,11 @@ const AppState = {
   theme: localStorage.getItem("theme") || "dark",
   font: localStorage.getItem("font") || "Manrope",
   checklists: {
-    starting: { total: 12, checks: {} },
-    stepup: { total: 9, checks: {} },
-    repeat: { total: 12, checks: {} },
-    "transfer-above": { total: 10, checks: {} },
-    "transfer-below": { total: 12, checks: {} },
+    starting: { total: 21, checks: {} },
+    stepup: { total: 20, checks: {} },
+    repeat: { total: 34, checks: {} },
+    "transfer-above": { total: 18, checks: {} },
+    "transfer-below": { total: 21, checks: {} },
   },
 };
 
@@ -1502,11 +1502,11 @@ const ContentManager = {
                     <div class="prescription-icon starter">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                     </div>
-                    <h3>Starting Dose</h3>
+                    <h3>New Order — Starter Dose</h3>
                     <p>New patients beginning GLP-1 treatment for the first time</p>
                     <div class="checks-count">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-                      12 checks required
+                      21 checks required
                     </div>
                 </div>
 
@@ -1514,7 +1514,7 @@ const ContentManager = {
                     <div class="prescription-icon stepup">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
                     </div>
-                    <h3>Step Up Dose</h3>
+                    <h3>New Order — Continuation Dose</h3>
                     <p>Existing patients titrating to a higher dose</p>
                     <div class="checks-count">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
@@ -1526,32 +1526,8 @@ const ContentManager = {
                     <div class="prescription-icon repeat">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
                     </div>
-                    <h3>Repeat Order</h3>
+                    <h3>Simple Repeats</h3>
                     <p>Existing patients ordering same dose (maintenance)</p>
-                    <div class="checks-count">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-                        12 checks required
-                    </div>
-                </div>
-
-                <div class="prescription-card" data-type="transfer-above">
-                    <div class="prescription-icon transfer">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3l4 4-4 4"/><path d="M20 7H4"/></svg>
-                    </div>
-                    <h3>Transfer (Above Licence)</h3>
-                    <p>Patients from another provider with BMI ≥25</p>
-                    <div class="checks-count">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-                        10 checks required
-                    </div>
-                </div>
-
-                <div class="prescription-card" data-type="transfer-below">
-                    <div class="prescription-icon switching">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 21l-4-4 4-4"/><path d="M4 17h16"/></svg>
-                    </div>
-                    <h3>Transfer (Below Licence)</h3>
-                    <p>Patients from another provider with BMI 21-25</p>
                     <div class="checks-count">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
                         12 checks required
@@ -1571,11 +1547,17 @@ const ContentManager = {
                     </div>
                     <div class="progress-ring">
                         <div class="progress-circle">
-                            <svg width="56" height="56">
-                                <circle class="bg" cx="28" cy="28" r="24"/>
-                                <circle class="progress" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8" id="progress-starting"/>
+                            <svg width="64" height="64">
+                                <defs>
+                                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#22c55e"/>
+                                        <stop offset="100%" stop-color="#06b6d4"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="bg" cx="32" cy="32" r="27"/>
+                                <circle class="progress" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" id="progress-starting"/>
                             </svg>
-                <span class="progress-text" id="progress-text-starting">0/12</span>
+                <span class="progress-text" id="progress-text-starting">0/21</span>
                         </div>
                         <div class="progress-label">Checks<br>Complete</div>
                     </div>
@@ -1612,89 +1594,932 @@ const ContentManager = {
           checks: [
             {
               id: "s1",
-              label: "Consultation answers reviewed — no contraindications",
-              hint: "Check patient notes for email updates. Confirm eligibility.",
+              label: "Read full consultation and patient notes",
+              hint: "Check for email updates, eligibility, any contraindications (Appendix 24), or GLP-1 hospitalisation history.",
               linkPage: "contraindications",
               linkLabel: "Open contraindications →",
             },
             {
               id: "s2",
-              label: "Age is 18–74 years old (inclusive)",
-              hint: 'Outside range → Reject "Clinically Unsuitable"',
+              label: "Confirm age 18–74 years (up to 74y 11m)",
+              hint: "Check DOB from ID. Outside range → Reject 'Clinically Unsuitable' with refund. No escalation needed.",
               warning: true,
               linkPage: "consultation",
               linkLabel: "Open consultation questions →",
             },
             {
               id: "s3",
-              label: "BMI within eligible range",
-              hint: "≥30 (no comorbidities) or ≥27 (with). Max 60. BAME ≥27.5",
+              label: "BMI within eligible range (30–60, or 27–60 with comorbidity)",
+              hint: "Comorbidities: prediabetes, diabetes, heart disease, high BP, high cholesterol, sleep apnoea. Max BMI = 60.",
+              infoCard: {
+                type: "orange",
+                title: "BMI Licensing Thresholds",
+                content: "• BMI ≥30: Eligible for GLP-1 (standard licensing)\n• BMI ≥27 with comorbidities: Eligible with comorbidity\n• BMI <30 (or <27 without comorbidity): Below-licence - requires PUE + starting BMI photo for NEW patients",
+                linkPage: "pue",
+                linkLabel: "View PUE & Below-Licence BMI Protocol →"
+              }
+            },
+            {
+              id: "s3b",
+              label: "Check ethnicity-adjusted BMI if applicable",
+              hint: "Eligible ethnicities → threshold lowered to 27.5. Do not challenge ethnicity even if doesn't match ID.",
+            },
+            {
+              id: "s3c",
+              label: "No contraindications or GLP-1-related hospitalisation",
+              hint: "If hospitalisation due to GLP-1 confirmed → Reject. If unclear → hold + email patient.",
+              danger: true,
             },
           ],
         },
         {
-          title: "ID & Photo Verification",
+          title: "ID Verification",
           icon: "green",
           checks: [
             {
               id: "s4",
-              label: "ID valid and in date (first orders must be in date)",
-              hint: "Full name, DoB, photo visible. Official govt org.",
+              label: "ID is government-issued, valid, and in date",
+              hint: "Passport, driving licence, PASS card. Must show full name, DOB, photo. Can be non-UK if genuine.",
             },
             {
               id: "s5",
               label: "ID matches patient account details",
-              hint: "Small differences → Amend account before prescribing",
+              hint: "Small mismatches (nickname, DOB day, married name) → correct via Users page before prescribing.",
               warning: true,
             },
             {
-              id: "s6",
-              label: "Weight verification photo meets requirements",
-              hint: "Full-length, fitted clothing, face visible, same person as ID",
+              id: "s5b",
+              label: "If ID fails: Apply correct tag",
+              hint: "1st fail → add 'Failed ID' tag (auto email). 2nd+ fail → send personalised email + 'Pending Customer Response'. Unsure → escalate (Appendix 7).",
             },
           ],
         },
         {
-          title: "SCR Screening (Pre-Prescription)",
+          title: "Photo & Weight Verification",
           icon: "orange",
           checks: [
             {
+              id: "s6",
+              label: "Compare ID to selfie — confirm same person",
+              hint: "Photos also used to verify BMI range. Face must be visible and match ID.",
+            },
+            {
+              id: "s6b",
+              label: "Weight verification photo meets requirements",
+              hint: "Ideal: patient alone, full-length, face visible, fitted clothing. Accept imperfect if ID match clear & BMI assessable.",
+            },
+            {
+              id: "s6c",
+              label: "Photo issues handled correctly",
+              hint: "Blurry/covered → 'Weight verification failed' tag (once). Genitalia exposed → hold, request new photo, ask CS to delete. Photos don't match BMI → escalate.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "SCR Screening",
+          icon: "blue",
+          checks: [
+            {
               id: "s9",
-              label: "SCR checks are done after ID & weight verification",
-              hint: "Do NOT enter SCR until eligibility steps are completed (wrongful access = incident).",
+              label: "SCR checks done AFTER ID & weight verification",
+              hint: "Do NOT access SCR until eligibility steps are completed (wrongful access = incident).",
               warning: true,
             },
             {
               id: "s10",
               label: "Review SCR scraping tool outcome",
-              hint: "Pass = prescribe without opening SCR. Flagged = open SCR. No person found = follow SCR unavailable guidance.",
+              hint: "Pass → prescribe without opening SCR. Flagged → open SCR. No person found → follow SCR unavailable guidance.",
               linkPage: "proto-scr",
+              linkLabel: "Open SCR Protocol →",
             },
             {
               id: "s11",
-              label: "If flagged: review SCR for contraindications and required details",
+              label: "If flagged: review SCR for contraindications",
               hint: "Check Acute/Repeat Meds + Diagnoses + Problems/Issues. Reject for absolute contraindication; email/hold only if more info needed.",
             },
             {
               id: "s12",
               label: "Document SCR outcome in patient record",
-              hint: "Use consistent notes (SCR pass / SCR checked no contraindication / SCR unavailable / limited SCR / contraindication found).",
+              hint: "Notes: 'SCR pass' / 'SCR checked no contraindication' / 'SCR unavailable' / 'limited SCR' / 'contraindication found'.",
             },
           ],
         },
         {
-          title: "GP & Final",
+          title: "GP Details",
           icon: "purple",
           checks: [
             {
               id: "s7",
-              label: "GP details verified (UK NHS surgery)",
-              hint: "Green tick = verified. No tick → validate via Google/NHS ODS",
+              label: "GP is UK NHS surgery and verified",
+              hint: "Green tick = validated. No tick → validate via Google/NHS ODS. Cannot validate → 'Incomplete GP details' tag (auto email).",
             },
             {
+              id: "s7b",
+              label: "GP address is UK-based",
+              hint: "Non-UK GP → tag 'Incomplete GP details', remove Prescriber Review, email for UK GP. No UK GP = reject.",
+              warning: true,
+            },
+            {
+              id: "s7c",
+              label: "Minor GP errors corrected (if applicable)",
+              hint: "Small corrections (name/house number) can be fixed directly by prescriber. Record the change.",
+            },
+          ],
+        },
+        {
+          title: "Final Verification",
+          icon: "green",
+          checks: [
+            {
               id: "s8",
-              label: "All checks passed — safe to prescribe starting dose",
-              hint: "Confirm all above items are verified before signing",
+              label: "Confirm order is in correct queue",
+              hint: "'GLP1s – New orders, starter dose, screened / ready to be prescribed' (CC will have done initial screening).",
+            },
+            {
+              id: "s8b",
+              label: "Check for Assisted Prescribing flag",
+              hint: "If flagged, apply all above checks + follow Assisted Prescribe SOP for extra steps.",
+            },
+            {
+              id: "s8c",
+              label: "All checks passed — safe to prescribe starter dose",
+              hint: "Document that all prescribing checks in section 4.3 have been met before signing.",
+            },
+          ],
+        },
+      ],
+      "transfer-above": [
+        {
+          title: "Order Identification & Common Checks",
+          icon: "blue",
+          checks: [
+            {
+              id: "ta1",
+              label: "Confirm order is in Transfer Continuation queue",
+              hint: "Queue: 'GLP1s – New orders, continuation dose, screened / ready to be prescribed'. Patient is new to MedExpress but has had GLP-1 elsewhere.",
+            },
+            {
+              id: "ta2",
+              label: "Read full consultation and patient notes",
+              hint: "Check for email updates, contraindications, GLP-1 hospitalisation history. If unclear, tag 'Pending Customer Response' and email ALL missing points.",
+              linkPage: "contraindications",
+              linkLabel: "Open contraindications →",
+            },
+            {
+              id: "ta3",
+              label: "Age 18–74, ID valid and matches account",
+              hint: "ID can be expired for continuation (still first MedExpress order). Small mismatches → correct via Users page.",
+            },
+            {
+              id: "ta4",
+              label: "Confirm UK NHS GP (green tick or validated)",
+              hint: "Validate via Google/NHS ODS if no tick. Correct small errors if needed.",
+            },
+          ],
+        },
+        {
+          title: "BMI & Photo Verification",
+          icon: "green",
+          checks: [
+            {
+              id: "ta5",
+              label: "Confirm BMI is ABOVE licence threshold",
+              hint: "BMI ≥30, or 27–30 with comorbidity, or ≥27.5 with eligible ethnicity. Max 60. This is for ABOVE licence transfers.",
+            },
+            {
+              id: "ta6",
+              label: "Current weight verification photos acceptable",
+              hint: "Full-length, fitted clothing, face visible, consistent with stated BMI. ID matches selfie.",
+            },
+          ],
+        },
+        {
+          title: "Previous Use Evidence (PUE)",
+          icon: "orange",
+          checks: [
+            {
+              id: "ta7",
+              label: "PUE document shows: name, drug, dose, date, regulated provider",
+              hint: "Acceptable: dispatch note, prescription, dispensing label. Order confirmation ALONE is NOT enough. NHS/registered pharmacy/clinic.",
+              linkPage: "pue",
+              linkLabel: "Open PUE Protocol →",
+            },
+            {
+              id: "ta8",
+              label: "PUE date is within past 6 months",
+              hint: "Evidence must be within 6 months for step-up/maintenance request.",
+            },
+            {
+              id: "ta9",
+              label: "If PUE <2 weeks old: plan to send macro",
+              hint: "Approve but send 'Clinical: PUE <2 Weeks Old' macro instructing patient NOT to start until current course complete.",
+              warning: true,
+            },
+            {
+              id: "ta10",
+              label: "If PUE missing/inadequate: email + hold",
+              hint: "Email via 'Clinical: Evidence missing information'. Add 'Pending Customer Response'. Without valid PUE → starter dose only.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "Dose & Timing Assessment",
+          icon: "purple",
+          checks: [
+            {
+              id: "ta11",
+              label: "Requested dose fits gap-in-treatment guidance",
+              hint: "Use PUE date + dose to check against Visual gap tables / Appendix 20 & 23.",
+              linkPage: "titration",
+              linkLabel: "Open Titration & Gap →",
+            },
+            {
+              id: "ta12",
+              label: "If switching GLP-1 drug: apply switching guidance",
+              hint: "Use Visual Flow 2, Switching SOP, and dose equivalents table (Appendix 20). Complex cases → escalate.",
+              linkPage: "switching",
+              linkLabel: "Open Switching Protocol →",
+            },
+          ],
+        },
+        {
+          title: "Hospitalisation & NHS Checks",
+          icon: "blue",
+          checks: [
+            {
+              id: "ta13",
+              label: "No GLP-1-related hospitalisation",
+              hint: "If hospitalisation indicated → hold + email to clarify. If confirmed GLP-1 related → REJECT.",
+              danger: true,
+            },
+            {
+              id: "ta14",
+              label: "Patient NOT currently on NHS GLP-1",
+              hint: "Current NHS treatment → NOT eligible for MedExpress. Stopped NHS treatment → NHS prescription can be used as PUE.",
+              danger: true,
+            },
+          ],
+        },
+        {
+          title: "SCR Screening",
+          icon: "orange",
+          checks: [
+            {
+              id: "ta15",
+              label: "SCR checks done AFTER eligibility verified",
+              hint: "Do NOT access SCR until eligibility steps are completed.",
+              warning: true,
+            },
+            {
+              id: "ta16",
+              label: "Review SCR scraping tool outcome",
+              hint: "Pass → prescribe without opening SCR. Flagged → open SCR. No person found → follow SCR unavailable guidance.",
+              linkPage: "proto-scr",
+              linkLabel: "Open SCR Protocol →",
+            },
+            {
+              id: "ta17",
+              label: "Document SCR outcome in patient record",
+              hint: "Notes: 'SCR pass' / 'SCR checked no contraindication' / 'SCR unavailable' / 'contraindication found'.",
+            },
+          ],
+        },
+        {
+          title: "Final Decision",
+          icon: "green",
+          checks: [
+            {
+              id: "ta18",
+              label: "All checks passed — safe to prescribe continuation",
+              hint: "Document: 'Transfer continuation – BMI above licence, PUE within 6 months and dose aligned with gap/titration guidance'.",
+            },
+          ],
+        },
+      ],
+      "transfer-below": [
+        {
+          title: "Order Identification & Common Checks",
+          icon: "blue",
+          checks: [
+            {
+              id: "tb1",
+              label: "Confirm order is in Transfer Continuation queue",
+              hint: "Queue: 'GLP1s – New orders, continuation dose, screened / ready to be prescribed'. Patient is new to MedExpress but has had GLP-1 elsewhere.",
+            },
+            {
+              id: "tb2",
+              label: "Read full consultation and patient notes",
+              hint: "Check for email updates, contraindications, GLP-1 hospitalisation history. If unclear, tag 'Pending Customer Response' and email ALL missing points.",
+              linkPage: "contraindications",
+              linkLabel: "Open contraindications →",
+            },
+            {
+              id: "tb3",
+              label: "Age 18–74, ID valid and matches account",
+              hint: "ID can be expired for continuation. Small mismatches → correct via Users page.",
+            },
+            {
+              id: "tb4",
+              label: "Confirm UK NHS GP (green tick or validated)",
+              hint: "Validate via Google/NHS ODS if no tick. Correct small errors if needed.",
+            },
+          ],
+        },
+        {
+          title: "BMI Verification (Below Licence)",
+          icon: "green",
+          checks: [
+            {
+              id: "tb5",
+              label: "Confirm BMI is BELOW licence but ≥25",
+              hint: "BMI below 30 (or 27 without comorbidity). Below-licence transfers need BOTH proof of supply AND previous BMI photo.",
+              warning: true,
+            },
+            {
+              id: "tb6",
+              label: "Current weight verification photos acceptable",
+              hint: "Full-length, fitted clothing, face visible, consistent with current BMI. ID matches selfie.",
+            },
+          ],
+        },
+        {
+          title: "Previous Use Evidence (PUE) Document",
+          icon: "orange",
+          checks: [
+            {
+              id: "tb7",
+              label: "PUE document shows: name, drug, dose, date, regulated provider",
+              hint: "Dispatch note, prescription, or dispensing label. Order confirmation ALONE is NOT enough. NHS/registered pharmacy/clinic.",
+              linkPage: "pue",
+              linkLabel: "Open PUE Protocol →",
+            },
+            {
+              id: "tb8",
+              label: "PUE date is within past 6 months",
+              hint: "Evidence must be within 6 months for continuation request.",
+            },
+            {
+              id: "tb9",
+              label: "If PUE fails: email via 'Evidence missing information'",
+              hint: "Explain what's wrong, what's needed. Add 'Pending Customer Response'. Below-licence with no valid PUE = NOT eligible.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "Previous BMI Photo (REQUIRED for Below Licence)",
+          icon: "purple",
+          checks: [
+            {
+              id: "tb10",
+              label: "Previous BMI photo provided",
+              hint: "REQUIRED for below-licence transfers. Must prove they met licence BMI when starting GLP-1.",
+              danger: true,
+            },
+            {
+              id: "tb11",
+              label: "Photo taken within 30 days of starting GLP-1",
+              hint: "Must be from when they started with previous provider, not current photos.",
+            },
+            {
+              id: "tb12",
+              label: "Photo quality: full-length, well-lit, fitted clothing",
+              hint: "Must support that they met licence BMI at start and are not clearly underweight.",
+            },
+            {
+              id: "tb13",
+              label: "If previous BMI photo fails: apply correct tag",
+              hint: "Use 'previous BMI verification failed' tag (NOT 'Weight verification failed'). Email explaining why photo failed.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "Dose & Timing Assessment",
+          icon: "blue",
+          checks: [
+            {
+              id: "tb14",
+              label: "Requested dose fits gap-in-treatment guidance",
+              hint: "Use PUE date + dose to check against Visual gap tables / Appendix 20 & 23.",
+              linkPage: "titration",
+              linkLabel: "Open Titration & Gap →",
+            },
+            {
+              id: "tb15",
+              label: "If PUE <2 weeks old: plan to send macro",
+              hint: "Approve but send 'Clinical: PUE <2 Weeks Old' macro instructing patient NOT to start until current course complete.",
+            },
+          ],
+        },
+        {
+          title: "Hospitalisation & NHS Checks",
+          icon: "orange",
+          checks: [
+            {
+              id: "tb16",
+              label: "No GLP-1-related hospitalisation",
+              hint: "If hospitalisation indicated → hold + email to clarify. If confirmed GLP-1 related → REJECT.",
+              danger: true,
+            },
+            {
+              id: "tb17",
+              label: "Patient NOT currently on NHS GLP-1",
+              hint: "Current NHS treatment → NOT eligible. Stopped NHS treatment → NHS prescription can be used as PUE.",
+              danger: true,
+            },
+          ],
+        },
+        {
+          title: "SCR Screening",
+          icon: "green",
+          checks: [
+            {
+              id: "tb18",
+              label: "SCR checks done AFTER eligibility verified",
+              hint: "Do NOT access SCR until eligibility steps are completed.",
+              warning: true,
+            },
+            {
+              id: "tb19",
+              label: "Review SCR scraping tool outcome + document",
+              hint: "Pass → prescribe. Flagged → open SCR. Document outcome in patient record.",
+              linkPage: "proto-scr",
+              linkLabel: "Open SCR Protocol →",
+            },
+          ],
+        },
+        {
+          title: "Final Decision",
+          icon: "purple",
+          checks: [
+            {
+              id: "tb20",
+              label: "BOTH PUE document AND previous BMI photo acceptable",
+              hint: "If either fails and cannot be corrected → patient is NOT eligible for MedExpress GLP-1 at below-licence BMI. Do NOT offer starter dose.",
+              danger: true,
+            },
+            {
+              id: "tb21",
+              label: "All checks passed — safe to prescribe continuation",
+              hint: "Document: 'Transfer continuation – below licence, PUE and starting-BMI photo requirements both met'.",
+            },
+          ],
+        },
+      ],
+      repeat: [
+        {
+          title: "Step 1: Patient Confirmation & Basic Safety",
+          icon: "blue",
+          checks: [
+            {
+              id: "r1",
+              label: "Confirm REPEAT GLP-1 patient (previous MedExpress GLP-1 prescribed and dispatched)",
+              hint: "Order will be in repeat queue (not screened by Customer Care). Patient has had same GLP-1 before.",
+              warning: true,
+            },
+            {
+              id: "r2",
+              label: "Age 18–74 years confirmed",
+              hint: "Age must be 18–74. If outside range → Reject 'Clinically Unsuitable' with refund, no escalation needed.",
+              danger: true,
+              infoCard: {
+                type: "warning",
+                title: "Age Eligibility",
+                content: "Age <18 or >74 → Automatic rejection with refund using 'Clinically Unsuitable'."
+              }
+            },
+            {
+              id: "r3",
+              label: "ID verified (can be expired for repeats, must show full name, DOB, photo match)",
+              hint: "For repeats, expired ID is acceptable. Must be official ID with photo matching account. Small discrepancies (nickname, day of DOB, married name) → correct via Users page before issuing.",
+            },
+            {
+              id: "r4",
+              label: "Consultation read in full and reviewed for new contraindications",
+              hint: "Check for pregnancy, new serious disease, incomplete/unclear info. If incomplete → email patient, tag Pending Customer Response, send only one email covering all issues.",
+              linkPage: "contraindications",
+              linkLabel: "View contraindications →",
+            },
+            {
+              id: "r5",
+              label: "UK NHS GP confirmed and validated",
+              hint: "Small details differ but surgery clearly valid → correct and prescribe. If GP cannot be validated or non-UK → tag 'Incomplete GP details', remove Prescriber Review, email to request UK NHS GP, do NOT prescribe until provided.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "Step 2: BMI, Ethnicity & Photos (Repeat Rules)",
+          icon: "blue",
+          checks: [
+            {
+              id: "r6",
+              label: "Check return purchase timeframe and apply correct BMI threshold",
+              hint: "Minimum BMI for ongoing treatment: 21 kg/m². Timeframe determines eligibility rules.",
+              warning: true,
+              infoCard: {
+                type: "orange",
+                title: "BMI Thresholds for Repeat Patients",
+                content: "• Return <6 months: BMI ≥21 (PUE only if dose not aligned with gap rules)\n• Return 6–12 months: BMI ≥25 (PUE if dose not aligned with gap rules)\n• Return >12 months: Must meet full licensing BMI (30+ or 27+ with comorbidity/ethnicity)",
+                linkPage: "pue",
+                linkLabel: "View PUE Protocol →"
+              }
+            },
+            {
+              id: "r7",
+              label: "If return <6 months: BMI ≥21 acceptable",
+              hint: "May prescribe down to BMI 21. PUE needed only if dose not in line with gap rules.",
+            },
+            {
+              id: "r8",
+              label: "If return 6–12 months: BMI ≥25 required",
+              hint: "May prescribe only if BMI ≥25. PUE needed if dose not aligned with gap rules.",
+            },
+            {
+              id: "r9",
+              label: "If return >12 months: Full licensing BMI required (30+ or 27+ with comorbidity/ethnicity)",
+              hint: "Treat as new patient. Must meet BMI 30+ or 27+ with comorbidity or qualifying ethnicity.",
+              danger: true,
+            },
+            {
+              id: "r10",
+              label: "Ethnicity-adjusted BMI applied correctly if applicable",
+              hint: "Certain ethnicities lower threshold to 27.5 (system allows from BMI 27.5). Do NOT question ethnicity if doesn't align with ID. If materially affects eligibility (BMI<30) and causes concern → escalate on Jira 'Weight – other/BMI questions'.",
+            },
+            {
+              id: "r11",
+              label: "Photos reviewed: ID match and BMI range validated",
+              hint: "Use photos to validate ID match and BMI range. Follow photo scenarios below.",
+              infoCard: {
+                type: "orange",
+                title: "Photo Scenarios for Repeats",
+                content: "• Borderline BMI but safe: Continue treatment per previous decision (maintain continuity). Do NOT request new photo or apply Weight verification failed.\n• Clearly underweight: Send macro 'Repeat Customer Weight/Height Verification' requesting GP verified height/weight, then escalate.\n• Blurred/face covered/ID mismatch (genuine mistake): May request new photos following Weight verification failed process.",
+                linkPage: "weight-monitoring",
+                linkLabel: "View Weight Monitoring →"
+              }
+            },
+          ],
+        },
+        {
+          title: "Step 3: Titration Check (All Repeat Orders)",
+          icon: "green",
+          checks: [
+            {
+              id: "r12",
+              label: "Check 'Has the patient titrated correctly?' for every repeat",
+              hint: "Wegovy/Mounjaro: monthly titration. Nevolat: weekly titration (0.6mg increments up to 3mg max).",
+              linkPage: "titration",
+              linkLabel: "View Titration Guide →",
+            },
+            {
+              id: "r13",
+              label: "Scenario 3A: Normal upwards titration (previous ≤8 weeks, one step higher)",
+              hint: "All checks OK → Prescribe next dose. Document: 'Simple titration repeat'.",
+              infoCard: {
+                type: "green",
+                title: "Scenario 3A: Normal Upwards Titration",
+                content: "Previous order within ≤8 weeks + requested dose one step higher + all other checks pass → Prescribe and document as 'Simple titration repeat'."
+              }
+            },
+            {
+              id: "r14",
+              label: "Scenario 3B: Same dose or going down in strength",
+              hint: "If no other issues → Prescribe, then send macro 'Clinical: Did not titrate up / Went down in strength (GLP1)'. Safe to step down >1 dose. Do NOT hold if otherwise safe. Don't repeat macro if already sent and patient has reasonable explanation.",
+              infoCard: {
+                type: "orange",
+                title: "Scenario 3B: Same/Lower Dose",
+                content: "Patient orders same or lower dose → Prescribe if safe, send macro advising contact if support needed. Safe to step down by >1 dose. Don't resend macro if already sent + reasonable explanation (good response, manageable side effects, affordability)."
+              }
+            },
+            {
+              id: "r15",
+              label: "Scenario 3C: Apparent skipped dose (including 1-pen/2-pen patterns)",
+              hint: "System shows dose X steps lower/higher. Check full order history and dates including pen quantities. If dates of higher-dose pens (ignoring interim lower order) would still make patient eligible within normal titration spacing → may be acceptable.",
+              danger: true,
+              infoCard: {
+                type: "orange",
+                title: "Scenario 3C: Skipped Dose",
+                content: "If still appears skipped after review → Send macro 'Clinical: Evidence request – Skipped Dose (GLP1)'. Offer 2 options: (1) Amend to correct dose per titration, (2) Provide evidence of missing dose from another provider (PUE). Tag Pending Customer Response and hold. If justification/PUE acceptable (cost, trial, accident, stock) → prescribe higher dose. If not → change to correct dose, email explanation.",
+                linkPage: "titration",
+                linkLabel: "View Titration Protocol →"
+              }
+            },
+          ],
+        },
+        {
+          title: "Step 4: Gap in Treatment Check",
+          icon: "orange",
+          checks: [
+            {
+              id: "r16",
+              label: "Check 'Is there a gap between their orders?' for ALL repeat orders",
+              hint: "Patients with >8 weeks gap automatically get 'Long treatment gap' tag. Use order date (not injection date) to measure gap.",
+              warning: true,
+              infoCard: {
+                type: "orange",
+                title: "Gap Rules Summary",
+                content: "• ≤8 weeks: Normal repeat, may titrate up\n• >8 to ≤12 weeks: Continue last tolerated dose up to max restarting dose (see Appendix 23)\n• Up to 6 months (BMI ≥21) or up to 12 months (BMI ≥25): Use gap guidance tables for safe restarting dose\n• >12 months: Treat as restart, must meet full licensing BMI",
+                linkPage: "titration",
+                linkLabel: "View Gap Treatment Protocol →"
+              }
+            },
+            {
+              id: "r17",
+              label: "Gap ≤8 weeks: Normal repeat (may titrate up to next dose)",
+              hint: "Treat as normal simple repeat if all other checks pass.",
+            },
+            {
+              id: "r18",
+              label: "Gap >8 to ≤12 weeks: Continue last tolerated dose up to max restarting dose",
+              hint: "Use Appendix 23 for multi-pen orders. If ordered higher than allowed → Amend order to appropriate restarting dose + email explanation, OR hold with Pending Customer Response to discuss options.",
+            },
+            {
+              id: "r19",
+              label: "Gap up to 6 months (BMI ≥21) or up to 12 months (BMI ≥25)",
+              hint: "Confirm BMI meets threshold. Use gap-in-treatment visual tables to pick safe restarting dose (often last tolerated or lower). If requested dose above guidance → adjust or hold + email. Ensure weight change and side-effect checks still pass.",
+              warning: true,
+            },
+            {
+              id: "r20",
+              label: "Gap >12 months: Treat as restart (full licensing BMI required)",
+              hint: "Must meet BMI 30+ or 27+ with comorbidity/ethnicity. If not → reject as clinically unsuitable. If meets → treat like new start (starter dose) and document.",
+              danger: true,
+            },
+          ],
+        },
+        {
+          title: "Step 5: Weight Change Thresholds",
+          icon: "purple",
+          checks: [
+            {
+              id: "r21",
+              label: "Check 'Is their weight gain within the 7% threshold?'",
+              hint: "Weight gain since last MedExpress order must be <7%. If ≥7% → use Appendix 12 guidance for tailored advice. Consider maintain/reduce/pause. Large weight gain should NOT be routine repeat.",
+              warning: true,
+              infoCard: {
+                type: "orange",
+                title: "Weight Gain >7% Threshold",
+                content: "Weight gain ≥7% since last order → Use Appendix 12 for guidance. Options: maintain current dose, reduce dose, or pause treatment. Very large gains require clinical judgement or escalation.",
+                linkPage: "weight-monitoring",
+                linkLabel: "View Weight Monitoring →"
+              }
+            },
+            {
+              id: "r22",
+              label: "Check 'Is their weight loss within the 10% threshold?'",
+              hint: "Weight loss since last MedExpress order must be <10%. If ≥10% → use Appendix 13 guidance. Very large weight loss should NOT be routine repeat; escalation expected.",
+              warning: true,
+              infoCard: {
+                type: "orange",
+                title: "Weight Loss >10% Threshold",
+                content: "Weight loss ≥10% since last order → Use Appendix 13 for guidance. Very large weight loss requires clinical judgement or escalation. Not a routine repeat.",
+                linkPage: "weight-monitoring",
+                linkLabel: "View Weight Monitoring →"
+              }
+            },
+          ],
+        },
+        {
+          title: "Step 6: Side Effects & Hospitalisation",
+          icon: "red",
+          checks: [
+            {
+              id: "r23",
+              label: "Check 'Has the patient experienced side effects?' and review PUE notes",
+              hint: "Review for any adverse effects. Check hospitalisation specifically.",
+              linkPage: "contraindications",
+              linkLabel: "View contraindications →",
+            },
+            {
+              id: "r24",
+              label: "Non-serious side effects: Continue with advice/dose adjustment",
+              hint: "No hospitalisation + no major safety concern → May continue at same or lower dose. Provide side-effect advice using macros if needed.",
+            },
+            {
+              id: "r25",
+              label: "Hospitalisation linked to GLP-1: REJECT immediately",
+              hint: "If consultation/PUE mentions hospitalisation → Place on hold and email to clarify. If patient confirms hospitalisation DUE TO GLP-1 → REJECT order. Patient NOT eligible for further MedExpress GLP-1 treatment.",
+              danger: true,
+              infoCard: {
+                type: "red",
+                title: "GLP-1 Hospitalisation = Permanent Exclusion",
+                content: "Any confirmed hospitalisation due to GLP-1 (pancreatitis, severe gastroparesis, severe dehydration, allergic reaction) → Patient is permanently ineligible for MedExpress GLP-1 treatment. Reject order immediately.",
+                linkPage: "contraindications",
+                linkLabel: "View Contraindications →"
+              }
+            },
+          ],
+        },
+        {
+          title: "Step 7: Periodic Review (PR) Requirements",
+          icon: "purple",
+          checks: [
+            {
+              id: "r26",
+              label: "Check if Periodic Review (PR) is due for this repeat patient",
+              hint: "Wegovy/Mounjaro: PR at 6, 12, 18 months from first GLP-1 course (any provider) if weight loss <5%. Nevolat: 4-month check-in if weight loss <5%. PR clock resets when switching GLP-1 products.",
+              warning: true,
+              infoCard: {
+                type: "purple",
+                title: "Periodic Review (PR) Rules",
+                content: "• Wegovy/Mounjaro: PR required at 6, 12, 18 months if overall weight loss <5%\n• Nevolat: 4-month check-in if weight loss <5%\n• PR 'clock' resets when patient switches GLP-1 product (e.g., Mounjaro → Wegovy)\n• Do NOT continue routine repeats until PR completed if due",
+                linkPage: "reviews",
+                linkLabel: "View 6 Month Reviews →"
+              }
+            },
+            {
+              id: "r27",
+              label: "If PR due and not completed: Follow Periodic Review SOP",
+              hint: "Generally do NOT continue routine repeats until review is done. If PR outcome is to continue → proceed with all simple-repeat checks.",
+            },
+          ],
+        },
+        {
+          title: "Step 8: Final Decision & Documentation",
+          icon: "purple",
+          checks: [
+            {
+              id: "r28",
+              label: "APPROVE: All checks passed (consultation, ID, GP, BMI/gap, titration, weight, side effects, PR)",
+              hint: "Issue prescription. Document: 'Simple repeat – correct titration, BMI and weight change within SOP thresholds, no contraindications or PR due'.",
+            },
+            {
+              id: "r29",
+              label: "HOLD: Use appropriate tag (Pending Customer Response, Long treatment gap, Incomplete GP details)",
+              hint: "Send ONE email covering all missing information. Do not send multiple CRMs.",
+            },
+            {
+              id: "r30",
+              label: "ESCALATE: Use escalated tag and remove Prescriber Review when uncertain",
+              hint: "Escalate for: BMI/photo safety concerns, ethnicity/BMI concerns, complex PUE/titration, unusual side-effect patterns. Follow Appendix 7 escalation process.",
+            },
+            {
+              id: "r31",
+              label: "REJECT: Age outside 18–74, BMI rules not met, confirmed GLP-1 hospitalisation, no acceptable UK GP, contraindications",
+              hint: "Use correct rejection reason from Appendix 16. Clearly document why. Reject for: age, BMI (cannot be resolved with PUE), GLP-1 hospitalisation, no UK GP, contraindications in Appendix 24.",
+              danger: true,
+            },
+          ],
+        },
+      ],
+      stepup: [
+        {
+          title: "Order Type Identification",
+          icon: "blue",
+          checks: [
+            {
+              id: "c1",
+              label: "Identify if this is a NEW order or continuation",
+              hint: "NEW order: patient has never received GLP-1 from MedExpress before. Continuation: patient already receiving treatment.",
+              warning: true,
+            },
+            {
+              id: "c2",
+              label: "If NEW order: verify this is continuation dose, not starter",
+              hint: "New orders for continuation dose must meet transfer criteria (PUE + BMI documentation if below-licence).",
+              danger: true,
+            },
+          ],
+        },
+        {
+          title: "BMI Verification (All Continuation Orders)",
+          icon: "blue",
+          checks: [
+            {
+              id: "c3",
+              label: "Current BMI documented and calculated correctly",
+              hint: "Verify height and weight measurements. Calculate BMI = weight(kg) / height(m)².",
+            },
+            {
+              id: "c4",
+              label: "For ABOVE-licence BMI (≥30, or ≥27 with comorbidity): standard continuation criteria apply",
+              hint: "Comorbidities: prediabetes, diabetes, heart disease, high BP, high cholesterol, sleep apnoea. These patients can continue as normal.",
+            },
+            {
+              id: "c5",
+              label: "For BELOW-licence BMI (<30, or <27 without comorbidity): PUE required for NEW orders only",
+              hint: "If this is a NEW order (transfer patient) with below-licence BMI → PUE document AND starting BMI photo required. If continuation from existing MedExpress patient → PUE NOT required.",
+              danger: true,
+            },
+          ],
+        },
+        {
+          title: "PUE Requirements (NEW Orders Below-Licence Only)",
+          icon: "orange",
+          checks: [
+            {
+              id: "c6",
+              label: "PUE document provided and acceptable",
+              hint: "Must show: patient name, medication name, dose, prescriber details, date. Must be from legitimate prescriber.",
+              danger: true,
+            },
+            {
+              id: "c7",
+              label: "Previous BMI photo provided showing STARTING BMI was above licence threshold",
+              hint: "Photo must show BMI ≥30 (or ≥27 with comorbidity) at treatment start. If photo unavailable or shows below-licence → patient NOT eligible.",
+              danger: true,
+            },
+            {
+              id: "c8",
+              label: "BOTH PUE and starting BMI photo requirements met",
+              hint: "If either requirement fails → patient cannot receive below-licence continuation via MedExpress. Reject order.",
+              danger: true,
+            },
+          ],
+        },
+        {
+          title: "Dose Titration & Safety",
+          icon: "green",
+          checks: [
+            {
+              id: "c9",
+              label: "Requested dose follows appropriate titration schedule",
+              hint: "Review previous doses. Titration should follow manufacturer guidance (typically 4-week intervals).",
+            },
+            {
+              id: "c10",
+              label: "Check for any treatment gaps",
+              hint: "Gap >90 days may require clinical review. Gap >180 days requires restart from starter dose.",
+              warning: true,
+            },
+            {
+              id: "c11",
+              label: "No recent hospitalisations related to GLP-1",
+              hint: "Check for: pancreatitis, severe gastroparesis, severe dehydration, allergic reaction. Any GLP-1 hospitalisation = permanent exclusion.",
+              danger: true,
+              linkPage: "contraindications",
+              linkLabel: "View contraindications →",
+            },
+          ],
+        },
+        {
+          title: "SCR Screening & Contraindications",
+          icon: "red",
+          checks: [
+            {
+              id: "c12",
+              label: "SCR screening completed (if applicable)",
+              hint: "Review Summary Care Record for relevant medical history, medications, allergies.",
+            },
+            {
+              id: "c13",
+              label: "No new contraindications identified",
+              hint: "Check Appendix 24 for absolute and relative contraindications. Any new contraindications → escalate to senior clinician.",
+              danger: true,
+              linkPage: "contraindications",
+              linkLabel: "View contraindications →",
+            },
+            {
+              id: "c14",
+              label: "No concerning drug interactions",
+              hint: "Pay special attention to: insulin, sulfonylureas, warfarin, other diabetes medications.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "Clinical Review & Documentation",
+          icon: "purple",
+          checks: [
+            {
+              id: "c15",
+              label: "Weight loss progress documented (if applicable)",
+              hint: "Review weight trend. Minimum 5% weight loss expected after 6 months for continuation.",
+            },
+            {
+              id: "c16",
+              label: "Side effects reviewed and manageable",
+              hint: "Common side effects: nausea, vomiting, diarrhea, constipation. Should improve with time. Severe/persistent → escalate.",
+            },
+            {
+              id: "c17",
+              label: "Patient consultation/review completed within last 12 months",
+              hint: "All continuation patients need valid consultation within 12 months. If >12 months → new consultation required.",
+              warning: true,
+            },
+          ],
+        },
+        {
+          title: "Final Decision",
+          icon: "purple",
+          checks: [
+            {
+              id: "c18",
+              label: "All eligibility criteria met",
+              hint: "Confirm: BMI appropriate, no contraindications, safe dose progression, valid consultation.",
+            },
+            {
+              id: "c19",
+              label: "Clinical notes updated with decision rationale",
+              hint: "Document: current BMI, dose justification, any PUE requirements met (if applicable), next review due.",
+            },
+            {
+              id: "c20",
+              label: "All checks passed — safe to prescribe continuation dose",
+              hint: "Final confirmation that continuation prescription is clinically appropriate and safe to dispense.",
             },
           ],
         },
@@ -1731,6 +2556,19 @@ const ContentManager = {
                                 ? `<a class="check-link" href="#" data-page="${
                                     check.linkPage
                                   }">${check.linkLabel || "View protocol →"}</a>`
+                                : ""
+                            }
+                            ${
+                              check.infoCard
+                                ? `<div class="info-card ${check.infoCard.type || 'blue'}" style="margin-top: 12px;">
+                                    <div class="info-card-title">${check.infoCard.title}</div>
+                                    <div class="info-card-text" style="white-space: pre-line;">${check.infoCard.content}</div>
+                                    ${
+                                      check.infoCard.linkPage
+                                        ? `<a class="check-link" href="#" data-page="${check.infoCard.linkPage}" style="margin-top: 8px; display: inline-block;">${check.infoCard.linkLabel || "View protocol →"}</a>`
+                                        : ""
+                                    }
+                                   </div>`
                                 : ""
                             }
                         </div>
@@ -1810,6 +2648,42 @@ const ContentManager = {
   getSCRProtocolCards() {
     return `
       <div class="scr-protocol">
+        <!-- SCR Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="workflow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+            Workflow & Steps
+          </button>
+          <button class="protocol-tab" data-tab="checking">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="16" rx="2"/>
+              <path d="M8 8h8M8 12h8M8 16h8"/>
+            </svg>
+            Checking SCR
+          </button>
+          <button class="protocol-tab" data-tab="outcomes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <path d="M12 9v4"/>
+              <path d="M12 17h.01"/>
+            </svg>
+            Outcomes & Actions
+          </button>
+          <button class="protocol-tab" data-tab="documentation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            Documentation
+          </button>
+        </div>
+
+        <!-- Tab 1: Workflow & Steps -->
+        <div class="protocol-tab-content active" data-tab-content="workflow">
+
         <div class="protocol-hero">
           <div class="protocol-hero-title">SCR workflow — quick view</div>
           <div class="protocol-hero-subtitle">
@@ -1857,7 +2731,7 @@ const ContentManager = {
                 <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
               </svg>
             </div>
-            Step 1 — When to check SCR (and in what order)
+            When to check SCR (and in what order)
           </div>
           <ul class="protocol-list">
             <li><strong>New patients:</strong> after ID + weight verification and questionnaire eligibility checks, proceed to SCR pathway.</li>
@@ -1870,7 +2744,7 @@ const ContentManager = {
           </div>
           <div class="info-card blue" style="margin-top: 12px;">
             <div class="info-card-title">Repeat rejections</div>
-            <div class="info-card-text">If a <strong>repeat</strong> order is rejected based on SCR information, complete a PSI using “Patient provided incorrect information - SCR confirmed”.</div>
+            <div class="info-card-text">If a <strong>repeat</strong> order is rejected based on SCR information, complete a PSI using "Patient provided incorrect information - SCR confirmed".</div>
           </div>
         </div>
 
@@ -1881,12 +2755,12 @@ const ContentManager = {
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
               </svg>
             </div>
-            Step 2 — Scraping tool outcomes (what to do)
+            Scraping tool outcomes (what to do)
           </div>
           <div class="scr-outcomes">
             <div class="scr-outcome-card green">
               <div class="scr-outcome-title"><span class="scr-chip green">PASS</span> No keyword match</div>
-              <div class="scr-outcome-text">Valid for 6 months. <strong>Prescribe without opening SCR.</strong> Document “SCR pass”.</div>
+              <div class="scr-outcome-text">Valid for 6 months. <strong>Prescribe without opening SCR.</strong> Document "SCR pass".</div>
             </div>
             <div class="scr-outcome-card orange">
               <div class="scr-outcome-title"><span class="scr-chip orange">FLAGGED</span> Keyword match</div>
@@ -1899,6 +2773,12 @@ const ContentManager = {
           </div>
         </div>
 
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: Checking SCR -->
+        <div class="protocol-tab-content" data-tab-content="checking">
+
         <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon orange">
@@ -1908,7 +2788,7 @@ const ContentManager = {
                 <path d="M12 16h.01"/>
               </svg>
             </div>
-            Step 3 — Permission to view SCR
+            Permission to view SCR
           </div>
           <div class="protocol-text">If a patient has not granted permission to view SCR (legacy orders placed before permission was mandatory):</div>
           <ul class="protocol-list">
@@ -1926,7 +2806,7 @@ const ContentManager = {
                 <path d="M8 8h8M8 12h8M8 16h8"/>
               </svg>
             </div>
-            Step 4 — If flagged: how to enter & review SCR
+            If flagged: how to enter & review SCR
           </div>
           <div class="scr-two-col">
             <div>
@@ -1964,6 +2844,12 @@ const ContentManager = {
             </div>
           </details>
         </div>
+
+        </div>
+        <!-- End Tab 2 -->
+
+        <!-- Tab 3: Outcomes & Actions -->
+        <div class="protocol-tab-content" data-tab-content="outcomes">
 
         <div class="protocol-card">
           <div class="protocol-title">
@@ -2285,6 +3171,12 @@ const ContentManager = {
           </ul>
         </div>
 
+        </div>
+        <!-- End Tab 3 -->
+
+        <!-- Tab 4: Documentation -->
+        <div class="protocol-tab-content" data-tab-content="documentation">
+
         <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon green">
@@ -2325,6 +3217,10 @@ const ContentManager = {
           <div class="protocol-text">Use these when additional information is required or when permission/rejection messaging is needed.</div>
           ${this.getSCRMacroAccordions()}
         </div>
+
+        </div>
+        <!-- End Tab 4 -->
+
       </div>
     `;
   },
@@ -2431,6 +3327,40 @@ const ContentManager = {
 
   getCoreProtocolCards() {
     return `
+      <!-- Core Checks Tabs -->
+      <div class="protocol-tabs">
+        <button class="protocol-tab active" data-tab="consultation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+          Consultation Review
+        </button>
+        <button class="protocol-tab" data-tab="identity">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="16" rx="2"/>
+            <circle cx="15" cy="10" r="2"/>
+          </svg>
+          Identity & Age
+        </button>
+        <button class="protocol-tab" data-tab="biometric">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 3v18M3 12h18"/>
+            <circle cx="12" cy="12" r="9"/>
+          </svg>
+          BMI & Photo
+        </button>
+        <button class="protocol-tab" data-tab="gp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <path d="M9 22V12h6v10"/>
+          </svg>
+          GP Details
+        </button>
+      </div>
+
+      <!-- Tab 1: Consultation Review -->
+      <div class="protocol-tab-content active" data-tab-content="consultation">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon blue">
@@ -2453,6 +3383,12 @@ const ContentManager = {
           </div>
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 1 -->
+
+      <!-- Tab 2: Identity & Age -->
+      <div class="protocol-tab-content" data-tab-content="identity">
 
       <div class="protocol-card">
         <div class="protocol-title">
@@ -2505,6 +3441,12 @@ const ContentManager = {
           If outside this range, reject with code <strong>"Clinically Unsuitable"</strong>. No escalation needed for age rejections, even if prescriber is in probation period.
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 2 -->
+
+      <!-- Tab 3: BMI & Photo -->
+      <div class="protocol-tab-content" data-tab-content="biometric">
 
       <div class="protocol-card">
         <div class="protocol-title">
@@ -2609,6 +3551,12 @@ const ContentManager = {
         </div>
       </div>
 
+      </div>
+      <!-- End Tab 3 -->
+
+      <!-- Tab 4: GP Details -->
+      <div class="protocol-tab-content" data-tab-content="gp">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon green">
@@ -2638,11 +3586,50 @@ const ContentManager = {
           </div>
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 4 -->
+
     `;
   },
 
   getPUEProtocolCards() {
     return `
+      <!-- PUE Tabs -->
+      <div class="protocol-tabs">
+        <button class="protocol-tab active" data-tab="requirements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <path d="M14 2v6h6"/>
+          </svg>
+          PUE Requirements
+        </button>
+        <button class="protocol-tab" data-tab="below-licence">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+          </svg>
+          Below-Licence BMI
+        </button>
+        <button class="protocol-tab" data-tab="failures">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="15" y1="9" x2="9" y2="15"/>
+            <line x1="9" y1="9" x2="15" y2="15"/>
+          </svg>
+          PUE Failures
+        </button>
+        <button class="protocol-tab" data-tab="timing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          Timing Issues
+        </button>
+      </div>
+
+      <!-- Tab 1: PUE Requirements -->
+      <div class="protocol-tab-content active" data-tab-content="requirements">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon purple">
@@ -2707,7 +3694,10 @@ const ContentManager = {
           </div>
         </div>
       </div>
+      </div>
 
+      <!-- Tab 2: Below-Licence BMI -->
+      <div class="protocol-tab-content" data-tab-content="below-licence">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon orange">
@@ -2715,6 +3705,47 @@ const ContentManager = {
               <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
               <line x1="12" y1="9" x2="12" y2="13"/>
               <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          Below-Licence BMI Requirements
+        </div>
+        <div class="protocol-section">
+          <div class="protocol-section-title">For Patients with BMI Below Licence</div>
+          <div class="protocol-text">
+            <strong>Cannot proceed without BOTH PUE AND previous BMI photo.</strong>
+          </div>
+          <div class="protocol-text">
+            If either PUE or previous BMI photo fails requirements, patient is not eligible. Use email template <em>Clinical: Evidence of starting BMI</em>.
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="protocol-section">
+          <div class="protocol-section-title">If Previous BMI Photo Fails</div>
+          <div class="protocol-text">
+            Add <span class="tag purple">previous BMI verification failed</span> tag and remove <span class="tag blue">prescriber review</span> tag.
+          </div>
+          <div class="protocol-text">
+            Send manual email explaining why the photo doesn't meet requirements.
+          </div>
+          <div class="info-card" style="margin-top: 12px;">
+            <div class="info-card-title">Important Tag Note</div>
+            <div class="info-card-text">
+              <strong>DO NOT use "Weight verification failed" tag</strong> for previous BMI photos. That tag is only for current weight verification photos.
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- Tab 3: PUE Failures -->
+      <div class="protocol-tab-content" data-tab-content="failures">
+      <div class="protocol-card">
+        <div class="protocol-title">
+          <div class="icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
             </svg>
           </div>
           If PUE Doesn't Meet Requirements
@@ -2738,24 +3769,11 @@ const ContentManager = {
             If either PUE or previous BMI photo fails requirements, patient is not eligible. Use email template <em>Clinical: Evidence of starting BMI</em>.
           </div>
         </div>
-        <div class="divider"></div>
-        <div class="protocol-section">
-          <div class="protocol-section-title">If Previous BMI Photo Fails</div>
-          <div class="protocol-text">
-            Add <span class="tag purple">previous BMI verification failed</span> tag and remove <span class="tag blue">prescriber review</span> tag.
-          </div>
-          <div class="protocol-text">
-            Send manual email explaining why the photo doesn't meet requirements.
-          </div>
-          <div class="info-card" style="margin-top: 12px;">
-            <div class="info-card-title">Important Tag Note</div>
-            <div class="info-card-text">
-              <strong>Do NOT use "Weight verification failed" tag</strong> for previous BMI photos. That tag is only for current weight verification photos.
-            </div>
-          </div>
-        </div>
+      </div>
       </div>
 
+      <!-- Tab 4: Timing Issues -->
+      <div class="protocol-tab-content" data-tab-content="timing">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon green">
@@ -2778,11 +3796,44 @@ const ContentManager = {
           <li>Email reminds them to complete their current treatment before starting the MedExpress pen</li>
         </ul>
       </div>
+      </div>
     `;
   },
 
   getTitrationProtocolCards() {
     return `
+      <!-- Titration Tabs -->
+      <div class="protocol-tabs">
+        <button class="protocol-tab active" data-tab="schedules">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20V10M18 20V4M6 20v-4"/>
+          </svg>
+          Titration Schedules
+        </button>
+        <button class="protocol-tab" data-tab="skipped">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+          </svg>
+          Skipped Doses
+        </button>
+        <button class="protocol-tab" data-tab="gaps">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          Treatment Gaps
+        </button>
+        <button class="protocol-tab" data-tab="additional">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+          Additional Pens
+        </button>
+      </div>
+
+      <!-- Tab 1: Titration Schedules -->
+      <div class="protocol-tab-content active" data-tab-content="schedules">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon blue">
@@ -2821,7 +3872,10 @@ const ContentManager = {
           </div>
         </div>
       </div>
+      </div>
 
+      <!-- Tab 2: Skipped Doses -->
+      <div class="protocol-tab-content" data-tab-content="skipped">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon orange">
@@ -2868,7 +3922,10 @@ const ContentManager = {
           </ul>
         </div>
       </div>
+      </div>
 
+      <!-- Tab 3: Treatment Gaps -->
+      <div class="protocol-tab-content" data-tab-content="gaps">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon red">
@@ -2945,7 +4002,10 @@ const ContentManager = {
           </div>
         </div>
       </div>
+      </div>
 
+      <!-- Tab 4: Additional Pens -->
+      <div class="protocol-tab-content" data-tab-content="additional">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon purple">
@@ -2971,15 +4031,34 @@ const ContentManager = {
         <div class="info-card red" style="margin-top: 12px;">
           <div class="info-card-title">Stock Issues</div>
           <div class="info-card-text">
-            Do NOT give multiple doses to match an equivalent (e.g., 2×5mg instead of 10mg). Redirect patient to stay on same dose until their next dose comes back in stock.
+            DO NOT give multiple doses to match an equivalent (e.g., 2×5mg instead of 10mg). Redirect patient to stay on same dose until their next dose comes back in stock.
           </div>
         </div>
+      </div>
       </div>
     `;
   },
 
   getWeightProtocolCards() {
     return `
+      <!-- Weight Monitoring Tabs -->
+      <div class="protocol-tabs">
+        <button class="protocol-tab active" data-tab="weight-gain">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+          </svg>
+          Weight Gain >7%
+        </button>
+        <button class="protocol-tab" data-tab="weight-loss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+          Weight Loss >10%
+        </button>
+      </div>
+
+      <!-- Tab 1: Weight Gain -->
+      <div class="protocol-tab-content active" data-tab-content="weight-gain">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon orange">
@@ -3091,7 +4170,10 @@ const ContentManager = {
           </div>
         </div>
       </div>
+      </div>
 
+      <!-- Tab 2: Weight Loss -->
+      <div class="protocol-tab-content" data-tab-content="weight-loss">
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon red">
@@ -3207,11 +4289,46 @@ const ContentManager = {
           </div>
         </div>
       </div>
+      </div>
     `;
   },
 
   getSwitchingProtocolCards() {
     return `
+      <!-- Switching & Side Effects Tabs -->
+      <div class="protocol-tabs">
+        <button class="protocol-tab active" data-tab="switching">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/>
+          </svg>
+          Switching Medications
+        </button>
+        <button class="protocol-tab" data-tab="contraception">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 9v2M12 15h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Contraception Guidance
+        </button>
+        <button class="protocol-tab" data-tab="orlistat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          Orlistat Switching
+        </button>
+        <button class="protocol-tab" data-tab="side-effects">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          Side Effects
+        </button>
+      </div>
+
+      <!-- Tab 1: Switching Medications -->
+      <div class="protocol-tab-content active" data-tab-content="switching">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon purple">
@@ -3274,6 +4391,12 @@ const ContentManager = {
         </div>
       </div>
 
+      </div>
+      <!-- End Tab 1 -->
+
+      <!-- Tab 2: Contraception Guidance -->
+      <div class="protocol-tab-content" data-tab-content="contraception">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon orange">
@@ -3313,6 +4436,12 @@ const ContentManager = {
         </div>
       </div>
 
+      </div>
+      <!-- End Tab 2 -->
+
+      <!-- Tab 3: Orlistat Switching -->
+      <div class="protocol-tab-content" data-tab-content="orlistat">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon blue">
@@ -3333,6 +4462,12 @@ const ContentManager = {
           If confirmed, proceed with GLP-1 prescription following standard protocols.
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 3 -->
+
+      <!-- Tab 4: Side Effects -->
+      <div class="protocol-tab-content" data-tab-content="side-effects">
 
       <div class="protocol-card">
         <div class="protocol-title">
@@ -3370,11 +4505,42 @@ const ContentManager = {
           </div>
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 4 -->
     `;
   },
 
   getReviewsProtocolCards() {
     return `
+      <!-- 6 Month Reviews Tabs -->
+      <div class="protocol-tabs">
+        <button class="protocol-tab active" data-tab="requirements">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 6v6l4 2"/>
+          </svg>
+          Review Requirements
+        </button>
+        <button class="protocol-tab" data-tab="weight-loss">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+            <circle cx="8.5" cy="7" r="4"/>
+          </svg>
+          Weight Loss Criteria
+        </button>
+        <button class="protocol-tab" data-tab="linked-accounts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+          </svg>
+          Linked Accounts
+        </button>
+      </div>
+
+      <!-- Tab 1: Review Requirements -->
+      <div class="protocol-tab-content active" data-tab-content="requirements">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon blue">
@@ -3398,6 +4564,12 @@ const ContentManager = {
           </div>
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 1 -->
+
+      <!-- Tab 2: Weight Loss Criteria -->
+      <div class="protocol-tab-content" data-tab-content="weight-loss">
 
       <div class="protocol-card">
         <div class="protocol-title">
@@ -3458,6 +4630,12 @@ const ContentManager = {
         </div>
       </div>
 
+      </div>
+      <!-- End Tab 2 -->
+
+      <!-- Tab 3: Linked Accounts -->
+      <div class="protocol-tab-content" data-tab-content="linked-accounts">
+
       <div class="protocol-card">
         <div class="protocol-title">
           <div class="icon purple">
@@ -3489,6 +4667,9 @@ const ContentManager = {
           </div>
         </div>
       </div>
+
+      </div>
+      <!-- End Tab 3 -->
     `;
   },
 
@@ -3496,6 +4677,27 @@ const ContentManager = {
     return `
       <div class="protocol-page">
         <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">Definitions</h1>
+
+        <!-- Definitions Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="patient-types">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+            </svg>
+            Patient Types
+          </button>
+          <button class="protocol-tab" data-tab="terminology">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <path d="M14 2v6h6"/>
+            </svg>
+            Terminology
+          </button>
+        </div>
+
+        <!-- Tab 1: Patient Types -->
+        <div class="protocol-tab-content active" data-tab-content="patient-types">
         <div class="definitions-grid" style="display: flex; flex-direction: column; gap: 16px;">
 
           <div class="definition-card">
@@ -3555,6 +4757,14 @@ const ContentManager = {
             </div>
           </div>
 
+        </div>
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: Terminology -->
+        <div class="protocol-tab-content" data-tab-content="terminology">
+        <div class="definitions-grid" style="display: flex; flex-direction: column; gap: 16px;">
+
           <div class="definition-card">
             <div class="definition-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
               <div class="definition-icon ctp" style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%); display: flex; align-items: center; justify-content: center;">
@@ -3585,6 +4795,8 @@ const ContentManager = {
           </div>
 
         </div>
+        </div>
+        <!-- End Tab 2 -->
       </div>
     `;
   },
@@ -3638,6 +4850,43 @@ const ContentManager = {
             </div>
           </div>
         </div>
+
+        <!-- Contraindications Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="absolute">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Absolute Contraindications
+          </button>
+          <button class="protocol-tab" data-tab="time-sensitive">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Time-Sensitive Conditions
+          </button>
+          <button class="protocol-tab" data-tab="clinical-details">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+            </svg>
+            Clinical Details Required
+          </button>
+          <button class="protocol-tab" data-tab="patient-assessment">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+              <path d="M20 8v6M23 11h-6"/>
+            </svg>
+            Patient Assessment Required
+          </button>
+        </div>
+
+        <!-- Tab 1: Absolute Contraindications -->
+        <div class="protocol-tab-content active" data-tab-content="absolute">
 
         <div class="protocol-card" id="pregnancy-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
@@ -3844,6 +5093,12 @@ const ContentManager = {
           </div>
         </div>
 
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: Time-Sensitive Conditions -->
+        <div class="protocol-tab-content" data-tab-content="time-sensitive">
+
         <div class="protocol-card" id="bariatric-surgery">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--warning); flex-shrink: 0;">
@@ -4003,6 +5258,12 @@ const ContentManager = {
           </div>
         </div>
 
+        </div>
+        <!-- End Tab 2 -->
+
+        <!-- Tab 3: Clinical Details Required -->
+        <div class="protocol-tab-content" data-tab-content="clinical-details">
+
         <h2 style="font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border);">Clinical Details Required</h2>
 
         <div class="info-card blue" style="margin-bottom: 20px;">
@@ -4091,6 +5352,12 @@ const ContentManager = {
             <div class="info-card-text">eGFR ≥30 (Stage 1, 2, or 3)</div>
           </div>
         </div>
+
+        </div>
+        <!-- End Tab 3 -->
+
+        <!-- Tab 4: Patient Assessment Required -->
+        <div class="protocol-tab-content" data-tab-content="patient-assessment">
 
         <h2 style="font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border);">Patient Assessment Required</h2>
 
@@ -4272,6 +5539,10 @@ const ContentManager = {
             <div class="info-card-text">Only <strong>current alcohol dependence</strong> is an exclusion. Past history (&gt;12 months) is acceptable if patient is no longer dependent.</div>
           </div>
         </div>
+
+        </div>
+        <!-- End Tab 4 -->
+
       </div>
     `;
   },
@@ -4286,6 +5557,27 @@ const ContentManager = {
           <div class="info-card-title">How to Use This Reference</div>
           <div class="info-card-text"><strong>Action Tags</strong> require you to take specific steps before approving/rejecting. <strong>System Tags</strong> are informational only and show patient history or status.</div>
         </div>
+
+        <!-- Tags Reference Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="action-tags">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/>
+              <line x1="7" y1="7" x2="7.01" y2="7"/>
+            </svg>
+            Action Tags
+          </button>
+          <button class="protocol-tab" data-tab="system-tags">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+            System Tags
+          </button>
+        </div>
+
+        <!-- Tab 1: Action Tags -->
+        <div class="protocol-tab-content active" data-tab-content="action-tags">
 
         <div class="protocol-card">
           <div class="protocol-title">
@@ -4353,7 +5645,13 @@ const ContentManager = {
           </div>
         </div>
 
-        <div class="protocol-card" style="margin-top: 20px;">
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: System Tags -->
+        <div class="protocol-tab-content" data-tab-content="system-tags">
+
+        <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -4413,6 +5711,9 @@ const ContentManager = {
           <div class="info-card-title">Tag Management</div>
           <div class="info-card-text">Tags are automatically applied by the system based on patient actions and consultation answers. You may need to manually add tags like <span class="tag orange">Pending Customer Response</span> or <span class="tag purple">escalated</span> when required.</div>
         </div>
+
+        </div>
+        <!-- End Tab 2 -->
       </div>
     `;
   },
@@ -4701,6 +6002,41 @@ const ContentManager = {
           <div class="info-card-text">All patients must complete consultation form covering age, BMI eligibility, medical history, contraindications, current medications, and consent. The tables below show required answers for approval.</div>
         </div>
 
+        <!-- Consultation Questions Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="eligibility">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+            </svg>
+            BMI Eligibility
+          </button>
+          <button class="protocol-tab" data-tab="critical">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Critical Questions
+          </button>
+          <button class="protocol-tab" data-tab="medications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <path d="M12 9v4M12 17h.01"/>
+            </svg>
+            Medications
+          </button>
+          <button class="protocol-tab" data-tab="consent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+            Consent & Branching
+          </button>
+        </div>
+
+        <!-- Tab 1: BMI Eligibility -->
+        <div class="protocol-tab-content active" data-tab-content="eligibility">
+
         <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon blue">
@@ -4786,7 +6122,13 @@ const ContentManager = {
           </div>
         </div>
 
-        <div class="protocol-card" style="margin-top: 20px;">
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: Critical Questions -->
+        <div class="protocol-tab-content" data-tab-content="critical">
+
+        <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon orange">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -4833,7 +6175,13 @@ const ContentManager = {
           </div>
         </div>
 
-        <div class="protocol-card" style="margin-top: 20px;">
+        </div>
+        <!-- End Tab 2 -->
+
+        <!-- Tab 3: Medications -->
+        <div class="protocol-tab-content" data-tab-content="medications">
+
+        <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon red">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -4877,7 +6225,13 @@ const ContentManager = {
           </div>
         </div>
 
-        <div class="protocol-card" style="margin-top: 20px;">
+        </div>
+        <!-- End Tab 3 -->
+
+        <!-- Tab 4: Consent & Branching -->
+        <div class="protocol-tab-content" data-tab-content="consent">
+
+        <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon blue">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -4941,6 +6295,9 @@ const ContentManager = {
             </div>
           </div>
         </div>
+
+        </div>
+        <!-- End Tab 4 -->
       </div>
     `;
   },
@@ -4962,6 +6319,26 @@ const ContentManager = {
             </div>
           </div>
         </div>
+
+        <!-- Titration Guide Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="equivalence">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 20V10M18 20V4M6 20v-4"/>
+            </svg>
+            Dose Equivalence
+          </button>
+          <button class="protocol-tab" data-tab="gaps">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            Treatment Gaps
+          </button>
+        </div>
+
+        <!-- Tab 1: Dose Equivalence -->
+        <div class="protocol-tab-content active" data-tab-content="equivalence">
 
         <div class="protocol-card">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
@@ -5074,7 +6451,13 @@ const ContentManager = {
           </div>
         </div>
 
-        <div class="protocol-card" style="margin-top: 20px;">
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: Treatment Gaps -->
+        <div class="protocol-tab-content" data-tab-content="gaps">
+
+        <div class="protocol-card">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--warning); flex-shrink: 0;">
               <circle cx="12" cy="12" r="10"/>
@@ -5168,6 +6551,9 @@ const ContentManager = {
           </div>
         </div>
 
+        </div>
+        <!-- End Tab 2 -->
+
         <div class="info-card purple" style="margin-top: 20px;">
           <div style="display: flex; align-items: flex-start; gap: 10px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;">
@@ -5188,6 +6574,27 @@ const ContentManager = {
       <div class="protocol-page">
         <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Rejection Reasons</h1>
         <p style="color: var(--text-secondary); margin-bottom: 24px;">Manual rejection reasons and when to use them</p>
+
+        <!-- Rejection Reasons Tabs -->
+        <div class="protocol-tabs">
+          <button class="protocol-tab active" data-tab="manual">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="15" y1="9" x2="9" y2="15"/>
+              <line x1="9" y1="9" x2="15" y2="15"/>
+            </svg>
+            Manual Rejections
+          </button>
+          <button class="protocol-tab" data-tab="cancellations">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+            </svg>
+            Order Cancellations
+          </button>
+        </div>
+
+        <!-- Tab 1: Manual Rejections -->
+        <div class="protocol-tab-content active" data-tab-content="manual">
 
         <div class="protocol-card">
           <div class="protocol-title">
@@ -5297,7 +6704,13 @@ const ContentManager = {
           </table>
         </div>
 
-        <div class="protocol-card" style="margin-top: 20px;">
+        </div>
+        <!-- End Tab 1 -->
+
+        <!-- Tab 2: Order Cancellations -->
+        <div class="protocol-tab-content" data-tab-content="cancellations">
+
+        <div class="protocol-card">
           <div class="protocol-title">
             <div class="icon orange">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -5419,6 +6832,9 @@ const ContentManager = {
             </div>
           </div>
         </div>
+
+        </div>
+        <!-- End Tab 2 -->
       </div>
     `;
   },
@@ -5479,6 +6895,35 @@ const ContentManager = {
     if (backBtn) {
       backBtn.addEventListener("click", () => {
         NavigationManager.goToPage(backBtn.dataset.page || "dashboard");
+      });
+    }
+
+    // Protocol tabs (for all protocols with tabs)
+    if (
+      pageId === "proto-core" ||
+      pageId === "proto-pue" ||
+      pageId === "proto-titration" ||
+      pageId === "proto-scr" ||
+      pageId === "contraindications"
+    ) {
+      const tabs = document.querySelectorAll(".protocol-tab");
+      const tabContents = document.querySelectorAll(".protocol-tab-content");
+
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const tabId = tab.dataset.tab;
+
+          // Remove active class from all tabs and contents
+          tabs.forEach((t) => t.classList.remove("active"));
+          tabContents.forEach((content) => content.classList.remove("active"));
+
+          // Add active class to clicked tab and corresponding content
+          tab.classList.add("active");
+          const activeContent = document.querySelector(`[data-tab-content="${tabId}"]`);
+          if (activeContent) {
+            activeContent.classList.add("active");
+          }
+        });
       });
     }
 
@@ -5558,8 +7003,8 @@ const ChecklistManager = {
     const total = data.total;
     const percent = (checked / total) * 100;
 
-    // Update progress circle
-    const circumference = 150.8;
+    // Update progress circle (circumference = 2 * π * 27 ≈ 169.6)
+    const circumference = 169.6;
     const offset = circumference - (percent / 100) * circumference;
     const progressEl = document.getElementById(`progress-${checklist}`);
     if (progressEl) {
