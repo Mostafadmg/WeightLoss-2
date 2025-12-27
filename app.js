@@ -1,4 +1,23 @@
 // ============================================
+// SCR Tabbed Conditions (responsive tabs for Outcomes & Actions)
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.scr-tabbed-conditions').forEach(function(tabbed) {
+    const tabs = tabbed.querySelectorAll('.scr-tab');
+    const contents = tabbed.querySelectorAll('.scr-tab-content');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        tabs.forEach(t => t.classList.remove('active'));
+        contents.forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        const target = tab.getAttribute('data-tab');
+        const content = tabbed.querySelector('.scr-tab-content[data-tab-content="' + target + '"]');
+        if (content) content.classList.add('active');
+      });
+    });
+  });
+});
+// ============================================
 // State Management
 // ============================================
 const AppState = {
@@ -3163,58 +3182,58 @@ const ContentManager = {
             <summary>Table 2: Time-sensitive conditions — workflow with macros</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 2:</strong> When timing information is needed, use appropriate macro. Reject when timing falls within contraindication window.</div>
-              <div class="table-wrapper decision-table-wide">
-                <table class="protocol-table">
-                <tr>
-                  <th>Condition</th>
-                  <th>Timeframe</th>
-                  <th>Macro</th>
-                  <th>Before Emailing</th>
-                  <th>After Patient Response</th>
-                </tr>
-                <tr>
-                  <td><strong>🏥 Bariatric Surgery</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">RYGB • Sleeve • Gastric Band • BPD/DS • Mini Bypass • Gastric balloon</span></td>
-                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;12 months</span></td>
-                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
-                  <td><div class=\"checklist-item\">Check SCR for surgery date</div><div class=\"checklist-item\">If timing unclear → hold + email</div><div class=\"checklist-item\">Add tag: <span class=\"tag orange\">Pending Customer Response</span></div></td>
-                  <td><span class=\"decision-reject\">REJECT</span> if &lt;12 months<br><br><span class=\"decision-prescribe\">PRESCRIBE</span> if ≥12 months</td>
-                </tr>
-                <tr>
-                  <td><strong>🏥 Cholecystectomy</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">(gallbladder removal)</span></td>
-                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;12 months</span></td>
-                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
-                  <td><div class=\"checklist-item\">Check SCR for surgery date</div><div class=\"checklist-item\">If timing unclear → hold + email</div><div class=\"checklist-item\">Add tag: <span class=\"tag orange\">Pending Customer Response</span></div></td>
-                  <td><span class=\"decision-reject\">REJECT</span> if &lt;12 months<br><br><span class=\"decision-prescribe\">PRESCRIBE</span> if ≥12 months</td>
-                </tr>
-                <tr>
-                  <td><strong>💉 Insulin</strong></td>
-                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;3 months</span><br><strong style=\"color: var(--danger);\">OR</strong><br><span style=\"font-weight: 700; color: var(--danger);\">On repeat list</span></td>
-                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
-                  <td><div class=\"checklist-item\">Check acute meds (last 3 months)</div><div class=\"checklist-item\">Check repeat medication list</div><div class=\"checklist-item\">If on repeat list → <strong>reject immediately</strong></div><div class=\"checklist-item\">If timing unclear → hold + email</div></td>
-                  <td><span class=\"decision-reject\">REJECT</span> if prescribed within 3 months or on repeat list</td>
-                </tr>
-                <tr>
-                  <td><strong>💊 Oral Diabetic Meds</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">Sulfonylureas • SGLT2 inhibitors • DPP-4 inhibitors • Thiazolidinediones</span></td>
-                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;3 months</span><br><strong style=\"color: var(--danger);\">OR</strong><br><span style=\"font-weight: 700; color: var(--danger);\">On repeat list</span></td>
-                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
-                  <td><div class=\"checklist-item\">Check acute meds (last 3 months)</div><div class=\"checklist-item\">Check repeat medication list</div><div class=\"checklist-item\">If on repeat list → <strong>reject immediately</strong></div><div class=\"checklist-item\">If timing unclear → hold + email</div></td>
-                  <td><span class=\"decision-reject\">REJECT</span> if prescribed within 3 months or on repeat list</td>
-                </tr>
-                <tr>
-                  <td><strong>⚠️ Narrow Therapeutic Index Meds</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">Amiodarone • Carbamazepine • Ciclosporin • Clozapine • Digoxin • Lithium • Warfarin • Others</span></td>
-                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;3 months</span><br><strong style=\"color: var(--danger);\">OR</strong><br><span style=\"font-weight: 700; color: var(--danger);\">On repeat list</span></td>
-                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
-                  <td><div class=\"checklist-item\">Check acute meds (last 3 months)</div><div class=\"checklist-item\">Check repeat medication list</div><div class=\"checklist-item\">If on repeat list → <strong>reject immediately</strong></div><div class=\"checklist-item\">If timing unclear → hold + email</div></td>
-                  <td><span class=\"decision-reject\">REJECT</span> if prescribed within 3 months or on repeat list</td>
-                </tr>
-                <tr>
-                  <td><strong>💊 Orlistat</strong><br><span style=\"font-size: 0.85em; color: var(--text-muted); font-style: italic;\">Alli • Xenical</span></td>
-                  <td><span style=\"font-weight: 700; color: var(--danger); font-size: 14px;\">&lt;1 month</span></td>
-                  <td><a href=\"#macro-1\" class=\"tag blue\">Macro 1</a></td>
-                  <td><div class=\"checklist-item\">Check SCR for recent Orlistat</div><div class=\"checklist-item\">If timing unclear → hold + email</div><div class=\"checklist-item\">Add tag: <span class=\"tag orange\">Pending Customer Response</span></div></td>
-                  <td><span class=\"decision-reject\">REJECT</span> if &lt;1 month<br><br><em style=\"color: var(--text-muted); font-size: 0.9em;\">Concurrent use contraindicated</em></td>
-                </tr>
-              </table>
+              <div class="scr-tabbed-conditions">
+                <div class="scr-tabs">
+                  <button class="scr-tab active" data-tab="bariatric">🏥 Bariatric Surgery</button>
+                  <button class="scr-tab" data-tab="cholecystectomy">🏥 Cholecystectomy</button>
+                  <button class="scr-tab" data-tab="insulin">💉 Insulin</button>
+                  <button class="scr-tab" data-tab="oral">💊 Oral Diabetic Meds</button>
+                  <button class="scr-tab" data-tab="narrow">⚠️ Narrow Therapeutic Index Meds</button>
+                  <button class="scr-tab" data-tab="orlistat">💊 Orlistat</button>
+                </div>
+                <div class="scr-tab-content active" data-tab-content="bariatric">
+                  <div class="scr-condition-title">🏥 Bariatric Surgery <span class="scr-condition-desc">RYGB • Sleeve • Gastric Band • BPD/DS • Mini Bypass • Gastric balloon</span></div>
+                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
+                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
+                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for surgery date</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</div>
+                </div>
+                <div class="scr-tab-content" data-tab-content="cholecystectomy">
+                  <div class="scr-condition-title">🏥 Cholecystectomy <span class="scr-condition-desc">(gallbladder removal)</span></div>
+                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
+                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
+                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for surgery date</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</div>
+                </div>
+                <div class="scr-tab-content" data-tab-content="insulin">
+                  <div class="scr-condition-title">💉 Insulin</div>
+                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
+                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
+                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
+                </div>
+                <div class="scr-tab-content" data-tab-content="oral">
+                  <div class="scr-condition-title">💊 Oral Diabetic Meds <span class="scr-condition-desc">Sulfonylureas • SGLT2 inhibitors • DPP-4 inhibitors • Thiazolidinediones</span></div>
+                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
+                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
+                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
+                </div>
+                <div class="scr-tab-content" data-tab-content="narrow">
+                  <div class="scr-condition-title">⚠️ Narrow Therapeutic Index Meds <span class="scr-condition-desc">Amiodarone • Carbamazepine • Ciclosporin • Clozapine • Digoxin • Lithium • Warfarin • Others</span></div>
+                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
+                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
+                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
+                </div>
+                <div class="scr-tab-content" data-tab-content="orlistat">
+                  <div class="scr-condition-title">💊 Orlistat <span class="scr-condition-desc">Alli • Xenical</span></div>
+                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;1 month</span></div>
+                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
+                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for recent Orlistat</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;1 month<br><em style="color: var(--text-muted); font-size: 0.9em;">Concurrent use contraindicated</em></div>
+                </div>
+              </div>
               <div class="info-card warning" style="margin-top: 12px;">
                 <div class="info-card-title">Transfer edge case</div>
                 <div class="info-card-text">If GLP‑1 is flagged for a transfer patient with PUE within the last month, follow up using main SOP (macro “PUE &lt;2 Weeks Old”) rather than rejecting.</div>

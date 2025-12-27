@@ -1,4 +1,78 @@
 /* ============================================
+   SCR Tabbed Conditions (responsive tabs for Outcomes & Actions)
+   ============================================ */
+.scr-tabbed-conditions {
+  margin: 18px 0 0 0;
+}
+.scr-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.scr-tab {
+  background: var(--bg-elevated);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  border-radius: 8px 8px 0 0;
+  padding: 8px 18px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  outline: none;
+}
+.scr-tab.active, .scr-tab:focus {
+  background: var(--accent);
+  color: #fff;
+  z-index: 2;
+}
+.scr-tab-content {
+  display: none;
+  background: var(--bg-card);
+  border: 1.5px solid var(--accent);
+  border-radius: 0 0 12px 12px;
+  padding: 18px 18px 10px 18px;
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.scr-tab-content.active {
+  display: block;
+}
+.scr-condition-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--accent);
+}
+.scr-condition-desc {
+  font-size: 0.95em;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-left: 8px;
+}
+.scr-condition-row {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+.scr-tab:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+@media (max-width: 700px) {
+  .scr-tabs {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .scr-tab {
+    border-radius: 8px;
+    width: 100%;
+    text-align: left;
+  }
+  .scr-tab-content {
+    padding: 14px 8px 8px 8px;
+  }
+}
+/* ============================================
    CSS Variables & Themes
    ============================================ */
 :root {
