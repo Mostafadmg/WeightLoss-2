@@ -1,0 +1,13 @@
+This file contains the updated stepup checklist structure with all required sections based on your SOP.
+
+I will now manually update the app.js file with the complete checklist that includes:
+
+1. Order Type & Patient Status
+2. Current BMI Verification
+3. PUE Verification (with Scenario H provider legitimacy)
+4. Titration & Gap Rules (corrected per SOP)
+5. Current Photos (Scenarios I & J)
+6. SCR Mental Health & Hospitalization (suicidal ideation, bariatric surgery, GLP-1 hospitalization)
+7. Final Outcomes & Documentation
+
+Total: 20 checks (c1-c20)

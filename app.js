@@ -9,7 +9,7 @@ const AppState = {
   checklists: {
     starting: { total: 21, checks: {} },
     stepup: { total: 20, checks: {} },
-    repeat: { total: 34, checks: {} },
+    repeat: { total: 31, checks: {} },
     "transfer-above": { total: 18, checks: {} },
     "transfer-below": { total: 21, checks: {} },
   },
@@ -59,6 +59,113 @@ const Utils = {
     }
   },
 };
+
+// ============================================
+// Global Macro Copy Function
+// ============================================
+async function copyMacro(btn) {
+  // Find the macro-text element within the same macro-template
+  const templateContainer = btn.closest('.macro-template');
+  const templateEl = templateContainer ? templateContainer.querySelector('.macro-text') : null;
+  
+  if (!templateEl) {
+    console.error('Macro template text not found');
+    return;
+  }
+  
+  const text = templateEl.textContent;
+  
+  // Try modern clipboard API first
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+      return;
+    } catch (e) {
+      // Fall through to legacy method
+    }
+  }
+  
+  // Legacy fallback
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "absolute";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    if (ok) {
+      btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M20 6L9 17l-5-5"/></svg> Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+  } catch (e) {
+    console.error("Failed to copy macro:", e);
+  }
+}
+
+// Function to navigate to a specific macro
+function navigateToMacro(macroNumber) {
+  // Navigate to macros page using NavigationManager (updates navbar and page title)
+  NavigationManager.goToPage('macros');
+  
+  // Wait for page to load, then activate correct tab/subtab and expand the macro card
+  setTimeout(() => {
+    // Determine which sub-panel the macro is in
+    let subtabId = 'scr-macros'; // default
+    if (macroNumber >= 14 && macroNumber <= 17) {
+      subtabId = 'pue-macros';
+    } else if (macroNumber >= 18 && macroNumber <= 20) {
+      subtabId = 'titration-macros';
+    } else if (macroNumber >= 21 && macroNumber <= 22) {
+      subtabId = 'verification-macros';
+    } else if (macroNumber >= 23 && macroNumber <= 24) {
+      subtabId = 'weight-macros';
+    } else if (macroNumber >= 25 && macroNumber <= 26) {
+      subtabId = 'nevolat-macros';
+    } else if (macroNumber >= 27 && macroNumber <= 30) {
+      subtabId = 'rejection-macros';
+    }
+    
+    // Make sure email-macros main tab is active
+    const mainTabs = document.querySelectorAll('.protocol-tab[data-tab]');
+    const mainPanels = document.querySelectorAll('.tab-panel[data-panel]');
+    mainTabs.forEach(t => t.classList.remove('active'));
+    mainPanels.forEach(p => p.classList.remove('active'));
+    const emailTab = document.querySelector('.protocol-tab[data-tab="email-macros"]');
+    const emailPanel = document.querySelector('.tab-panel[data-panel="email-macros"]');
+    if (emailTab) emailTab.classList.add('active');
+    if (emailPanel) emailPanel.classList.add('active');
+    
+    // Activate the correct sub-tab
+    const subTabs = document.querySelectorAll('.protocol-tab[data-subtab]');
+    const subPanels = document.querySelectorAll('.sub-panel[data-subpanel]');
+    subTabs.forEach(t => t.classList.remove('active'));
+    subPanels.forEach(p => p.classList.remove('active'));
+    const targetSubTab = document.querySelector(`.protocol-tab[data-subtab="${subtabId}"]`);
+    const targetSubPanel = document.querySelector(`.sub-panel[data-subpanel="${subtabId}"]`);
+    if (targetSubTab) targetSubTab.classList.add('active');
+    if (targetSubPanel) targetSubPanel.classList.add('active');
+    
+    // Now expand and scroll to the macro
+    const macroCard = document.getElementById(`macro-${macroNumber}`);
+    if (macroCard) {
+      macroCard.classList.add('expanded');
+      macroCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, 200);
+}
 
 // ============================================
 // Theme Management
@@ -220,6 +327,7 @@ const SearchManager = {
       "titration-guide": "Titration Guide",
       rejections: "Rejection Reasons",
       tags: "Tags Reference",
+      macros: "Email Macros",
     };
 
     const pageIds = Object.keys(titles);
@@ -266,6 +374,8 @@ const SearchManager = {
           return ContentManager.getRejectionsContent();
         case "tags":
           return ContentManager.getTagsContent();
+        case "macros":
+          return ContentManager.getMacrosContent();
         default:
           return "";
       }
@@ -751,7 +861,7 @@ const SearchManager = {
       },
       {
         title: "Heart Failure",
-        context: "REJECT if Stage IV - email patient for cardiology letter (Macro 4)",
+        context: "REJECT if Stage IV - email patient for cardiology letter (<a href='#macro-4' onclick='navigateToMacro(4); return false;' style='color: var(--accent);'>Macro 4</a>)",
         page: "contraindications",
         sectionId: "heart-failure",
         category: "Clinical Details Required",
@@ -765,7 +875,7 @@ const SearchManager = {
       },
       {
         title: "Chronic Kidney Disease",
-        context: "REJECT if eGFR <30 or Stage 4 - request eGFR (Macro 5)",
+        context: "REJECT if eGFR <30 or Stage 4 - request eGFR (<a href='#macro-5' onclick='navigateToMacro(5); return false;' style='color: var(--accent);'>Macro 5</a>)",
         page: "contraindications",
         sectionId: "chronic-kidney-disease",
         category: "Clinical Details Required",
@@ -780,7 +890,7 @@ const SearchManager = {
       },
       {
         title: "Cancer",
-        context: "Excluding MEN2/medullary thyroid - request oncology letter (Macro 3)",
+        context: "Excluding MEN2/medullary thyroid - request oncology letter (<a href='#macro-3' onclick='navigateToMacro(3); return false;' style='color: var(--accent);'>Macro 3</a>)",
         page: "contraindications",
         sectionId: "cancer-assessment",
         category: "Patient Assessment",
@@ -788,7 +898,7 @@ const SearchManager = {
       },
       {
         title: "Dementia / Cognitive Impairment",
-        context: "Assess safety at home and ability to use medication (Macro 7)",
+        context: "Assess safety at home and ability to use medication (<a href='#macro-7' onclick='navigateToMacro(7); return false;' style='color: var(--accent);'>Macro 7</a>)",
         page: "contraindications",
         sectionId: "dementia-assessment",
         category: "Patient Assessment",
@@ -802,7 +912,7 @@ const SearchManager = {
       },
       {
         title: "Chronic Malabsorption",
-        context: "REJECT if formal diagnosis confirmed (Macro 8)",
+        context: "REJECT if formal diagnosis confirmed (<a href='#macro-8' onclick='navigateToMacro(8); return false;' style='color: var(--accent);'>Macro 8</a>)",
         page: "contraindications",
         sectionId: "malabsorption-assessment",
         category: "Patient Assessment",
@@ -810,7 +920,7 @@ const SearchManager = {
       },
       {
         title: "Depression / Anxiety",
-        context: "REJECT if acutely unwell <3 months or new antidepressant (Macro 9)",
+        context: "REJECT if acutely unwell <3 months or new antidepressant (<a href='#macro-9' onclick='navigateToMacro(9); return false;' style='color: var(--accent);'>Macro 9</a>)",
         page: "contraindications",
         sectionId: "depression-anxiety-assessment",
         category: "Patient Assessment",
@@ -826,7 +936,7 @@ const SearchManager = {
       },
       {
         title: "Suicidal Ideation",
-        context: "REJECT if <12 months - active suicidal thoughts (Macro 9)",
+        context: "REJECT if <12 months - active suicidal thoughts (<a href='#macro-9' onclick='navigateToMacro(9); return false;' style='color: var(--accent);'>Macro 9</a>)",
         page: "contraindications",
         sectionId: "suicidal-ideation-assessment",
         category: "Patient Assessment",
@@ -834,7 +944,7 @@ const SearchManager = {
       },
       {
         title: "Alcohol Abuse",
-        context: "REJECT if current dependence or <12 months (Macro 10)",
+        context: "REJECT if current dependence or <12 months (<a href='#macro-10' onclick='navigateToMacro(10); return false;' style='color: var(--accent);'>Macro 10</a>)",
         page: "contraindications",
         sectionId: "alcohol-abuse-assessment",
         category: "Patient Assessment",
@@ -886,7 +996,7 @@ const SearchManager = {
       },
       {
         title: "SCR Permission",
-        context: "Patient must grant permission to view SCR - use Macro 11 if missing",
+        context: "Patient must grant permission to view SCR - use <a href='#macro-11' onclick='navigateToMacro(11); return false;' style='color: var(--accent);'>Macro 11</a> if missing",
         page: "proto-scr",
         category: "SCR Protocol",
         keywords: ["scr permission", "permission to view", "consent"],
@@ -1370,7 +1480,7 @@ const NavigationManager = {
         "Prescribing Dashboard",
         "Select a prescription type to begin safety checks",
       ],
-      checklists: ["Safety Checklists", "Complete all required checks before signing"],
+      checklists: this.getChecklistHeaderText(),
       transfer: [
         "Transfer Patient Checks",
         "New to MedExpress but has previous GLP-1 use",
@@ -1391,6 +1501,7 @@ const NavigationManager = {
       "titration-guide": ["Titration Guide", "Dose equivalence and gap adjustments"],
       rejections: ["Rejection Reasons", "Manual rejection reasons and when to use them"],
       tags: ["Tags Reference", "Common tags and usage"],
+      macros: ["Macros", "Email templates and documentation notes"],
     };
 
     const [title, subtitle] = titles[pageId] || ["Page", "Loading..."];
@@ -1414,6 +1525,25 @@ const NavigationManager = {
     if (!sidebar || !overlay) return;
     sidebar.classList.remove("open");
     overlay.classList.remove("active");
+  },
+
+  getChecklistHeaderText() {
+    const type = AppState.currentChecklist || "starting";
+    const headers = {
+      starting: [
+        "Safety Checklist: New Order — Starter Dose",
+        "Complete all required checks for patients beginning GLP-1 treatment"
+      ],
+      stepup: [
+        "Safety Checklist: New Order — Continuation Dose",
+        "Complete all required checks for patients titrating to a higher dose"
+      ],
+      repeat: [
+        "Safety Checklist: Simple Repeats",
+        "Complete all required checks for maintenance dose prescriptions"
+      ]
+    };
+    return headers[type] || headers.starting;
   },
 };
 
@@ -1477,6 +1607,9 @@ const ContentManager = {
         case "tags":
           content = this.getTagsContent();
           break;
+        case "macros":
+          content = this.getMacrosContent();
+          break;
         default:
           content = "<p>Page not found</p>";
       }
@@ -1518,7 +1651,7 @@ const ContentManager = {
                     <p>Existing patients titrating to a higher dose</p>
                     <div class="checks-count">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-                        9 checks required
+                        20 checks required
                     </div>
                 </div>
 
@@ -1530,7 +1663,7 @@ const ContentManager = {
                     <p>Existing patients ordering same dose (maintenance)</p>
                     <div class="checks-count">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/></svg>
-                        12 checks required
+                        31 checks required
                     </div>
                 </div>
             </div>
@@ -1538,44 +1671,117 @@ const ContentManager = {
   },
 
   getChecklistsContent() {
+    // Determine which checklist to show based on current state
+    const type = AppState.currentChecklist || "starting";
+    console.log("Loading checklist for type:", type);
+    console.log("AppState.currentChecklist:", AppState.currentChecklist);
+
+    const checklistConfig = {
+      starting: {
+        title: "New Order — Starter Dose",
+        subtitle: "New Patient",
+        badgeClass: "starter",
+        total: 21,
+        description: "Complete safety checks for patients beginning GLP-1 treatment for the first time"
+      },
+      stepup: {
+        title: "New Order — Continuation Dose",
+        subtitle: "Titration",
+        badgeClass: "stepup",
+        total: 20,
+        description: "Safety checks for existing patients titrating to a higher dose"
+      },
+      repeat: {
+        title: "Simple Repeats",
+        subtitle: "Maintenance",
+        badgeClass: "repeat",
+        total: 31,
+        description: "Streamlined checks for existing patients ordering the same dose"
+      }
+    };
+
+    const config = checklistConfig[type] || checklistConfig.starting;
+
     return `
-            <div class="checklist-panel active" id="checklist-starting">
+            <div class="back-to-dashboard" style="margin-bottom: 20px;">
+                <button class="btn btn-secondary back-btn" data-page="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Back to Dashboard
+                </button>
+            </div>
+
+            <!-- Prescription Type Tabs -->
+            <div class="protocol-tabs" style="margin-bottom: 24px;">
+                <button class="protocol-tab checklist-type-tab ${type === 'starting' ? 'active' : ''}" data-checklist-type="starting">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                    </svg>
+                    New Order — Starter Dose
+                    <span style="display: block; font-size: 11px; opacity: 0.7; margin-top: 2px;">21 checks</span>
+                </button>
+                <button class="protocol-tab checklist-type-tab ${type === 'stepup' ? 'active' : ''}" data-checklist-type="stepup">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                        <path d="M12 19V5M5 12l7-7 7 7"/>
+                    </svg>
+                    New Order — Continuation Dose
+                    <span style="display: block; font-size: 11px; opacity: 0.7; margin-top: 2px;">20 checks</span>
+                </button>
+                <button class="protocol-tab checklist-type-tab ${type === 'repeat' ? 'active' : ''}" data-checklist-type="repeat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+                        <path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
+                    </svg>
+                    Simple Repeats
+                    <span style="display: block; font-size: 11px; opacity: 0.7; margin-top: 2px;">31 checks</span>
+                </button>
+            </div>
+
+            <div class="checklist-panel active" id="checklist-${type}">
                 <div class="checklist-header">
                     <div class="checklist-title">
-                        <h2>Starting Dose Checklist</h2>
-                        <span class="type-badge starter">New Patient</span>
+                        <h2>${config.title}</h2>
+                        <span class="type-badge ${config.badgeClass}">${config.subtitle}</span>
                     </div>
                     <div class="progress-ring">
-                        <div class="progress-circle">
-                            <svg width="64" height="64">
+                        <div class="progress-circle" style="width: 64px !important; height: 64px !important; max-width: 64px !important; max-height: 64px !important;">
+                            <svg width="64" height="64" viewBox="0 0 64 64" style="width: 64px !important; height: 64px !important; max-width: 64px !important; max-height: 64px !important;">
                                 <defs>
-                                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <linearGradient id="progressGradient-${type}" x1="0%" y1="0%" x2="100%" y2="100%">
                                         <stop offset="0%" stop-color="#22c55e"/>
                                         <stop offset="100%" stop-color="#06b6d4"/>
                                     </linearGradient>
                                 </defs>
                                 <circle class="bg" cx="32" cy="32" r="27"/>
-                                <circle class="progress" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" id="progress-starting"/>
+                                <circle class="progress" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" id="progress-${type}" stroke="url(#progressGradient-${type})"/>
                             </svg>
-                <span class="progress-text" id="progress-text-starting">0/21</span>
+                            <span class="progress-text" id="progress-text-${type}">0/${config.total}</span>
                         </div>
                         <div class="progress-label">Checks<br>Complete</div>
                     </div>
                 </div>
 
-                ${this.getChecklistSections("starting")}
+                <div class="info-card ${config.badgeClass === 'starter' ? 'green' : config.badgeClass === 'stepup' ? 'orange' : 'cyan'}" style="margin-bottom: 24px;">
+                    <div class="info-card-title">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px !important; height: 20px !important; max-width: 20px !important; max-height: 20px !important; flex-shrink: 0;">
+                            <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                        </svg>
+                        📋 Checklist Type: ${config.title}
+                    </div>
+                    <div class="info-card-text">${config.description}</div>
+                </div>
+
+                ${this.getChecklistSections(type)}
 
                 <div class="status-bar">
                     <div class="status-info">
-                        <div class="status-badge pending" id="status-badge-starting">
+                        <div class="status-badge pending" id="status-badge-${type}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                             <span>Pending</span>
                         </div>
                         <span style="color: var(--text-secondary); font-size: 14px;">Complete all checks to enable signing</span>
                     </div>
                     <div class="btn-actions">
-                        <button class="btn btn-reset" data-checklist="starting">Reset</button>
-                        <button class="btn btn-sign" id="btn-sign-starting" data-checklist="starting">
+                        <button class="btn btn-reset" data-checklist="${type}">Reset</button>
+                        <button class="btn btn-sign" id="btn-sign-${type}" data-checklist="${type}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                             Ready to Sign
                         </button>
@@ -1650,7 +1856,7 @@ const ContentManager = {
             {
               id: "s5b",
               label: "If ID fails: Apply correct tag",
-              hint: "1st fail → add 'Failed ID' tag (auto email). 2nd+ fail → send personalised email + 'Pending Customer Response'. Unsure → escalate (Appendix 7).",
+              hint: "1st fail → add 'Failed ID' tag (auto email, see <a href='#macro-21' onclick='navigateToMacro(21); return false;' style='color: var(--accent);'>Macro 21</a>). 2nd+ fail → send personalised email + 'Pending Customer Response'. Unsure → escalate (Appendix 7).",
             },
           ],
         },
@@ -1671,7 +1877,7 @@ const ContentManager = {
             {
               id: "s6c",
               label: "Photo issues handled correctly",
-              hint: "Blurry/covered → 'Weight verification failed' tag (once). Genitalia exposed → hold, request new photo, ask CS to delete. Photos don't match BMI → escalate.",
+              hint: "Blurry/covered → 'Weight verification failed' tag (once, see <a href='#macro-22' onclick='navigateToMacro(22); return false;' style='color: var(--accent);'>Macro 22</a>). Genitalia exposed → hold, request new photo, ask CS to delete. Photos don't match BMI → escalate.",
               warning: true,
             },
           ],
@@ -1812,14 +2018,14 @@ const ContentManager = {
             },
             {
               id: "ta9",
-              label: "If PUE <2 weeks old: plan to send macro",
-              hint: "Approve but send 'Clinical: PUE <2 Weeks Old' macro instructing patient NOT to start until current course complete.",
+              label: "If PUE <2 weeks old: send Macro 16",
+              hint: "Approve but send <a href='#macro-16' onclick='navigateToMacro(16); return false;' style='color: var(--accent);'>Macro 16: PUE 2 Weeks Old</a> instructing patient NOT to start until current course complete.",
               warning: true,
             },
             {
               id: "ta10",
               label: "If PUE missing/inadequate: email + hold",
-              hint: "Email via 'Clinical: Evidence missing information'. Add 'Pending Customer Response'. Without valid PUE → starter dose only.",
+              hint: "Use <a href='#macro-14' onclick='navigateToMacro(14); return false;' style='color: var(--accent);'>Macro 14: Missing Information</a>. Add 'Pending Customer Response'. Without valid PUE → starter dose only.",
               warning: true,
             },
           ],
@@ -2009,8 +2215,8 @@ const ContentManager = {
             },
             {
               id: "tb15",
-              label: "If PUE <2 weeks old: plan to send macro",
-              hint: "Approve but send 'Clinical: PUE <2 Weeks Old' macro instructing patient NOT to start until current course complete.",
+              label: "If PUE <2 weeks old: send Macro 16",
+              hint: "Approve but send <a href='#macro-16' onclick='navigateToMacro(16); return false;' style='color: var(--accent);'>Macro 16: PUE 2 Weeks Old</a> instructing patient NOT to start until current course complete.",
             },
           ],
         },
@@ -2156,7 +2362,7 @@ const ContentManager = {
               infoCard: {
                 type: "orange",
                 title: "Photo Scenarios for Repeats",
-                content: "• Borderline BMI but safe: Continue treatment per previous decision (maintain continuity). Do NOT request new photo or apply Weight verification failed.\n• Clearly underweight: Send macro 'Repeat Customer Weight/Height Verification' requesting GP verified height/weight, then escalate.\n• Blurred/face covered/ID mismatch (genuine mistake): May request new photos following Weight verification failed process.",
+                content: "• Borderline BMI but safe: Continue treatment per previous decision (maintain continuity). Do NOT request new photo or apply Weight verification failed.<br>• Clearly underweight: Send <a href='#macro-17' onclick='navigateToMacro(17); return false;' style='color: var(--accent);'>Macro 17: Weight/Height Verification</a> requesting GP verified height/weight, then escalate.<br>• Blurred/face covered/ID mismatch (genuine mistake): May request new photos following Weight verification failed process.",
                 linkPage: "weight-monitoring",
                 linkLabel: "View Weight Monitoring →"
               }
@@ -2187,7 +2393,7 @@ const ContentManager = {
             {
               id: "r14",
               label: "Scenario 3B: Same dose or going down in strength",
-              hint: "If no other issues → Prescribe, then send macro 'Clinical: Did not titrate up / Went down in strength (GLP1)'. Safe to step down >1 dose. Do NOT hold if otherwise safe. Don't repeat macro if already sent and patient has reasonable explanation.",
+              hint: "If no other issues → Prescribe, then send <a href='#macro-19' onclick='navigateToMacro(19); return false;' style='color: var(--accent);'>Macro 19: Not Titrated Up</a> or <a href='#macro-20' onclick='navigateToMacro(20); return false;' style='color: var(--accent);'>Macro 20: Went Down</a>. Safe to step down >1 dose. Do NOT hold if otherwise safe. Don't repeat macro if already sent and patient has reasonable explanation.",
               infoCard: {
                 type: "orange",
                 title: "Scenario 3B: Same/Lower Dose",
@@ -2202,7 +2408,7 @@ const ContentManager = {
               infoCard: {
                 type: "orange",
                 title: "Scenario 3C: Skipped Dose",
-                content: "If still appears skipped after review → Send macro 'Clinical: Evidence request – Skipped Dose (GLP1)'. Offer 2 options: (1) Amend to correct dose per titration, (2) Provide evidence of missing dose from another provider (PUE). Tag Pending Customer Response and hold. If justification/PUE acceptable (cost, trial, accident, stock) → prescribe higher dose. If not → change to correct dose, email explanation.",
+                content: "If still appears skipped after review → Send <a href='#macro-18' onclick='navigateToMacro(18); return false;' style='color: var(--accent); text-decoration: underline;'>Macro 18: Skipped Dose</a>. Offer 2 options: (1) Amend to correct dose per titration, (2) Provide evidence of missing dose from another provider (PUE). Tag Pending Customer Response and hold. If justification/PUE acceptable (cost, trial, accident, stock) → prescribe higher dose. If not → change to correct dose, email explanation.",
                 linkPage: "titration",
                 linkLabel: "View Titration Protocol →"
               }
@@ -2296,7 +2502,7 @@ const ContentManager = {
             {
               id: "r24",
               label: "Non-serious side effects: Continue with advice/dose adjustment",
-              hint: "No hospitalisation + no major safety concern → May continue at same or lower dose. Provide side-effect advice using macros if needed.",
+              hint: "No hospitalisation + no major safety concern → May continue at same or lower dose. Use <a href='#macro-28' onclick='navigateToMacro(28); return false;' style='color: var(--accent);'>Macro 28: Side Effects</a> or <a href='#macro-29' onclick='navigateToMacro(29); return false;' style='color: var(--accent);'>Macro 29: Injection Site</a> if needed.",
             },
             {
               id: "r25",
@@ -2367,19 +2573,24 @@ const ContentManager = {
       ],
       stepup: [
         {
-          title: "Order Type Identification",
+          title: "Step 1: Order Type & Patient Status",
           icon: "blue",
           checks: [
             {
               id: "c1",
-              label: "Identify if this is a NEW order or continuation",
-              hint: "NEW order: patient has never received GLP-1 from MedExpress before. Continuation: patient already receiving treatment.",
+              label: "Identify if this is a NEW order (transfer) or existing MedExpress continuation",
+              hint: "NEW order = never received GLP-1 from MedExpress before (transfer from another provider). Continuation = already receiving from MedExpress.",
               warning: true,
+              infoCard: {
+                type: "blue",
+                title: "Transfer vs Continuation",
+                content: "• NEW order (transfer): Requires PUE + BMI checks (see transfer-specific tabs)\n• Existing patient continuation: No PUE needed if already established on MedExpress GLP-1"
+              }
             },
             {
               id: "c2",
-              label: "If NEW order: verify this is continuation dose, not starter",
-              hint: "New orders for continuation dose must meet transfer criteria (PUE + BMI documentation if below-licence).",
+              label: "If NEW order: verify continuation dose is appropriate (not starter)",
+              hint: "New orders for continuation dose must meet transfer criteria. Check current BMI to determine above/below licence requirements.",
               danger: true,
             },
           ],
@@ -2792,7 +3003,7 @@ const ContentManager = {
           </div>
           <div class="protocol-text">If a patient has not granted permission to view SCR (legacy orders placed before permission was mandatory):</div>
           <ul class="protocol-list">
-            <li>Email the patient using <strong>Macro 11</strong> (template below).</li>
+            <li>Email the patient using <a href="#macro-11" onclick="navigateToMacro(11); return false;" class="tag blue">Macro 11: SCR Permission</a>.</li>
             <li>If permission is granted over email: document permission + link to Zendesk ticket, then proceed to check SCR on NHS site.</li>
             <li>If permission is not granted: <strong>reject</strong> the order.</li>
           </ul>
@@ -3026,28 +3237,28 @@ const ContentManager = {
                 </tr>
                 <tr>
                   <td><strong>🩺 Cholelithiasis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(gallstones)</span></td>
-                  <td><a href="#macro-2" class="tag blue">Macro 2</a></td>
+                  <td><a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></td>
                   <td><div class="checklist-item">Check SCR for cholecystectomy evidence</div><div class="checklist-item">If no evidence → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if patient had cholecystectomy (gallbladder removal surgery)</td>
                   <td><span class="decision-reject">REJECT</span> if no cholecystectomy<br><br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</td>
                 </tr>
                 <tr>
                   <td><strong>🩺 Cholecystitis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(gallbladder inflammation)</span></td>
-                  <td><a href="#macro-2" class="tag blue">Macro 2</a></td>
+                  <td><a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></td>
                   <td><div class="checklist-item">Check SCR for cholecystectomy evidence</div><div class="checklist-item">If no evidence → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if patient had cholecystectomy (gallbladder removal surgery)</td>
                   <td><span class="decision-reject">REJECT</span> if no cholecystectomy<br><br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</td>
                 </tr>
                 <tr>
                   <td><strong>❤️ Heart Failure (HF)</strong></td>
-                  <td><a href="#macro-4" class="tag blue">Macro 4</a></td>
+                  <td><a href="#macro-4" onclick="navigateToMacro(4); return false;" class="tag blue">Macro 4</a></td>
                   <td><div class="checklist-item">Check SCR for HF stage</div><div class="checklist-item">If stage unclear → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request latest cardiology letter stating:<br>• HF stage, OR<br>• Confirmation if fit for GLP-1</td>
                   <td><span class="decision-reject">REJECT</span> if Stage IV<br><br><span class="decision-prescribe">PRESCRIBE</span> if Stage I, II, or III</td>
                 </tr>
                 <tr>
                   <td><strong>🫘 Chronic Kidney Disease (CKD)</strong></td>
-                  <td><a href="#macro-5" class="tag blue">Macro 5</a></td>
+                  <td><a href="#macro-5" onclick="navigateToMacro(5); return false;" class="tag blue">Macro 5</a></td>
                   <td><div class="checklist-item">Check SCR for eGFR or CKD stage</div><div class="checklist-item">If eGFR/stage unclear → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request:<br>• Most recent eGFR result, OR<br>• Latest specialist letter with CKD details</td>
                   <td><span class="decision-reject">REJECT</span> if eGFR &lt;30 or Stage 4/5<br><br><span class="decision-prescribe">PRESCRIBE</span> if eGFR ≥30 or Stage 1/2/3</td>
@@ -3066,49 +3277,49 @@ const ContentManager = {
                 <tr><th>Condition</th><th>Macro</th><th>Before Emailing</th><th>Information to Request</th><th>After Patient Response</th></tr>
                 <tr>
                   <td><strong>🎗️ Any Cancer Diagnosis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(excluding MEN2 or medullary thyroid cancer)</span></td>
-                  <td><a href="#macro-3" class="tag blue">Macro 3</a></td>
+                  <td><a href="#macro-3" onclick="navigateToMacro(3); return false;" class="tag blue">Macro 3</a></td>
                   <td><div class="checklist-item">Check SCR for cancer type and timeline</div><div class="checklist-item">Always require patient input</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if:<br>• Currently under oncology care?<br>• Cancer in remission?<br>• Request discharge/latest oncology letter</td>
                   <td><span class="decision-reject">REJECT</span> if active cancer/undergoing treatment<br><br><span class="decision-clinical">CLINICAL DECISION</span> if in remission (review oncology letter)</td>
                 </tr>
                 <tr>
                   <td><strong>🤰 Pregnancy</strong></td>
-                  <td><a href="#macro-6" class="tag blue">Macro 6</a></td>
+                  <td><a href="#macro-6" onclick="navigateToMacro(6); return false;" class="tag blue">Macro 6</a></td>
                   <td><div class="checklist-item">Always require confirmation</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if currently:<br>• Pregnant?<br>• Breastfeeding?<br>• Trying to conceive?</td>
                   <td><span class="decision-reject">REJECT</span> if pregnant, breastfeeding, or trying to conceive<br><br><span class="decision-prescribe">PRESCRIBE</span> if none of the above</td>
                 </tr>
                 <tr>
                   <td><strong>🧠 Dementia / Cognitive Impairment</strong></td>
-                  <td><a href="#macro-7" class="tag blue">Macro 7</a></td>
+                  <td><a href="#macro-7" onclick="navigateToMacro(7); return false;" class="tag blue">Macro 7</a></td>
                   <td><div class="checklist-item">Always require patient/carer input</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask:<br>• Safe to use medication at home?<br>• Support available?<br>• Ability to self-administer?</td>
                   <td><span class="decision-clinical">CLINICAL DECISION</span> based on:<br>• Patient's ability to take medication safely<br>• Support network around patient</td>
                 </tr>
                 <tr>
                   <td><strong>🫃 Chronic Malabsorption</strong></td>
-                  <td><a href="#macro-8" class="tag blue">Macro 8</a></td>
+                  <td><a href="#macro-8" onclick="navigateToMacro(8); return false;" class="tag blue">Macro 8</a></td>
                   <td><div class="checklist-item">Always require confirmation</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Ask if patient has formal diagnosis of chronic malabsorption</td>
                   <td><span class="decision-reject">REJECT</span> if formal diagnosis confirmed<br><br><span class="decision-prescribe">PRESCRIBE</span> if no formal diagnosis</td>
                 </tr>
                 <tr>
                   <td><strong>😔 Depression or Anxiety</strong><br><br><span style="font-size: 0.85em; color: var(--danger); font-weight: 600;">⚠️ Contraindication: acutely mentally unwell</span></td>
-                  <td><a href="#macro-9" class="tag blue">Macro 9</a></td>
+                  <td><a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></td>
                   <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">Check antidepressant start/dose change dates</div><div class="checklist-item">If &lt;3 months → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request confirmation of:<br>• When condition added to SCR<br>• Any new antidepressants or dose changes in last 3 months</td>
                   <td><span class="decision-reject">REJECT</span> if entry &lt;3 months old OR new antidepressant/dose increase in last 3 months<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥3 months</td>
                 </tr>
                 <tr>
                   <td><strong>⚠️ Active Suicidal Ideation</strong></td>
-                  <td><a href="#macro-9" class="tag blue">Macro 9</a></td>
+                  <td><a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></td>
                   <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">If &lt;12 months → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request confirmation of when suicidal ideation was added to SCR</td>
                   <td><span class="decision-reject">REJECT</span> if &lt;12 months<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</td>
                 </tr>
                 <tr>
                   <td><strong>🍺 Current Alcohol Abuse or Dependence</strong></td>
-                  <td><a href="#macro-10" class="tag blue">Macro 10</a></td>
+                  <td><a href="#macro-10" onclick="navigateToMacro(10); return false;" class="tag blue">Macro 10</a></td>
                   <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">If &lt;12 months or "current" → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
                   <td>Request confirmation of:<br>• When alcohol abuse was added to SCR<br>• Current alcohol use status</td>
                   <td><span class="decision-reject">REJECT</span> if &lt;12 months or current abuse<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months and no current abuse</td>
@@ -3116,7 +3327,7 @@ const ContentManager = {
               </table>
               </div>
 
-              <div class="protocol-section-title" style="margin-top: 20px;">Cancer assessment (Macro 3)</div>
+              <div class="protocol-section-title" style="margin-top: 20px;">Cancer assessment (<a href="#macro-3" onclick="navigateToMacro(3); return false;" style="color: var(--accent);">Macro 3</a>)</div>
               <div class="protocol-text">For any cancer diagnosis (excluding MEN2 or medullary thyroid cancer), ask the patient:</div>
               <ul class="protocol-list">
                 <li>Are they under a specialist / currently undergoing treatment from an oncology team?</li>
@@ -3161,7 +3372,7 @@ const ContentManager = {
             </div>
             Rejecting prescriptions (especially repeat patients)
           </div>
-          <div class="protocol-text">If rejecting a repeat patient after several months of prescribing, use <strong>Macro 12</strong>. If patients reply unhappy, senior pharmacists may call using these principles:</div>
+          <div class="protocol-text">If rejecting a repeat patient after several months of prescribing, use <a href="#macro-12" onclick="navigateToMacro(12); return false;" class="tag blue">Macro 12: Rejection for Repeat Patients</a>. If patients reply unhappy, senior pharmacists may call using these principles:</div>
           <ul class="protocol-list">
             <li><strong>Lead with empathy</strong> (“I can hear you are frustrated”).</li>
             <li><strong>Explain through safety</strong> (protection not restriction).</li>
@@ -3582,7 +3793,7 @@ const ContentManager = {
         <div class="info-card red" style="margin-top: 12px;">
           <div class="info-card-title">GP Outside UK</div>
           <div class="info-card-text">
-            Email patient requesting UK GP details. If patient is unable to provide a UK GP, <strong>reject the order</strong>.
+            Email patient requesting UK GP details. If patient is unable to provide a UK GP, <strong>reject the order</strong> using <a href="#macro-27" onclick="navigateToMacro(27); return false;" style="color: var(--accent);">Macro 27: Standard Rejection</a>.
           </div>
         </div>
       </div>
@@ -3715,7 +3926,7 @@ const ContentManager = {
             <strong>Cannot proceed without BOTH PUE AND previous BMI photo.</strong>
           </div>
           <div class="protocol-text">
-            If either PUE or previous BMI photo fails requirements, patient is not eligible. Use email template <em>Clinical: Evidence of starting BMI</em>.
+            If either PUE or previous BMI photo fails requirements, patient is not eligible. Use <a href="#macro-15" class="tag blue" onclick="navigateToMacro(15); return false;">Macro 15: Evidence of Starting BMI</a>.
           </div>
         </div>
         <div class="divider"></div>
@@ -3766,7 +3977,7 @@ const ContentManager = {
             <strong>Cannot proceed without BOTH PUE AND previous BMI photo.</strong>
           </div>
           <div class="protocol-text">
-            If either PUE or previous BMI photo fails requirements, patient is not eligible. Use email template <em>Clinical: Evidence of starting BMI</em>.
+            If either PUE or previous BMI photo fails requirements, patient is not eligible. Use <a href="#macro-15" class="tag blue" onclick="navigateToMacro(15); return false;">Macro 15: Evidence of Starting BMI</a>.
           </div>
         </div>
       </div>
@@ -3792,7 +4003,7 @@ const ContentManager = {
         </div>
         <ul class="protocol-list">
           <li><strong>Prescribe the order</strong> as normal</li>
-          <li>Send email using template: <em>Clinical: PUE &lt;2 Weeks Old</em></li>
+          <li>Send email using <a href="#macro-16" onclick="navigateToMacro(16); return false;" class="tag blue">Macro 16: PUE 2 Weeks Old</a></li>
           <li>Email reminds them to complete their current treatment before starting the MedExpress pen</li>
         </ul>
       </div>
@@ -3869,6 +4080,7 @@ const ContentManager = {
           <div class="info-card-title">Nevolat Pen Label Instruction</div>
           <div class="info-card-text">
             "Inject once daily under the skin at the same time each day. If switching from another weight loss medication, check your email for dosage instructions."
+            <div style="margin-top: 8px;"><a href="#macro-25" onclick="navigateToMacro(25); return false;" class="tag blue">Macro 25: Nevolat Titration (New)</a> <a href="#macro-26" onclick="navigateToMacro(26); return false;" class="tag blue">Macro 26: Nevolat Switching</a></div>
           </div>
         </div>
       </div>
@@ -3886,7 +4098,7 @@ const ContentManager = {
           Customer Skips a Dose
         </div>
         <div class="protocol-text">
-          If patient skips a dose in the titration sequence, use email template: <em>Clinical: Evidence request - Skipped Dose (GLP1)</em>
+          If patient skips a dose in the titration sequence, use <a href="#macro-18" onclick="navigateToMacro(18); return false;" class="tag blue">Macro 18: Skipped Dose</a>
         </div>
         <div class="protocol-text">
           Patient has <strong>two options</strong>:
@@ -3911,7 +4123,7 @@ const ContentManager = {
           Patient Stays Same or Goes Down
         </div>
         <div class="protocol-text">
-          If patient stays on same dose or reduces strength: <strong>Prescribe first, then contact afterwards</strong> using template <em>Clinical: Did not titrate up / Went down in strength (GLP1)</em>
+          If patient stays on same dose or reduces strength: <strong>Prescribe first, then contact afterwards</strong> using <a href="#macro-19" onclick="navigateToMacro(19); return false;" class="tag blue">Macro 19: Not Titrated Up</a> or <a href="#macro-20" onclick="navigateToMacro(20); return false;" class="tag blue">Macro 20: Went Down</a>
         </div>
         <div class="protocol-section">
           <div class="protocol-section-title">Justifiable Reasons (No Need to Re-send Macro)</div>
@@ -3998,7 +4210,7 @@ const ContentManager = {
             <li>Consent for us to amend their order to appropriate dose</li>
           </ul>
           <div class="protocol-text">
-            Use email template <em>Clinical: Gap in treatment (GLP1)</em> and add <span class="tag orange">Pending Customer Response</span> tag.
+            Use <a href="#macro-16" onclick="navigateToMacro(16); return false;" class="tag blue">Macro 16: PUE 2 Weeks Old</a> and add <span class="tag orange">Pending Customer Response</span> tag.
           </div>
         </div>
       </div>
@@ -4078,7 +4290,7 @@ const ContentManager = {
           <div class="protocol-section-title">System Tags Explained</div>
           <ul class="protocol-list">
             <li><span class="tag orange">Patient gained weight between orders</span> — <strong>First instance</strong> of &gt;7% weight gain. No action required from prescriber. Order falls into Simple Repeats queue.</li>
-            <li><span class="tag red">Patient has two consecutive weight gains</span> — <strong>Second consecutive instance</strong>. Falls into Complex Repeats queue. Order placed on hold until patient responds.</li>
+            <li><span class="tag red">Patient has two consecutive weight gains</span> — <strong>Second consecutive instance</strong>. Falls into Complex Repeats queue. Order placed on hold until patient responds. Use <a href="#macro-23" onclick="navigateToMacro(23); return false;" class="tag blue">Macro 23: Weight Increased</a> if needed.</li>
           </ul>
         </div>
       </div>
@@ -4105,7 +4317,7 @@ const ContentManager = {
           <tr>
             <td><strong>Difficulties injecting?</strong></td>
             <td>Approve if <strong>minor pain</strong> at injection site</td>
-            <td>Send <em>Minor SEs - Injection Site Reaction</em> macro with guidance on proper injection technique (ice pack before injection, antihistamine cream)</td>
+            <td>Send <a href="#macro-29" onclick="navigateToMacro(29); return false;" class="tag blue">Macro 29: Injection Site Reaction</a> with guidance on proper injection technique (ice pack before injection, antihistamine cream)</td>
           </tr>
           <tr>
             <td></td>
@@ -4140,7 +4352,7 @@ const ContentManager = {
           <tr>
             <td><strong>Side effects?</strong></td>
             <td>Approve if <strong>mild</strong> side effects (nausea, dizziness)</td>
-            <td>Use Side Effects Macros available on prescribing interface and ZenDesk</td>
+            <td>Use <a href="#macro-28" onclick="navigateToMacro(28); return false;" class="tag blue">Macro 28: Side Effects Query</a> or <a href="#macro-29" onclick="navigateToMacro(29); return false;" class="tag blue">Macro 29: Injection Site</a></td>
           </tr>
           <tr>
             <td></td>
@@ -4213,7 +4425,7 @@ const ContentManager = {
           </table>
         </div>
         <div class="protocol-text">
-          System adds <span class="tag red">Weight loss between orders exceeds threshold</span> tag. Order is placed on hold until patient responds.
+          System adds <span class="tag red">Weight loss between orders exceeds threshold</span> tag. Order is placed on hold until patient responds. Use <a href="#macro-24" onclick="navigateToMacro(24); return false;" class="tag blue">Macro 24: Rapid Weight Loss</a> to contact patient.
         </div>
       </div>
 
@@ -4239,7 +4451,7 @@ const ContentManager = {
           <tr>
             <td><strong>Side effects? (nausea, vomiting, diarrhoea)</strong></td>
             <td>Approve if <strong>mild</strong> side effects</td>
-            <td>Mild SEs are common with GLP-1s. Use Side Effects Macros available on interface</td>
+            <td>Mild SEs are common with GLP-1s. Use <a href="#macro-28" onclick="navigateToMacro(28); return false;" class="tag blue">Macro 28: Side Effects Query</a></td>
           </tr>
           <tr>
             <td></td>
@@ -4846,7 +5058,7 @@ const ContentManager = {
               <path d="M12 9v4M12 17h.01"/>
             </svg>
             <div>
-              <strong>DO NOT PRESCRIBE</strong> if patient has ANY of the following absolute contraindications. Reject the consultation immediately.
+              <strong>SCR Screening SOP v3.2</strong> — If patient has absolute contraindication, reject immediately. If condition requires more information, email patient using appropriate macro and hold. If uncertain, escalate via Jira.
             </div>
           </div>
         </div>
@@ -4888,207 +5100,201 @@ const ContentManager = {
         <!-- Tab 1: Absolute Contraindications -->
         <div class="protocol-tab-content active" data-tab-content="absolute">
 
-        <div class="protocol-card" id="pregnancy-contraindication">
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">Absolute Contraindications</h2>
+
+        <div class="info-card red" style="margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <path d="M12 9v4M12 17h.01"/>
+            </svg>
+            <div>
+              <strong>REJECT immediately</strong> if patient has ANY of the following absolute contraindications. No further information is required.
+            </div>
+          </div>
+        </div>
+
+        <div class="protocol-card" id="pancreatitis-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
             </svg>
-            <strong>Pregnancy & Reproduction</strong>
+            <strong>Pancreatitis</strong>
           </div>
           <ul class="protocol-list">
-            <li><strong>Pregnancy</strong> — confirmed or suspected</li>
-            <li><strong>Planning pregnancy</strong> — within next 2 months</li>
-            <li><strong>Breastfeeding</strong> — currently breastfeeding</li>
-            <li><strong>Inadequate contraception</strong> — sexually active women of childbearing potential must use reliable contraception</li>
+            <li><strong>Pancreatitis</strong> — including acute or chronic pancreatic insufficiency</li>
           </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
+        </div>
+
+        <div class="protocol-card" id="eating-disorders-contraindication">
+          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
+              <path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9z"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <strong>Eating Disorders</strong>
+          </div>
+          <ul class="protocol-list">
+            <li><strong>Anorexia nervosa</strong></li>
+            <li><strong>Bulimia nervosa</strong></li>
+            <li><strong>Binge Eating Disorder (BED)</strong></li>
+            <li><strong>Avoidant/Restrictive Food Intake Disorder (ARFID)</strong></li>
+          </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
         </div>
 
         <div class="protocol-card" id="diabetes-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--warning); flex-shrink: 0;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <polyline points="14 2 14 8 20 8"/>
               <line x1="9" y1="15" x2="15" y2="15"/>
             </svg>
-            <strong>Diabetes & Metabolic Conditions</strong>
+            <strong>Type 1 Diabetes</strong>
           </div>
           <ul class="protocol-list">
-            <li><strong>Type 1 diabetes</strong></li>
-            <li><strong>Diabetic ketoacidosis</strong> (history or current)</li>
-            <li><strong>Diabetic retinopathy</strong> (for GLP-1 medications)</li>
+            <li><strong>Type 1 diabetes</strong> (Insulin-dependent diabetes mellitus - IDDM)</li>
           </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
         </div>
 
-        <div class="protocol-card" id="thyroid-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--accent); flex-shrink: 0;">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            <strong>Thyroid & Endocrine</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Personal history of medullary thyroid carcinoma (MTC)</strong></li>
-            <li><strong>Family history of medullary thyroid carcinoma</strong></li>
-            <li><strong>Multiple endocrine neoplasia syndrome type 2 (MEN2)</strong></li>
-            <li><strong>History of thyroid cancer</strong> (any type)</li>
-          </ul>
-        </div>
-
-        <div class="protocol-card" id="gastrointestinal-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--warning); flex-shrink: 0;">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <strong>Gastrointestinal</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Active pancreatitis</strong></li>
-            <li><strong>History of pancreatitis</strong></li>
-            <li><strong>Inflammatory bowel disease</strong> (Crohn's disease, ulcerative colitis) — active or significant history</li>
-            <li><strong>Gastroparesis</strong></li>
-          </ul>
-        </div>
-
-        <div class="protocol-card" id="renal-hepatic-contraindication">
+        <div class="protocol-card" id="liver-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
               <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
               <circle cx="12" cy="12" r="3"/>
             </svg>
-            <strong>Renal & Hepatic</strong>
+            <strong>Liver Conditions</strong>
           </div>
           <ul class="protocol-list">
-            <li><strong>Severe renal impairment</strong> — eGFR &lt;30 mL/min/1.73m²</li>
-            <li><strong>End-stage renal disease (ESRD)</strong></li>
-            <li><strong>Severe hepatic impairment</strong> — decompensated cirrhosis, acute liver failure</li>
+            <li><strong>Liver cirrhosis</strong></li>
+            <li><strong>Liver transplant</strong></li>
           </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
         </div>
 
-        <div class="protocol-card" id="allergies-contraindication">
+        <div class="protocol-card" id="endocrine-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-              <path d="M12 9v4M12 17h.01"/>
-            </svg>
-            <strong>Allergies & Previous Reactions</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Known hypersensitivity</strong> to semaglutide, tirzepatide, liraglutide, or any excipients</li>
-            <li><strong>Previous severe reaction</strong> to any GLP-1 agonist</li>
-          </ul>
-        </div>
-
-        <div class="protocol-card" id="psychiatric-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--accent); flex-shrink: 0;">
-              <path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9z"/>
+              <circle cx="12" cy="12" r="10"/>
               <path d="M12 6v6l4 2"/>
-              <path d="M16.5 12c.28 0 .5.22.5.5s-.22.5-.5.5-.5-.22-.5-.5.22-.5.5-.5z"/>
             </svg>
-            <strong>Psychiatric & Behavioral</strong>
+            <strong>Endocrine Disorders</strong>
           </div>
           <ul class="protocol-list">
-            <li><strong>Active eating disorder</strong> — anorexia nervosa, bulimia nervosa</li>
-            <li><strong>Active suicidal ideation</strong></li>
-            <li><strong>Severe untreated depression</strong> or psychiatric instability</li>
+            <li><strong>Acromegaly</strong> (Growth hormone disorder)</li>
+            <li><strong>Cushing's syndrome</strong></li>
+            <li><strong>Addison's disease</strong> (Adrenal insufficiency)</li>
+            <li><strong>Congenital Adrenal Hyperplasia</strong></li>
           </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
         </div>
 
-        <div class="protocol-card" id="age-restrictions">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--accent); flex-shrink: 0;">
-              <circle cx="12" cy="8" r="7"/>
-              <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
-            </svg>
-            <strong>Age Restrictions</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Under 18 years old</strong> — unless exceptional circumstances with specialist input</li>
-            <li><strong>Over 75 years old</strong> — caution required, may need specialist review</li>
-          </ul>
-        </div>
-
-        <div class="protocol-card" id="other-contraindications">
+        <div class="protocol-card" id="gastrointestinal-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
             </svg>
-            <strong>Other Absolute Contraindications</strong>
+            <strong>Gastrointestinal Conditions</strong>
           </div>
           <ul class="protocol-list">
-            <li><strong>Malignancy</strong> — active cancer or recent cancer (within 5 years) except basal cell carcinoma</li>
-            <li><strong>Substance abuse</strong> — active drug or alcohol abuse</li>
-            <li><strong>Inability to give informed consent</strong></li>
+            <li><strong>Ulcerative Colitis</strong></li>
+            <li><strong>Crohn's disease</strong></li>
+            <li><strong>Gastroparesis</strong> (delayed gastric emptying)</li>
           </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
         </div>
 
-        <div class="protocol-card" id="interacting-medications">
+        <div class="protocol-card" id="thyroid-contraindication">
+          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 8v4M12 16h.01"/>
+            </svg>
+            <strong>Thyroid & Cancer</strong>
+          </div>
+          <ul class="protocol-list">
+            <li><strong>Multiple Endocrine Neoplasia type 2 (MEN2)</strong></li>
+            <li><strong>Medullary Thyroid cancer</strong></li>
+            <li><strong>Thyroid disease</strong> — for Nevolat prescriptions ONLY</li>
+          </ul>
+          <div class="tag red" style="margin-top: 8px;">REJECT</div>
+        </div>
+
+        <div class="protocol-card" id="medications-contraindication">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
               <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
               <path d="M12 9v4M12 17h.01"/>
             </svg>
-            <strong>Interacting Medications</strong>
+            <strong>Medications on Repeat List</strong>
           </div>
           <div class="protocol-text" style="margin-bottom: 12px;">
-            Patient must answer <strong>"No"</strong> to the question: "Are you currently taking any of the following medications?" If <strong>Yes</strong> to any → reject consultation.
+            <strong class="tag red">REJECT</strong> if any of the following are on <strong>repeat medication list</strong>:
           </div>
+          
+          <div class="protocol-section-title" style="margin-top: 16px; color: var(--danger);">Insulin:</div>
           <ul class="protocol-list">
-            <li>Amiodarone</li>
-            <li>Carbamazepine</li>
-            <li>Ciclosporin</li>
-            <li>Clozapine</li>
-            <li>Digoxin</li>
-            <li>Fenfluramine</li>
-            <li>Lithium</li>
-            <li>Mycophenolate mofetil</li>
-            <li>Oral methotrexate</li>
-            <li>Phenobarbital</li>
-            <li>Phenytoin</li>
-            <li>Somatrogon</li>
-            <li>Tacrolimus</li>
-            <li>Theophylline</li>
-            <li>Warfarin</li>
+            <li>Any insulin on repeat medication list</li>
           </ul>
-        </div>
-
-        <div class="info-card blue" style="margin-top: 20px;">
-          <div style="display: flex; align-items: flex-start; gap: 10px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4M12 8h.01"/>
-            </svg>
+          
+          <div class="protocol-section-title" style="margin-top: 16px; color: var(--danger);">Oral Diabetic Medications:</div>
+          <div class="scr-two-col">
             <div>
-              <strong>Caution Required (Not Absolute Contraindications):</strong> Moderate renal/hepatic impairment, history of gallbladder disease, cardiovascular disease, hypoglycemia risk (when used with insulin/sulfonylureas), gastrointestinal disease, age &gt;75 years. These require careful assessment but are not automatic rejections.
+              <strong style="color: var(--warning);">Sulfonylureas:</strong>
+              <ul class="protocol-list">
+                <li>Diamicron [gliclazide]</li>
+                <li>Daonil [glibenclamide]</li>
+                <li>Rastin [tolbutamide]</li>
+              </ul>
+              <strong style="color: var(--warning);">SGLT2 inhibitors:</strong>
+              <ul class="protocol-list">
+                <li>Jardiance [empagliflozin]</li>
+                <li>Forxiga [dapagliflozin]</li>
+                <li>Invokana [canagliflozin]</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: var(--warning);">DPP-4 inhibitors:</strong>
+              <ul class="protocol-list">
+                <li>Januvia [sitagliptin]</li>
+                <li>Galvus [vildagliptin]</li>
+                <li>Trajenta [linagliptin]</li>
+              </ul>
+              <strong style="color: var(--warning);">Thiazolidinediones:</strong>
+              <ul class="protocol-list">
+                <li>Actos [pioglitazone]</li>
+              </ul>
             </div>
           </div>
-        </div>
-
-        <div class="info-card blue" style="margin-top: 20px;">
-          <div style="display: flex; align-items: flex-start; gap: 10px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0; margin-top: 2px;">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 16v-4M12 8h.01"/>
-            </svg>
+          
+          <div class="protocol-section-title" style="margin-top: 16px; color: var(--danger);">Narrow Therapeutic Index Medications:</div>
+          <div class="scr-two-col">
             <div>
-              <strong>Caution Required (Not Absolute Contraindications):</strong> Moderate renal/hepatic impairment, history of gallbladder disease, cardiovascular disease, hypoglycemia risk (when used with insulin/sulfonylureas), gastrointestinal disease, age &gt;75 years. These require careful assessment but are not automatic rejections.
+              <ul class="protocol-list">
+                <li>Amiodarone</li>
+                <li>Carbamazepine</li>
+                <li>Ciclosporin</li>
+                <li>Clozapine</li>
+                <li>Digoxin</li>
+                <li>Fenfluramine</li>
+                <li>Lithium</li>
+                <li>Mycophenolate mofetil</li>
+              </ul>
             </div>
-          </div>
-        </div>
-
-        <h2 style="font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border);">Time-Sensitive Conditions</h2>
-
-        <div class="info-card orange" style="margin-bottom: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
             <div>
-              <strong>Timing Matters:</strong> If timing information is missing, email patient (Macro 1). Reject when timing falls within contraindication window.
+              <ul class="protocol-list">
+                <li>Oral methotrexate</li>
+                <li>Phenobarbital</li>
+                <li>Phenytoin</li>
+                <li>Somatrogon</li>
+                <li>Tacrolimus</li>
+                <li>Theophylline</li>
+                <li>Warfarin</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -5098,6 +5304,20 @@ const ContentManager = {
 
         <!-- Tab 2: Time-Sensitive Conditions -->
         <div class="protocol-tab-content" data-tab-content="time-sensitive">
+
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">Time-Sensitive Conditions</h2>
+
+        <div class="info-card orange" style="margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <div>
+              <strong>Timing Matters:</strong> If timing information is missing, email patient using <strong>Macro 1</strong>. Reject when timing falls within contraindication window.
+            </div>
+          </div>
+        </div>
 
         <div class="protocol-card" id="bariatric-surgery">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
@@ -5254,7 +5474,7 @@ const ContentManager = {
           </div>
           <div class="info-card warning" style="margin-top: 12px;">
             <div class="info-card-title">Edge case: Transfer patients with recent PUE</div>
-            <div class="info-card-text">Transfer patients will have PUE for the past month. In these cases please <strong>follow up with an email</strong> as per main SOP rather than rejecting. Email macro titled <strong>'PUE &lt;2 Weeks Old'</strong></div>
+            <div class="info-card-text">Transfer patients will have PUE for the past month. In these cases please <strong>follow up with an email</strong> as per main SOP rather than rejecting. Use <a href="#macro-16" style="color: var(--accent);">Macro 16: PUE 2 Weeks Old</a></div>
           </div>
         </div>
 
@@ -5264,7 +5484,7 @@ const ContentManager = {
         <!-- Tab 3: Clinical Details Required -->
         <div class="protocol-tab-content" data-tab-content="clinical-details">
 
-        <h2 style="font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border);">Clinical Details Required</h2>
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">Clinical Details Required</h2>
 
         <div class="info-card blue" style="margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -5359,7 +5579,7 @@ const ContentManager = {
         <!-- Tab 4: Patient Assessment Required -->
         <div class="protocol-tab-content" data-tab-content="patient-assessment">
 
-        <h2 style="font-size: 22px; font-weight: 700; margin-top: 48px; margin-bottom: 24px; padding-top: 24px; border-top: 2px solid var(--border);">Patient Assessment Required</h2>
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">Patient Assessment Required</h2>
 
         <div class="info-card purple" style="margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 10px;">
@@ -5384,12 +5604,27 @@ const ContentManager = {
             <strong>Information required in ALL cases</strong> — Email using <strong class="tag orange">Macro 3</strong>
           </div>
           <ul class="protocol-list">
-            <li>Are they under a specialist / currently undergoing treatment from an oncology team?</li>
-            <li>Is the cancer in remission? Have they been discharged from oncology?</li>
-            <li>Request: Discharge letter / latest oncology letter</li>
+            <li>Are they currently undergoing treatment from an oncology team?</li>
+            <li>Is the cancer in remission?</li>
+            <li>Have they been discharged from the oncology team?</li>
+            <li>Request: Discharge letter / most recent letter from the Oncology team</li>
           </ul>
+          <div class="info-card green" style="margin-top: 12px;">
+            <div class="info-card-title">Can prescribe if:</div>
+            <div class="info-card-text">
+              <ul style="margin: 0; padding-left: 16px;">
+                <li>Cancer in remission</li>
+                <li>Discharged from oncology team</li>
+                <li>Medication for remission maintenance (e.g., tamoxifen)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="info-card red" style="margin-top: 8px;">
+            <div class="info-card-title">Reject if:</div>
+            <div class="info-card-text">Active cancer currently undergoing treatment from an oncology team</div>
+          </div>
           <div class="protocol-text" style="margin-top: 12px;">
-            Use clinical judgement based on response to prescribe or reject.
+            If unclear whether OK to prescribe after receiving patient information, escalate to Senior Prescribers.
           </div>
         </div>
 
@@ -5402,7 +5637,7 @@ const ContentManager = {
             <strong>Pregnancy</strong>
           </div>
           <div class="protocol-text" style="margin-bottom: 12px;">
-            <strong>More information needed in ALL cases</strong> — Email using <strong class="tag orange">Macro 6</strong>
+            <strong>More information needed in ALL cases</strong> — Email using <a href="#macro-6" onclick="navigateToMacro(6); return false;" class="tag orange">Macro 6: Pregnancy</a>
           </div>
           <ul class="protocol-list" style="margin-bottom: 16px;">
             <li>Are you currently pregnant?</li>
@@ -5469,22 +5704,25 @@ const ContentManager = {
             </svg>
             <strong>Depression or Anxiety — Acutely Mentally Unwell</strong>
           </div>
+          <div class="info-card blue" style="margin-bottom: 12px;">
+            <div class="info-card-text"><strong>Note:</strong> Depression and anxiety are NOT contraindications on their own. Only acutely mentally unwell is a contraindication.</div>
+          </div>
           <div class="protocol-text" style="margin-bottom: 12px;">
-            Email using <strong class="tag orange">Macro 9</strong>
+            If diagnosis added <strong>within 3 months</strong>, email using <strong class="tag orange">Macro 9</strong> to find out more about their mental state and whether they have thoughts of self-harm. If they respond that they are fine, you can prescribe. If in doubt, escalate.
           </div>
           <div class="protocol-text" style="margin-bottom: 12px;">
             <strong>Check SCR for timing:</strong>
           </div>
           <ul class="protocol-list" style="margin-bottom: 16px;">
-            <li>Added to SCR &lt;3 months ago? → <strong class="tag red">REJECT</strong></li>
-            <li>Entry older than 3 months? → <strong class="tag green">Prescribe</strong></li>
+            <li>Added to SCR &lt;3 months ago? → Email for more info. If stable → <strong class="tag green">Prescribe</strong></li>
+            <li>Entry older than 3 months? → <strong class="tag green">Prescribe</strong> (no need for further info)</li>
           </ul>
           <div class="protocol-text" style="margin-bottom: 12px;">
             <strong>Antidepressant medications can be used as a proxy:</strong>
           </div>
           <ul class="protocol-list">
-            <li>New antidepressant or dose increase in last 3 months? → <strong class="tag red">REJECT</strong></li>
-            <li>New antidepressant or increased dose was ≥3 months ago? → <strong class="tag green">Prescribe</strong></li>
+            <li>New antidepressant or dose increase in last 3 months? → Email to find out about mental state. If stable → <strong class="tag green">Prescribe</strong></li>
+            <li>Started medication ≥3 months ago with no dose increase? → <strong class="tag green">Prescribe</strong></li>
           </ul>
         </div>
 
@@ -5498,14 +5736,19 @@ const ContentManager = {
             <strong>Active Suicidal Ideation</strong>
           </div>
           <div class="protocol-text" style="margin-bottom: 12px;">
-            Email using <strong class="tag orange">Macro 9</strong>
+            If mention of suicidal ideation in the <strong>last year</strong>, put prescription on hold and reach out using <strong class="tag orange">Macro 9</strong> for more information.
           </div>
+          <ul class="protocol-list" style="margin-bottom: 12px;">
+            <li>Are they currently having suicidal thoughts?</li>
+            <li>Have they tried to end their life recently?</li>
+            <li>If any concerns, ensure they are getting help and escalate appropriately</li>
+          </ul>
           <div class="protocol-text" style="margin-bottom: 12px;">
             <strong>Check SCR for timing:</strong>
           </div>
           <ul class="protocol-list">
             <li>Added to SCR in the last year (&lt;12 months)? → <strong class="tag red">REJECT</strong></li>
-            <li>Added ≥12 months ago or more? → <strong class="tag green">Prescribe</strong></li>
+            <li>Added ≥12 months ago? → <strong class="tag green">Prescribe</strong></li>
           </ul>
         </div>
 
@@ -5521,22 +5764,28 @@ const ContentManager = {
             Email using <strong class="tag orange">Macro 10</strong>
           </div>
           <div class="protocol-text" style="margin-bottom: 12px;">
-            <strong>Ask patient about current drinking:</strong>
+            If mention of alcohol dependence or alcohol abuse in the <strong>last year</strong>, put prescription on hold and reach out using <strong class="tag orange">Macro 10</strong> to find out how much they are currently drinking.
+          </div>
+          <div class="protocol-text" style="margin-bottom: 12px;">
+            <strong>CAGE Screening Questions:</strong>
           </div>
           <ul class="protocol-list" style="margin-bottom: 16px;">
-            <li>How much are they currently drinking?</li>
-            <li>CAGE-style prompts: cut down, annoyed by criticism, guilty, eye-opener?</li>
+            <li>How much are you currently drinking?</li>
+            <li>Have you ever felt that you ought to <strong>C</strong>ut down on your drinking?</li>
+            <li>Do you get <strong>A</strong>nnoyed by criticism of your drinking?</li>
+            <li>Do you ever feel <strong>G</strong>uilty about your drinking?</li>
+            <li>Do you ever take an early-morning drink (<strong>E</strong>ye-opener) to get the day started or to get rid of a hangover?</li>
           </ul>
           <div class="protocol-text" style="margin-bottom: 12px;">
             <strong>Check SCR for timing:</strong>
           </div>
           <ul class="protocol-list">
             <li>Added to SCR in the last year (&lt;12 months) OR current alcohol abuse? → <strong class="tag red">REJECT</strong></li>
-            <li>Added ≥12 months ago? → <strong class="tag green">Prescribe</strong></li>
+            <li>Added ≥12 months ago AND no current abuse? → <strong class="tag green">Prescribe</strong></li>
           </ul>
           <div class="info-card blue" style="margin-top: 12px;">
             <div class="info-card-title">Important Note</div>
-            <div class="info-card-text">Only <strong>current alcohol dependence</strong> is an exclusion. Past history (&gt;12 months) is acceptable if patient is no longer dependent.</div>
+            <div class="info-card-text">Only <strong>current alcohol dependence</strong> is an exclusion criteria. Past history (&gt;12 months) is acceptable if patient is no longer dependent.</div>
           </div>
         </div>
 
@@ -5718,21 +5967,1925 @@ const ContentManager = {
     `;
   },
 
-  getTransferContent() {
+  getMacrosContent() {
     return `
       <div class="protocol-page">
-        <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 24px;">Transfer Patients</h1>
+        <h1 style="font-size: 24px; font-weight: 700; margin-bottom: 16px;">Email Macros & Documentation</h1>
+        <p style="color: var(--text-secondary); margin-bottom: 24px;">Pre-written templates for patient communication and documentation notes.</p>
 
-        <div class="info-card purple" style="margin-bottom: 20px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
-              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5"/>
+        <!-- Main Tabs: Email Macros vs Documentation Notes -->
+        <div class="protocol-tabs" style="margin-bottom: 24px;">
+          <button class="protocol-tab active" data-tab="email-macros">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
             </svg>
-            <div>
-              <strong>Transfer Patient:</strong> A new MedExpress patient who has previously used GLP-1 medication from another <strong>private provider</strong>. Must provide proof of previous supply. <span style="display: inline-block; margin-left: 8px; padding: 2px 8px; background: var(--danger); color: white; border-radius: 4px; font-size: 11px; font-weight: 700;">NHS TRANSFERS NOT ALLOWED</span>
+            Email Macros
+          </button>
+          <button class="protocol-tab" data-tab="doc-notes">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Documentation Notes
+          </button>
+        </div>
+
+        <!-- Tab Content: Email Macros -->
+        <div class="tab-panel active" data-panel="email-macros">
+        
+        <div class="info-card blue" style="margin-bottom: 20px;">
+          <div class="info-card-title">How to Use Macros</div>
+          <div class="info-card-text">
+            <strong>1.</strong> Find the appropriate macro for your scenario using the category tabs below<br>
+            <strong>2.</strong> Click to expand the template<br>
+            <strong>3.</strong> Click the <strong>Copy</strong> button to copy to clipboard<br>
+            <strong>4.</strong> Paste into your email and replace placeholders like <code>&lt;&lt;Patient Name&gt;&gt;</code>
+          </div>
+        </div>
+
+        <div class="info-card orange" style="margin-bottom: 24px;">
+          <div class="info-card-title">Important Reminder</div>
+          <div class="info-card-text">After emailing a patient, always: <strong>1)</strong> Add note to patient record (see <a href="#doc-scr-hold" onclick="navigateToMacro('doc-scr-hold')" style="color: var(--accent);">Documentation Notes</a>) <strong>2)</strong> Change tag to "Pending Customer Response" <strong>3)</strong> Put order on hold. <strong>Rule:</strong> Send only ONE email covering all information requirements.</div>
+        </div>
+
+        <!-- Sub-tabs for macro categories -->
+        <div class="protocol-tabs" style="margin-bottom: 20px; flex-wrap: wrap;">
+          <button class="protocol-tab active" data-subtab="scr-macros" style="font-size: 13px; padding: 8px 14px;">
+            SCR/Clinical
+          </button>
+          <button class="protocol-tab" data-subtab="pue-macros" style="font-size: 13px; padding: 8px 14px;">
+            Transfer/PUE
+          </button>
+          <button class="protocol-tab" data-subtab="titration-macros" style="font-size: 13px; padding: 8px 14px;">
+            Titration
+          </button>
+          <button class="protocol-tab" data-subtab="verification-macros" style="font-size: 13px; padding: 8px 14px;">
+            ID/Photos
+          </button>
+          <button class="protocol-tab" data-subtab="weight-macros" style="font-size: 13px; padding: 8px 14px;">
+            Weight Changes
+          </button>
+          <button class="protocol-tab" data-subtab="nevolat-macros" style="font-size: 13px; padding: 8px 14px;">
+            Nevolat
+          </button>
+          <button class="protocol-tab" data-subtab="rejection-macros" style="font-size: 13px; padding: 8px 14px;">
+            Rejections
+          </button>
+        </div>
+
+        <!-- SCR/Clinical Macros Sub-panel -->
+        <div class="sub-panel active" data-subpanel="scr-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">SCR & Clinical Information Macros</h3>
+
+        <!-- Macro 1 -->
+        <div class="macro-card" id="macro-1">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 1</span>
+              <span class="macro-name">Request for Further Information (General/Time-Sensitive)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Time-Sensitive Conditions</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> You need to confirm timing of a condition (bariatric surgery, cholecystectomy, medications, etc.) from Table 2 conditions.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Request for Further Information About Your Medical History
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+I can see from your records that you have had [X condition]. Could you please provide us with a bit more information about when this occurred and any relevant details you feel may be important?
+
+Your response will help us ensure that we have an accurate and up-to-date understanding of your medical history when reviewing your request.
+
+Thank you for your time, and please let us know if you have any questions.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
             </div>
           </div>
         </div>
+
+        <!-- Macro 2 -->
+        <div class="macro-card" id="macro-2">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 2</span>
+              <span class="macro-name">Previous Gallbladder Problems</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag blue">Clinical Details Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows cholelithiasis (gallstones) or cholecystitis (gallbladder inflammation) but no evidence of cholecystectomy.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Your Medical History
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+From your records, I can see you have had a gallbladder problem noted. Could you please confirm if you have had a cholecystectomy (gallbladder removal surgery) following this, and if so, when the surgery took place?
+
+This information will help us ensure your medical history is accurate and up to date.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 3 -->
+        <div class="macro-card" id="macro-3">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 3</span>
+              <span class="macro-name">Previous Cancer Diagnosis</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Patient Assessment Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows any cancer diagnosis (excluding MEN2 or medullary thyroid cancer). Information required in ALL cases.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Your Medical History
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We would be grateful if you could provide us with some further details about your medical history:
+
+• Have you ever had a cancer diagnosis (excluding MEN2 or medullary thyroid cancer)?
+• Are you currently on, or awaiting, any treatment such as surgery, chemotherapy, or radiotherapy?
+• Is the cancer in remission?
+• Have you been discharged from the oncology team? If so, please send a copy of your discharge letter or your most recent letter from the Oncology team.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us make sure we have an accurate and up-to-date understanding of your medical history.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 4 -->
+        <div class="macro-card" id="macro-4">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 4</span>
+              <span class="macro-name">Heart Failure Information</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag blue">Clinical Details Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows heart failure diagnosis but no information on stage. Reject if Stage IV confirmed.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Request for Information on Heart Failure Diagnosis
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We can see a coded diagnosis of heart failure in your records. To ensure we have the most accurate and up-to-date information about your condition, could you please provide us with:
+
+• A copy of your most recent cardiology letter, or
+• Any additional details regarding your diagnosis that you feel are relevant.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us provide the best possible care.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 5 -->
+        <div class="macro-card" id="macro-5">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 5</span>
+              <span class="macro-name">CKD Diagnosis</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag blue">Clinical Details Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows chronic kidney disease but no information on eGFR or stage. Reject if eGFR &lt;30 or Stage 4.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Request for Information on CKD Diagnosis
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We can see a diagnosis of chronic kidney disease (CKD) noted in your records. To ensure we have the most accurate and up-to-date information about your condition, could you please provide us with:
+
+• Your most recent eGFR result, and/or
+• A copy of the latest letter from your specialist with further details about your CKD.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us provide the best possible care.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 6 -->
+        <div class="macro-card" id="macro-6">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 6</span>
+              <span class="macro-name">Pregnancy Status</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Patient Assessment Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows pregnancy noted. Reject if currently pregnant, breastfeeding, or trying to conceive.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Your Current Status
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+To help us provide the most appropriate care, could you please confirm your current status regarding the following:
+
+• Are you currently pregnant?
+• Are you breastfeeding?
+• Are you trying to conceive?
+
+Your response will ensure we have accurate and up-to-date information for your care.
+
+Thank you for choosing MedExpress to support you on your weight loss journey.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 7 -->
+        <div class="macro-card" id="macro-7">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 7</span>
+              <span class="macro-name">Dementia / Cognitive Impairment</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Patient Assessment Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows dementia or cognitive impairment. Need to assess if patient can safely use injectable medication.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Your Care and Support
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We can see that dementia is noted in your records. To help us understand your needs and provide the best support, could you please let us know:
+
+• How you manage at home on a day-to-day basis?
+• Whether you have any help or support at home?
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us ensure we have the most accurate and up-to-date information.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 8 -->
+        <div class="macro-card" id="macro-8">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 8</span>
+              <span class="macro-name">Chronic Malabsorption</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Patient Assessment Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows chronic malabsorption noted. Reject if patient has formal diagnosis.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Request for Information on Chronic Malabsorption
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We can see a note of chronic malabsorption in your records. To ensure we have accurate and up-to-date information about your condition, could you please provide us with:
+
+• Evidence of a formal diagnosis, or
+• A letter from your specialist with further details regarding your condition.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us provide the best possible care.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 9 -->
+        <div class="macro-card" id="macro-9">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 9</span>
+              <span class="macro-name">Mental Health (Depression, Anxiety, Suicidal Ideation)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Patient Assessment Required</span>
+              <span class="tag red">Sensitive</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows depression/anxiety added &lt;3 months ago OR suicidal ideation in last 12 months. Need to assess current mental state.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Your Mental Health
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We can see depression or anxiety noted in your records. To help us provide the best care and support, could you please provide some information regarding:
+
+• How your mood has been recently.
+• Whether your mood has changed in the past few weeks or months.
+• If you have had any thoughts of self-harm.
+• If you have had any thoughts of ending your life.
+
+If you are currently experiencing thoughts of self-harm or ending your life, please contact your GP or local crisis services immediately. In the UK, you can also contact Samaritans on 116 123.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us ensure we have the most accurate and up-to-date information.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 10 -->
+        <div class="macro-card" id="macro-10">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 10</span>
+              <span class="macro-name">Alcohol Abuse / Dependence</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Patient Assessment Required</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR shows alcohol abuse or dependence in last 12 months. CAGE screening questions included.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Alcohol Use
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+We can see alcohol abuse or dependence noted in your records. To help us understand your situation and provide the best support, could you please provide some information regarding:
+
+• How much you are currently drinking.
+• Whether you have ever felt that you ought to cut down on your drinking.
+• Whether you get annoyed by criticism of your drinking.
+• Whether you ever feel guilty about your drinking.
+• Whether you ever take an early-morning drink ("eye-opener") to get the day started or to relieve a hangover.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. Your response will help us ensure we have the most accurate and up-to-date information.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 11 -->
+        <div class="macro-card" id="macro-11">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 11</span>
+              <span class="macro-name">SCR Permission Not Granted</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">SCR Access</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient has not granted permission to view their SCR (for orders placed before permission was mandatory).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Update Regarding Access to Summary Care Records (SCR)
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your recent order.
+
+We wanted to let you know about an important change to our prescribing process.
+
+Unfortunately, we are now unable to prescribe medication if access to the Summary Care Record (SCR) is declined. Access to the SCR is essential to ensure that we prescribe safely and in accordance with clinical guidance.
+
+It appears that you have not granted us access to your SCR. If you would like to review this decision or have any questions about what the SCR is, we would be happy to provide more information.
+
+If you wish to change your mind and allow us access to your SCR, we would be happy to move forward with your prescription. However, if you choose not to grant access, we will need to reject your prescription request, and you will receive a full refund.
+
+Please let us know how you would like to proceed.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 12 -->
+        <div class="macro-card" id="macro-12">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 12</span>
+              <span class="macro-name">Rejection Email for Repeat Patients</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag red">Rejection</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Rejecting a repeat patient based on SCR findings. This template is reviewed by Brand Team for sensitive communication.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: An important update on your treatment plan
+
+Hi &lt;&lt;Patient Name&gt;&gt;,
+
+We're getting in touch to let you know that, following an updated review of your medical records, we're no longer able to prescribe weight loss treatments such as Wegovy, Mounjaro or Nevolat.
+
+This means your current order will be automatically cancelled and refunded.
+
+This decision is based on new information from your Summary Care Record (SCR), which is a national database that includes details like your current medication, allergies, any diagnoses or medical conditions and previous reactions to medicines. Reviewing your SCR is a new step we've introduced to further improve the safety of our service.
+
+During these checks, we noted [add information about contraindication(s) found].
+
+For your safety, please stop using your injectable treatment and take any remaining pens to your local pharmacy for safe disposal.
+
+We understand this news may be disappointing, but your safety is our top priority. If you'd like to speak with one of our clinicians about this update, just reply to this email. We'll get back to you as soon as possible.
+
+You can also discuss your weight management options with your GP for more personalised support.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 13 -->
+        <div class="macro-card" id="macro-13">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 13</span>
+              <span class="macro-name">PUE/Transfer Evidence Requirements</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Transfer Patients</span>
+              <span class="tag blue">Below Licence BMI</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Transfer patient has submitted PUE (Previous Use Evidence) that is incomplete or missing required details. Also used when below-licence BMI patient needs to verify their starting BMI from previous provider.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for providing evidence of your previous GLP‑1 treatment.
+
+We've reviewed the information submitted. While some details are present, it does not currently meet our verification requirements, and we'll need some additional information before we can proceed.
+
+
+1. Evidence of previous GLP‑1 use (PUE)
+
+To be accepted, evidence of previous GLP‑1 use must clearly show all of the following:
+
+• Patient name or email – your full name (not a nickname) or the email address used with the previous provider
+• Medication and dose – the exact medication name and strength prescribed
+• Date – order date, prescription date, or dispatch date
+• Regulated provider – the name of the healthcare provider, clinic, or pharmacy that supplied the treatment (for example an NHS service or a registered UK online pharmacy/clinic)
+
+At present, the evidence provided is missing [INSERT MISSING DETAILS], so we're unable to verify that the treatment was supplied by a regulated service.
+
+
+2. Weight/BMI verification at treatment start
+
+Because your current BMI is below the standard licensing threshold, we also need to confirm that you met the licence criteria when you first started GLP‑1 with your previous provider.
+
+For this, we require a previous BMI weight‑verification photo that:
+
+• Was taken within 30 days of starting GLP‑1 treatment with your previous provider
+• Shows you full‑length or nearly full‑length in fitted clothing
+• Is well lit and clear enough for us to see your body shape
+• Allows us to confirm that you met the licensed BMI at that time and do not appear underweight
+
+The images we have so far do not meet these requirements, so we cannot yet verify your starting BMI.
+
+
+What we need from you
+
+To continue your review, please send:
+
+1. Updated evidence of previous use that includes the name of the prescribing provider or pharmacy and clearly shows your name, medicine, dose and date; and
+2. A weight‑verification photo from when you first started GLP‑1 treatment that meets the criteria above, and (if possible) a brief note of the approximate date it was taken.
+
+Once we have both acceptable previous‑use evidence and a suitable starting‑BMI photo, we'll reassess your order and let you know whether it is safe to prescribe a continuation dose.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End SCR/Clinical Macros Sub-panel -->
+
+        <!-- Transfer/PUE Macros Sub-panel -->
+        <div class="sub-panel" data-subpanel="pue-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Transfer &amp; PUE Macros</h3>
+
+        <!-- Macro 14 - Clinical Evidence Missing Information -->
+        <div class="macro-card" id="macro-14">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 14</span>
+              <span class="macro-name">Clinical Evidence - Missing Information</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Transfer Patients</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Transfer patient has submitted clinical evidence that does not contain all required information (name, medication/dose, date, provider).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for providing evidence of your previous GLP-1 treatment.
+
+Unfortunately, the evidence submitted does not currently meet our verification requirements. For the evidence to be acceptable it must include all of the following:
+
+• Patient name or email – your full name (not a nickname) or the email address used with the previous provider
+• Medication and dose – the exact medication name and strength prescribed
+• Date – order date, prescription date, or dispatch date
+• Regulated provider – the name of the healthcare provider, clinic, or pharmacy that supplied the treatment
+
+At present, the evidence provided is missing [INSERT MISSING DETAILS].
+
+Please provide updated evidence that includes all of the above information so we can continue with your review.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 15 - Clinical Evidence of Starting BMI -->
+        <div class="macro-card" id="macro-15">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 15</span>
+              <span class="macro-name">Clinical Evidence of Starting BMI</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Transfer Patients</span>
+              <span class="tag blue">Below Licence BMI</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Transfer patient is currently below licence BMI and needs to provide evidence they met licence criteria when starting treatment.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+Your current BMI is below the standard licensing threshold for this medication. To continue treatment, we need to verify that you met the licence criteria when you first started GLP-1 therapy.
+
+Please provide a previous BMI weight-verification photo that:
+
+• Was taken within 30 days of starting GLP-1 treatment with your previous provider
+• Shows you full-length or nearly full-length in fitted clothing
+• Is well lit and clear enough for us to see your body shape
+• Allows us to confirm that you met the licensed BMI at that time
+
+If possible, please also provide the approximate date the photo was taken.
+
+Once we receive acceptable evidence, we'll reassess your order.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 16 - Clinical PUE 2 Weeks Old -->
+        <div class="macro-card" id="macro-16">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 16</span>
+              <span class="macro-name">Clinical PUE 2 Weeks Old</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Transfer Patients</span>
+              <span class="tag purple">Time-Sensitive</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Transfer patient's PUE is more than 2 weeks old since their last dose - need to determine if they should restart at maintenance or lower dose.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+We can see from your previous use evidence that there has been a gap of more than 2 weeks since your last GLP-1 injection. 
+
+For safety reasons, if you have missed more than 2 consecutive weeks of treatment, we may need to restart you at a lower dose rather than your previous maintenance dose.
+
+Please confirm:
+
+1. When did you take your last injection?
+2. How long have you been without medication?
+
+Once we have this information, we can determine the appropriate dose for you to restart on.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 17 - Repeat Customer Weight/Height Verification -->
+        <div class="macro-card" id="macro-17">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 17</span>
+              <span class="macro-name">Repeat Customer Weight/Height Verification</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag blue">Repeat Patients</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Repeat patient needs to provide weight/height verification (photo appears inconsistent with declared weight).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your recent order.
+
+To continue processing your prescription, we need to verify your current weight. Please provide:
+
+• A clear, full-length photo taken within the last 30 days
+• The photo should show you in fitted clothing
+• Good lighting so we can clearly see your body shape
+
+Alternatively, you can provide a photo showing your weight on scales.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End Transfer/PUE Macros Sub-panel -->
+
+        <!-- Titration Macros Sub-panel -->
+        <div class="sub-panel" data-subpanel="titration-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Titration Macros</h3>
+
+        <!-- Macro 18 - Skipped Dose -->
+        <div class="macro-card" id="macro-18">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 18</span>
+              <span class="macro-name">Clinical Evidence Request - Skipped Dose</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Titration Query</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient indicates they skipped a dose during titration and you need to understand why.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+We noticed that you indicated skipping a dose during your treatment. To ensure we prescribe the most appropriate dose for you, could you please let us know:
+
+• Why did you skip the dose?
+• Did you experience any side effects?
+• How did you feel after missing the dose?
+
+This information will help us determine whether to continue at your current dose level or adjust your treatment plan.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 19 - Did Not Titrate Up -->
+        <div class="macro-card" id="macro-19">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 19</span>
+              <span class="macro-name">Clinical Did Not Titrate Up</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Titration Query</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient should have titrated up but has ordered the same dose again.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+We noticed that you have ordered the same dose as your previous prescription rather than titrating up to the next dose level. Before we proceed, could you please confirm why you wish to stay at your current dose?
+
+• Are you experiencing any side effects at this dose?
+• Do you prefer to remain on this dose for any particular reason?
+
+Please let us know so we can ensure we prescribe the most appropriate treatment for you.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 20 - Went Down in Dose -->
+        <div class="macro-card" id="macro-20">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 20</span>
+              <span class="macro-name">Clinical Went Down in Dose</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Titration Query</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient has ordered a lower dose than their previous prescription.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+We noticed that you have ordered a lower dose than your previous prescription. Before we proceed, could you please let us know:
+
+• Why do you wish to reduce your dose?
+• Did you experience any side effects at the higher dose?
+• How severe were these side effects?
+
+This will help us determine whether reducing your dose is the best approach, or whether there are other options to help manage any side effects.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End Titration Macros Sub-panel -->
+
+        <!-- ID/Photos Verification Macros Sub-panel -->
+        <div class="sub-panel" data-subpanel="verification-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">ID &amp; Photo Verification Macros</h3>
+
+        <!-- Macro 21 - Failed ID (automated reference) -->
+        <div class="macro-card" id="macro-21">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 21</span>
+              <span class="macro-name">Failed ID Email (Automated)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag gray">Automated</span>
+              <span class="tag blue">Reference Only</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Note:</strong> This email is sent automatically by the system when ID verification fails. Provided for reference only.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Automated Email (Reference)</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">[This is an automated system email sent when ID verification fails]
+
+Subject: ID Verification Required
+
+Dear Customer,
+
+Unfortunately, we were unable to verify your identity from the documents you provided. This may be because the image was unclear, the document was expired, or the details didn't match our records.
+
+Please log in to your account and upload a new photo of a valid ID document (passport, driving licence, or national ID card).
+
+Kind regards,
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 22 - Weight Verification Failed -->
+        <div class="macro-card" id="macro-22">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 22</span>
+              <span class="macro-name">Weight Verification Failed (Automated)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag gray">Automated</span>
+              <span class="tag blue">Reference Only</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Note:</strong> This email is sent automatically when weight photo verification fails. Provided for reference only.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Automated Email (Reference)</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">[This is an automated system email sent when weight photo fails verification]
+
+Subject: Weight Verification Photo Required
+
+Dear Customer,
+
+Unfortunately, we were unable to verify your weight from the photo you provided. For us to proceed with your order, we need a clear photo that shows your full body.
+
+Please upload a new photo that:
+• Shows your full body (head to toe)
+• Is taken in fitted clothing
+• Has good lighting
+• Is clear and not blurry
+
+Kind regards,
+MedExpress</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End ID/Photos Verification Macros Sub-panel -->
+
+        <!-- Weight Changes Macros Sub-panel -->
+        <div class="sub-panel" data-subpanel="weight-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Weight Changes Macros</h3>
+
+        <!-- Macro 23 - Weight Increased -->
+        <div class="macro-card" id="macro-23">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 23</span>
+              <span class="macro-name">Weight Has Increased</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Weight Query</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Repeat patient's weight has increased since their last order.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your recent order.
+
+We noticed that your weight has increased since your last order. Before we proceed with your prescription, we wanted to check in with you:
+
+• Have you experienced any changes in your lifestyle or diet recently?
+• Have you been taking your medication as prescribed?
+• Have you experienced any issues with the medication?
+
+Please let us know so we can ensure your treatment plan is still appropriate for you.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 24 - Rapid Weight Loss -->
+        <div class="macro-card" id="macro-24">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 24</span>
+              <span class="macro-name">Rapid Weight Loss Query</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag red">Safety Check</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient appears to be losing weight too rapidly (more than expected for their dose/duration).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+We noticed that you appear to be losing weight quite rapidly. While this medication can be very effective, we want to make sure your weight loss is healthy and sustainable.
+
+Could you please let us know:
+
+• Are you eating regular meals?
+• Are you experiencing any side effects such as nausea, vomiting, or loss of appetite?
+• How are you feeling generally?
+
+Healthy weight loss is typically around 1-2 lbs per week. If you're losing more than this, we may need to review your treatment plan.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End Weight Changes Macros Sub-panel -->
+
+        <!-- Nevolat Macros Sub-panel -->
+        <div class="sub-panel" data-subpanel="nevolat-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Nevolat Titration Macros</h3>
+
+        <!-- Macro 25 - Nevolat New Patient Titration -->
+        <div class="macro-card" id="macro-25">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 25</span>
+              <span class="macro-name">Nevolat Titration Guidance (New Patients)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag teal">Nevolat</span>
+              <span class="tag green">New Patient</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> New patient starting Nevolat who needs titration guidance.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for choosing Nevolat for your weight loss journey.
+
+Here is your titration schedule for Nevolat:
+
+Week 1-4: 0.25mg once weekly
+Week 5-8: 0.5mg once weekly
+Week 9-12: 1mg once weekly
+Week 13-16: 1.7mg once weekly
+Week 17+: 2.4mg once weekly (maintenance dose)
+
+Important tips:
+• Take your injection on the same day each week
+• Rotate injection sites (thigh, abdomen, upper arm)
+• Store your medication in the refrigerator
+• If you miss a dose, take it as soon as you remember if within 5 days of the missed dose
+• Common side effects include nausea - this usually improves over time
+
+If you have any questions about your treatment, please don't hesitate to contact us.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 26 - Nevolat Switching from Wegovy/Mounjaro -->
+        <div class="macro-card" id="macro-26">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 26</span>
+              <span class="macro-name">Nevolat Switching Guidance</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag teal">Nevolat</span>
+              <span class="tag orange">Switching</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient switching to Nevolat from Wegovy or Mounjaro.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order. We can see you are switching to Nevolat from [Wegovy/Mounjaro].
+
+Based on your previous dose, we recommend starting Nevolat at [RECOMMENDED DOSE].
+
+Important information for switching:
+• Take your first Nevolat dose on the day your next [Wegovy/Mounjaro] dose would have been due
+• Do not take both medications together
+• You may experience some difference in side effects as your body adjusts to the new medication
+• Continue with your regular weekly injection schedule
+
+If you have any questions or experience any concerning side effects, please contact us.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End Nevolat Macros Sub-panel -->
+
+        <!-- Rejection Macros Sub-panel -->
+        <div class="sub-panel" data-subpanel="rejection-macros">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Rejection Macros</h3>
+        
+        <div class="info-card red" style="margin-bottom: 20px;">
+          <div class="info-card-title">Important: Rejection Emails</div>
+          <div class="info-card-text">Rejection emails to repeat patients are reviewed by the Brand Team for sensitive communication. Always include specific contraindication reason found.</div>
+        </div>
+
+        <!-- Macro 27 - Standard Rejection -->
+        <div class="macro-card" id="macro-27">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 27</span>
+              <span class="macro-name">Standard Rejection - New Patient</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag red">Rejection</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Rejecting a new patient due to contraindication.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order.
+
+Unfortunately, after reviewing your medical information, we are unable to prescribe this medication to you at this time.
+
+This decision was made because [INSERT CONTRAINDICATION REASON].
+
+Your order will be cancelled and a full refund will be processed automatically.
+
+We recommend discussing weight management options with your GP, who can provide personalised advice based on your full medical history.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 28 - Side Effects Rejection -->
+        <div class="macro-card" id="macro-28">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 28</span>
+              <span class="macro-name">Side Effects Query</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Side Effects</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient reports experiencing side effects and needs guidance.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for letting us know about the side effects you're experiencing.
+
+The side effects you've described ([INSERT SIDE EFFECTS]) are [common/less common] with this medication.
+
+[For common side effects:]
+These usually improve within the first few weeks of treatment. We recommend:
+• Eating smaller, more frequent meals
+• Staying hydrated
+• Avoiding fatty or spicy foods
+• Taking your medication in the evening if nausea is an issue
+
+[For concerning side effects:]
+Given the symptoms you've described, we recommend speaking with your GP or contacting NHS 111 for further advice.
+
+Please let us know if your symptoms persist or worsen.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 29 - Minor SES Injection Site -->
+        <div class="macro-card" id="macro-29">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 29</span>
+              <span class="macro-name">Minor SES - Injection Site Reaction</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Side Effects</span>
+              <span class="tag blue">Minor</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient reports injection site reactions (redness, swelling, pain at injection site).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for getting in touch about your injection site reaction.
+
+Mild reactions at the injection site such as redness, swelling, or discomfort are common and usually resolve on their own within a few days.
+
+To help reduce injection site reactions:
+• Rotate your injection sites (thigh, abdomen, upper arm)
+• Allow the medication to reach room temperature before injecting
+• Ensure the injection site is clean and dry
+• Apply a cold compress after injecting if needed
+
+If the reaction persists for more than a week, spreads beyond the injection site, or you develop signs of infection (increasing redness, warmth, pus, or fever), please contact your GP.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 30 - Photo Requirements -->
+        <div class="macro-card" id="macro-30">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 30</span>
+              <span class="macro-name">Photo Requirements Not Met</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Verification</span>
+              <span class="tag blue">Photos</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient's uploaded photo does not meet the requirements for prescribing (unclear, oversized clothing, not showing full body, etc.).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Hello &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your recent order with MedExpress.
+
+Unfortunately the photo uploaded did not meet our requirements to prescribe. Please respond to this email with a new photo which meets the following requirements:
+
+• Shows your current body shape in fitted clothing - please do not wear oversized clothing.
+• Pictures you standing, facing the camera, head to toes.
+• Shows your face clearly in good lighting and without sunglasses.
+• Is not edited or retouched.
+
+You may also wish to include a photo showing your side profile as well as one facing forward. This will provide our prescribers with additional evidence to assess your eligibility for treatment.
+
+Please reply directly to this email with the attached photo(s), and we will promptly upload it to your patient account.
+
+Patient safety is our top priority. This photo will only be used to assess prescription eligibility by our clinical team and will not be shared anywhere else. Rest assured, we adhere strictly to the guidelines outlined in the Data Protection Act 1998 and GDPR. We maintain a rigorous confidentiality policy and do not disclose any personal information to third parties.
+
+If you need further assistance, you can also call our Customer Support team on 0208 123 0508.
+
+Your order will be placed on hold whilst we await your response.
+
+Kind Regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End Rejection Macros Sub-panel -->
+
+        </div>
+        <!-- End Email Macros Tab Panel -->
+
+        <!-- Tab Content: Documentation Notes -->
+        <div class="tab-panel" data-panel="doc-notes">
+        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text);">Documentation Notes</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Standard notes to add to patient records after SCR checks.</p>
+
+        <!-- Doc Note: SCR Pass -->
+        <div class="macro-card" id="doc-scr-pass">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Doc</span>
+              <span class="macro-name">SCR Pass - No Contraindications</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag green">Approve</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Scraping tool passed or SCR checked manually with no contraindications found.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Patient Note</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">SCR pass - no contraindications to GLP1s
+
+Patient ID and Weight verification photo reviewed, eligible for medication according to information provided and no contraindications flagged by scraping tool. Prescription issued.</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doc Note: SCR Checked -->
+        <div class="macro-card" id="doc-scr-checked">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Doc</span>
+              <span class="macro-name">SCR Checked - No Contraindications</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag green">Approve</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Scraping tool flagged keyword but after reviewing SCR, no contraindications found.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Patient Note</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">SCR checked - no contraindications to GLP1s
+
+Patient ID and Weight verification photo reviewed, eligible for medication according to information provided and no contraindications found on SCR consultation. Prescription issued.</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doc Note: Absolute Contraindication -->
+        <div class="macro-card" id="doc-scr-reject">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Doc</span>
+              <span class="macro-name">Absolute Contraindication Found</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag red">Reject</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Absolute contraindication found on SCR. Add as CRITICAL note.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Patient Note (CRITICAL)</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">SCR checked - [CONTRAINDICATION REASON] - [DATE NOTED IN SCR]
+
+Absolute rejection reason found on SCR.
+
+Patient ID and Weight verification photo reviewed, not eligible for medication according to information found on SCR consultation. Contraindication found - [REASON].</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doc Note: Further Info Needed -->
+        <div class="macro-card" id="doc-scr-hold">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Doc</span>
+              <span class="macro-name">Further Information Needed</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag orange">Hold</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Need more information from patient before making decision.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Patient Note</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">SCR checked - further information needed - email sent [ADD ZENDESK LINK]
+
+Tag changed to "Pending Customer Response"</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doc Note: SCR Unavailable -->
+        <div class="macro-card" id="doc-scr-unavail">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Doc</span>
+              <span class="macro-name">SCR Unavailable</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag blue">Proceed</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> No SCR found for patient. Proceed with standard prescribing. Do NOT hold or email patient.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Patient Note</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">SCR unavailable
+
+Proceed according to standard prescription SOP. No hold/email purely for missing SCR.</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Doc Note: SCR Limited -->
+        <div class="macro-card" id="doc-scr-limited">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Doc</span>
+              <span class="macro-name">SCR Limited</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag blue">Proceed</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> SCR available but has limited information (locked/restricted).
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Patient Note</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">SCR checked but limited - no contraindications to GLP1 found
+
+Proceed according to standard prescription SOP. Hold only if specific information is required about a condition/medication.</pre>
+            </div>
+          </div>
+        </div>
+
+        </div>
+        <!-- End Documentation Notes Tab Panel -->
+
+      </div>
+    `;
+  },
+
+  getTransferContent() {
+    return `
+      <div class="protocol-page">
+        <div class="back-btn" data-page="dashboard" style="margin-bottom: 20px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Dashboard
+        </div>
+
+        <h1 style="font-size: 28px; font-weight: 700; margin-bottom: 12px;">Transfer Patients</h1>
+        <p style="font-size: 15px; color: var(--text-secondary); margin-bottom: 32px; line-height: 1.6;">New MedExpress patients with previous GLP-1 use from another private provider</p>
+
+        <div class="info-card red" style="margin-bottom: 24px;">
+          <div class="info-card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px !important; height: 20px !important;">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>
+            </svg>
+            NHS Transfers NOT Allowed
+          </div>
+          <div class="info-card-text">Transfer patients must have previous GLP-1 use from another <strong>private provider</strong>. NHS-prescribed GLP-1 patients cannot transfer to MedExpress.</div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="protocol-tabs" style="margin-bottom: 24px;">
+          <button class="protocol-tab active" data-tab="overview">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+            </svg>
+            Overview & Rules
+          </button>
+          <button class="protocol-tab" data-tab="above">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+            </svg>
+            Above Licence (BMI ≥27)
+          </button>
+          <button class="protocol-tab" data-tab="below">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px;">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>
+            </svg>
+            Below Licence (BMI <27)
+          </button>
+        </div>
+
+        <!-- Tab: Overview -->
+        <div class="protocol-tab-content active" data-tab-content="overview">
 
         <div class="protocol-card">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
@@ -5775,7 +7928,7 @@ const ContentManager = {
               <td>
                 <strong style="color: var(--danger);">Cannot proceed without BOTH</strong><br>
                 If either missing → Patient NOT eligible<br>
-                <span style="font-size: 12px; color: var(--accent);">Use email template: <em>Clinical: Evidence of starting BMI</em></span>
+                <span style="font-size: 12px;">Use <a href="#macro-13" onclick="navigateToMacro(13); return false;" class="tag blue">Macro 13: PUE/Transfer Evidence</a> or <a href="#macro-15" onclick="navigateToMacro(15); return false;" class="tag blue">Macro 15: Starting BMI</a></span>
               </td>
             </tr>
             </table>
@@ -5913,7 +8066,7 @@ const ContentManager = {
                 <strong>If Previous BMI Photo Fails:</strong><br>
                 1. Add tag: <span style="display: inline-block; margin: 4px 4px; padding: 3px 8px; background: var(--purple-bg); color: var(--purple); border-radius: 4px; font-size: 11px; font-weight: 600;">previous BMI verification failed</span><br>
                 2. Remove tag: <span style="display: inline-block; margin: 4px 4px; padding: 3px 8px; background: var(--accent-bg); color: var(--accent); border-radius: 4px; font-size: 11px; font-weight: 600;">prescriber review</span><br>
-                3. Send manual email explaining the failure<br>
+                3. Send <a href="#macro-13" onclick="navigateToMacro(13); return false;" class="tag blue" style="margin: 2px 0;">Macro 13: PUE/Transfer Evidence</a> or <a href="#macro-15" onclick="navigateToMacro(15); return false;" class="tag blue" style="margin: 2px 0;">Macro 15: Starting BMI</a><br>
                 <strong style="color: var(--danger);">⚠️ Do NOT use "Weight verification failed" tag</strong> — that's only for current weight photos
               </div>
             </div>
@@ -5987,6 +8140,277 @@ const ContentManager = {
             <strong>✓ Next Steps:</strong> Once all transfer patient checks are complete, proceed to <strong>Core Checks</strong>, <strong>Previous Use Evidence</strong>, and <strong>Titration & Gap</strong> protocols as needed.
           </div>
         </div>
+        </div>
+
+        <!-- Tab: Above Licence -->
+        <div class="protocol-tab-content" data-tab-content="above">
+          <div class="info-card green" style="margin-bottom: 24px;">
+            <div class="info-card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px !important; height: 20px !important;">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+              Transfer Patient: Above Licence (BMI ≥27)
+            </div>
+            <div class="info-card-text">Patient has current BMI ≥27 (above licence threshold). Only proof of previous use (PUE) required — no starting BMI photo needed.</div>
+          </div>
+
+          <div class="protocol-card">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--success); flex-shrink: 0;">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+              <strong>Requirements Summary</strong>
+            </div>
+            <div class="table-wrapper" style="margin-top: 16px;">
+              <table class="dose-table">
+                <tr>
+                  <th style="width: 30%;">Requirement</th>
+                  <th style="width: 70%;">Details</th>
+                </tr>
+                <tr>
+                  <td><strong>Current BMI</strong></td>
+                  <td>≥30 kg/m² (or ≥27 with comorbidity, or ≥27.5 with eligible ethnicity). Max 60.</td>
+                </tr>
+                <tr>
+                  <td><strong>PUE Required</strong></td>
+                  <td>✅ Yes — must show drug name, dose, date, patient name, regulated provider</td>
+                </tr>
+                <tr>
+                  <td><strong>Previous BMI Photo</strong></td>
+                  <td>❌ Not required for above-licence transfers</td>
+                </tr>
+                <tr>
+                  <td><strong>Current Photos</strong></td>
+                  <td>✅ Standard weight verification photos required</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="protocol-card" style="margin-top: 20px;">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--accent); flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+              </svg>
+              <strong>PUE Timing Rules</strong>
+            </div>
+            <div class="table-wrapper" style="margin-top: 16px;">
+              <table class="dose-table">
+                <tr>
+                  <th>PUE Age</th>
+                  <th>Action</th>
+                </tr>
+                <tr>
+                  <td><strong>&lt;2 weeks old</strong></td>
+                  <td>Approve but send <a href="#macro-16" onclick="navigateToMacro(16); return false;" class="tag blue">Macro 16: PUE 2 Weeks Old</a> — patient should finish current course first</td>
+                </tr>
+                <tr>
+                  <td><strong>2 weeks – 6 months</strong></td>
+                  <td>✅ Valid for continuation dose</td>
+                </tr>
+                <tr>
+                  <td><strong>&gt;6 months</strong></td>
+                  <td>Follow gap-in-treatment guidance for appropriate dose</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="protocol-card" style="margin-top: 20px;">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--orange); flex-shrink: 0;">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>
+              </svg>
+              <strong>If PUE Missing or Inadequate</strong>
+            </div>
+            <ul class="protocol-list" style="margin-top: 12px;">
+              <li>Send <a href="#macro-14" onclick="navigateToMacro(14); return false;" class="tag blue">Macro 14: Missing Information</a></li>
+              <li>Add tag: <span class="tag orange">Pending Customer Response</span></li>
+              <li>Place order on hold</li>
+              <li><strong>Without valid PUE:</strong> Can only prescribe starter dose (not continuation)</li>
+            </ul>
+            <div class="info-card blue" style="margin-top: 16px;">
+              <div class="info-card-title">Alternative: Amend to Starter</div>
+              <div class="info-card-text">Customer Care can amend order to starter dose if patient unable to provide PUE. Message <strong>ME-Clinical-Communication</strong> Slack channel.</div>
+            </div>
+          </div>
+
+          <div class="protocol-card" style="margin-top: 20px;">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--success); flex-shrink: 0;">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <strong>Approval Checklist</strong>
+            </div>
+            <div style="display: grid; gap: 8px; margin-top: 16px;">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Current BMI ≥27 (with applicable adjustments)
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Valid PUE from private provider (not NHS)
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Dose appropriate for gap-in-treatment
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> No GLP-1 related hospitalisation
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> SCR screening completed
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Standard verification checks passed (ID, photos, GP)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab: Below Licence -->
+        <div class="protocol-tab-content" data-tab-content="below">
+          <div class="info-card red" style="margin-bottom: 24px;">
+            <div class="info-card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px !important; height: 20px !important;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>
+              </svg>
+              Transfer Patient: Below Licence (BMI &lt;27)
+            </div>
+            <div class="info-card-text"><strong>High scrutiny required.</strong> Patient has current BMI &lt;27 (below licence threshold). BOTH PUE AND starting BMI photo required to proceed.</div>
+          </div>
+
+          <div class="protocol-card">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--danger); flex-shrink: 0;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>
+              </svg>
+              <strong>Requirements Summary</strong>
+            </div>
+            <div class="table-wrapper" style="margin-top: 16px;">
+              <table class="dose-table">
+                <tr>
+                  <th style="width: 30%;">Requirement</th>
+                  <th style="width: 70%;">Details</th>
+                </tr>
+                <tr>
+                  <td><strong>Current BMI</strong></td>
+                  <td>&lt;27 kg/m² (below licence threshold)</td>
+                </tr>
+                <tr>
+                  <td><strong>PUE Required</strong></td>
+                  <td>✅ Yes — must show drug name, dose, date, patient name, regulated provider</td>
+                </tr>
+                <tr>
+                  <td><strong>Previous BMI Photo</strong></td>
+                  <td>✅ <strong>REQUIRED</strong> — Must prove starting BMI was ≥27</td>
+                </tr>
+                <tr>
+                  <td><strong>Current Photos</strong></td>
+                  <td>✅ Standard weight verification photos required</td>
+                </tr>
+              </table>
+            </div>
+            <div class="info-card red" style="margin-top: 16px;">
+              <div class="info-card-title">⚠️ Critical Rule</div>
+              <div class="info-card-text"><strong>Cannot proceed without BOTH PUE AND previous BMI photo.</strong> If either is missing or fails requirements, patient is NOT eligible.</div>
+            </div>
+          </div>
+
+          <div class="protocol-card" style="margin-top: 20px;">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--purple); flex-shrink: 0;">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>
+              </svg>
+              <strong>Previous BMI Photo Requirements</strong>
+            </div>
+            <div style="margin-top: 16px; padding: 12px; background: var(--bg-elevated); border-radius: 8px; border-left: 3px solid var(--purple);">
+              Photo must prove patient's BMI was ≥27 when they started GLP-1 treatment
+            </div>
+            <div class="table-wrapper" style="margin-top: 16px;">
+              <table class="dose-table">
+                <tr>
+                  <th style="width: 30%;">Requirement</th>
+                  <th style="width: 70%;">Details</th>
+                </tr>
+                <tr>
+                  <td><strong>Full Body on Scales</strong></td>
+                  <td>Patient standing on weighing scales with full body visible</td>
+                </tr>
+                <tr>
+                  <td><strong>Clear Scale Display</strong></td>
+                  <td>Weight reading must be clearly visible and legible</td>
+                </tr>
+                <tr>
+                  <td><strong>Date</strong></td>
+                  <td>Within last 12 months, ideally when they started GLP-1</td>
+                </tr>
+                <tr>
+                  <td><strong>Patient Identifiable</strong></td>
+                  <td>Must be able to confirm it's the same patient</td>
+                </tr>
+                <tr>
+                  <td><strong>BMI Calculation</strong></td>
+                  <td>Calculate from visible weight and stated height — must be ≥27</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="protocol-card" style="margin-top: 20px;">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--orange); flex-shrink: 0;">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/>
+              </svg>
+              <strong>If Previous BMI Photo Fails</strong>
+            </div>
+            <div style="display: grid; gap: 12px; margin-top: 16px;">
+              <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--purple); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 12px;">1</div>
+                <div>Add tag: <span class="tag purple">previous BMI verification failed</span></div>
+              </div>
+              <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--purple); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 12px;">2</div>
+                <div>Remove tag: <span class="tag blue">prescriber review</span></div>
+              </div>
+              <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: var(--bg-elevated); border-radius: 8px;">
+                <div style="width: 24px; height: 24px; border-radius: 50%; background: var(--purple); color: white; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 700; font-size: 12px;">3</div>
+                <div>Send <a href="#macro-15" onclick="navigateToMacro(15); return false;" class="tag blue">Macro 15: Evidence of Starting BMI</a></div>
+              </div>
+            </div>
+            <div class="info-card orange" style="margin-top: 16px;">
+              <div class="info-card-title">⚠️ Important</div>
+              <div class="info-card-text">Do <strong>NOT</strong> use "Weight verification failed" tag — that's only for current weight photos, not previous BMI photos.</div>
+            </div>
+          </div>
+
+          <div class="protocol-card" style="margin-top: 20px;">
+            <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; color: var(--success); flex-shrink: 0;">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <strong>Approval Checklist</strong>
+            </div>
+            <div style="display: grid; gap: 8px; margin-top: 16px;">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Valid PUE from private provider (not NHS)
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Previous BMI photo shows starting BMI ≥27
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Dose appropriate for gap-in-treatment
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> No GLP-1 related hospitalisation
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> SCR screening completed
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+                <span style="color: var(--success);">☑</span> Standard verification checks passed (ID, photos, GP)
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     `;
   },
@@ -6845,6 +9269,8 @@ const ContentManager = {
       document.querySelectorAll(".prescription-card").forEach((card) => {
         card.addEventListener("click", () => {
           AppState.currentChecklist = card.dataset.type;
+          console.log("Prescription card clicked:", card.dataset.type);
+          console.log("AppState.currentChecklist set to:", AppState.currentChecklist);
           NavigationManager.goToPage("checklists");
         });
       });
@@ -6888,6 +9314,15 @@ const ContentManager = {
           ChecklistManager.handleSign(btn.dataset.checklist);
         });
       });
+
+      // Checklist type tabs - switch between prescription types
+      document.querySelectorAll(".checklist-type-tab").forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const newType = tab.dataset.checklistType;
+          AppState.currentChecklist = newType;
+          ContentManager.loadPage("checklists");
+        });
+      });
     }
 
     // Back button in protocol pages
@@ -6904,7 +9339,17 @@ const ContentManager = {
       pageId === "proto-pue" ||
       pageId === "proto-titration" ||
       pageId === "proto-scr" ||
-      pageId === "contraindications"
+      pageId === "proto-weight" ||
+      pageId === "proto-switching" ||
+      pageId === "proto-reviews" ||
+      pageId === "contraindications" ||
+      pageId === "transfer" ||
+      pageId === "definitions" ||
+      pageId === "consultation" ||
+      pageId === "titration-guide" ||
+      pageId === "rejections" ||
+      pageId === "macros" ||
+      pageId === "tags"
     ) {
       const tabs = document.querySelectorAll(".protocol-tab");
       const tabContents = document.querySelectorAll(".protocol-tab-content");
@@ -6922,6 +9367,47 @@ const ContentManager = {
           const activeContent = document.querySelector(`[data-tab-content="${tabId}"]`);
           if (activeContent) {
             activeContent.classList.add("active");
+          }
+        });
+      });
+    }
+
+    // Handle macros page main tabs (email-macros vs doc-notes) and sub-tabs
+    if (pageId === "macros") {
+      // Main tabs: Email Macros vs Documentation Notes
+      const mainTabs = document.querySelectorAll(".protocol-tab[data-tab]");
+      const mainPanels = document.querySelectorAll(".tab-panel[data-panel]");
+      
+      mainTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const tabId = tab.dataset.tab;
+          
+          mainTabs.forEach((t) => t.classList.remove("active"));
+          mainPanels.forEach((panel) => panel.classList.remove("active"));
+          
+          tab.classList.add("active");
+          const activePanel = document.querySelector(`.tab-panel[data-panel="${tabId}"]`);
+          if (activePanel) {
+            activePanel.classList.add("active");
+          }
+        });
+      });
+      
+      // Sub-tabs for macro categories
+      const subTabs = document.querySelectorAll(".protocol-tab[data-subtab]");
+      const subPanels = document.querySelectorAll(".sub-panel[data-subpanel]");
+      
+      subTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const subtabId = tab.dataset.subtab;
+          
+          subTabs.forEach((t) => t.classList.remove("active"));
+          subPanels.forEach((panel) => panel.classList.remove("active"));
+          
+          tab.classList.add("active");
+          const activePanel = document.querySelector(`.sub-panel[data-subpanel="${subtabId}"]`);
+          if (activePanel) {
+            activePanel.classList.add("active");
           }
         });
       });
@@ -7073,6 +9559,19 @@ document.addEventListener("DOMContentLoaded", () => {
   ThemeManager.init();
   NavigationManager.init();
   SearchManager.init();
+
+  // Global click handler for macro links
+  document.addEventListener("click", (e) => {
+    const macroLink = e.target.closest('a[href^="#macro-"]');
+    if (macroLink) {
+      e.preventDefault();
+      const href = macroLink.getAttribute("href");
+      const macroNumber = parseInt(href.replace("#macro-", ""));
+      if (macroNumber && !isNaN(macroNumber)) {
+        navigateToMacro(macroNumber);
+      }
+    }
+  });
 
   // Update time every minute
   setInterval(() => {
