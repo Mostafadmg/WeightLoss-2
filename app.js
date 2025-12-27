@@ -3163,7 +3163,7 @@ const ContentManager = {
             <summary>Table 2: Time-sensitive conditions — workflow with macros</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 2:</strong> When timing information is needed, use appropriate macro. Reject when timing falls within contraindication window.</div>
-              <div class="table-wrapper">
+              <div class="table-wrapper decision-table-wide">
                 <table class="protocol-table">
                 <tr>
                   <th>Condition</th>
@@ -3226,7 +3226,7 @@ const ContentManager = {
             <summary>Table 3: Clinical details needed — macros & decision pathway</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 3:</strong> When clinical details are needed to make a prescribing decision.</div>
-              <div class="table-wrapper">
+              <div class="table-wrapper decision-table-wide">
                 <table class="protocol-table">
                 <tr>
                   <th>Condition</th>
@@ -3272,7 +3272,7 @@ const ContentManager = {
             <summary>Conditions requiring patient assessment (Macros 3 / 6 / 7 / 8 / 9 / 10)</summary>
             <div class="accordion-body">
               <div class="protocol-text"><strong>Table 4:</strong> Additional conditions that require gathering information from the patient to determine safety and prescribing decision.</div>
-              <div class="table-wrapper">
+              <div class="table-wrapper decision-table-wide">
                 <table class="protocol-table">
                 <tr><th>Condition</th><th>Macro</th><th>Before Emailing</th><th>Information to Request</th><th>After Patient Response</th></tr>
                 <tr>

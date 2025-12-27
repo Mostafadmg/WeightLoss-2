@@ -3509,6 +3509,11 @@ details.accordion[open] summary::after {
   border-radius: 10px;
 }
 
+/* Wide decision tables - specifically for SCR Outcomes & Actions section */
+.table-wrapper.decision-table-wide .protocol-table {
+  min-width: 1400px;
+}
+
 .table-wrapper .protocol-table,
 .table-wrapper .dose-table {
   margin: 0;
