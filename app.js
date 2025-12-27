@@ -1,22 +1,44 @@
+        // ============================================
+        // SCR Tab Logic (Main Protocol Tabs and Nested Condition Tabs)
+
+        // Make initConditionTabs globally available
+        window.initConditionTabs = function() {
+          // Find all active protocol tab contents that have condition tabs
+          document.querySelectorAll('.protocol-tab-content.active').forEach(function(protocolContent) {
+            const conditionContainer = protocolContent.querySelector('.scr-tabbed-conditions');
+            if (!conditionContainer) return;
+
+            const condTabs = conditionContainer.querySelector('.scr-tabs');
+            if (!condTabs) return;
+
+            const tabs = condTabs.querySelectorAll('.scr-tab');
+            const contents = conditionContainer.querySelectorAll('.scr-tab-content');
+
+            tabs.forEach(tab => {
+              // Remove any existing onclick to prevent duplicate handlers
+              tab.onclick = null;
+              tab.onclick = function() {
+                tabs.forEach(t => t.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const target = tab.getAttribute('data-condition');
+                const content = conditionContainer.querySelector('.scr-tab-content[data-condition-content="' + target + '"]');
+                if (content) {
+                  content.classList.add('active');
+                }
+              };
+            });
+          });
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+          // Initialize condition tabs on initial page load
+          window.initConditionTabs();
+        });
 // ============================================
 // SCR Tabbed Conditions (responsive tabs for Outcomes & Actions)
 // ============================================
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.scr-tabbed-conditions').forEach(function(tabbed) {
-    const tabs = tabbed.querySelectorAll('.scr-tab');
-    const contents = tabbed.querySelectorAll('.scr-tab-content');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', function() {
-        tabs.forEach(t => t.classList.remove('active'));
-        contents.forEach(c => c.classList.remove('active'));
-        tab.classList.add('active');
-        const target = tab.getAttribute('data-tab');
-        const content = tabbed.querySelector('.scr-tab-content[data-tab-content="' + target + '"]');
-        if (content) content.classList.add('active');
-      });
-    });
-  });
-});
+// (SCR tabbed-conditions logic is now handled by initConditionTabs above)
 // ============================================
 // State Management
 // ============================================
@@ -74,6 +96,26 @@ const Utils = {
         AppState.checklists = JSON.parse(saved);
       } catch (e) {
         console.error("Failed to load saved state:", e);
+      // ============================================
+      // SCR Main Tab Switching Logic
+      // ============================================
+      document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.scr-protocol .protocol-tabs').forEach(function(tabBar) {
+          const tabs = tabBar.querySelectorAll('.protocol-tab');
+          const container = tabBar.parentElement;
+          const contents = container.querySelectorAll('.protocol-tab-content');
+          tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+              tabs.forEach(t => t.classList.remove('active'));
+              contents.forEach(c => c.classList.remove('active'));
+              tab.classList.add('active');
+              const target = tab.getAttribute('data-tab');
+              const content = container.querySelector('.protocol-tab-content[data-tab-content="' + target + '"]');
+              if (content) content.classList.add('active');
+            });
+          });
+        });
+      });
       }
     }
   },
@@ -2876,581 +2918,387 @@ const ContentManager = {
   },
 
   getSCRProtocolCards() {
+    // Full detailed SCR protocol content restored
     return `
       <div class="scr-protocol">
-        <!-- SCR Tabs -->
         <div class="protocol-tabs">
-          <button class="protocol-tab active" data-tab="workflow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 11l3 3L22 4"/>
-              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-            </svg>
-            Workflow & Steps
-          </button>
-          <button class="protocol-tab" data-tab="checking">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="4" width="18" height="16" rx="2"/>
-              <path d="M8 8h8M8 12h8M8 16h8"/>
-            </svg>
-            Checking SCR
-          </button>
-          <button class="protocol-tab" data-tab="outcomes">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-              <path d="M12 9v4"/>
-              <path d="M12 17h.01"/>
-            </svg>
-            Outcomes & Actions
-          </button>
-          <button class="protocol-tab" data-tab="documentation">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-            </svg>
-            Documentation
-          </button>
+          <button class="protocol-tab" data-tab="workflow">Workflow & Steps</button>
+          <button class="protocol-tab" data-tab="checking">Checking SCR</button>
+          <button class="protocol-tab active" data-tab="absolute">Absolute Contraindications</button>
+          <button class="protocol-tab" data-tab="table2">Table 2: Time-sensitive</button>
+          <button class="protocol-tab" data-tab="table3">Table 3: Clinical Details</button>
+          <button class="protocol-tab" data-tab="table4">Table 4: Patient Assessment</button>
+          <button class="protocol-tab" data-tab="escalation">Escalation</button>
+          <button class="protocol-tab" data-tab="rejecting">Rejecting Prescription</button>
+          <button class="protocol-tab" data-tab="documentation">Documentation</button>
         </div>
-
-        <!-- Tab 1: Workflow & Steps -->
-        <div class="protocol-tab-content active" data-tab-content="workflow">
-
-        <div class="protocol-hero">
-          <div class="protocol-hero-title">SCR workflow — quick view</div>
-          <div class="protocol-hero-subtitle">
-            Use SCR as an <strong>independent safety verification</strong> step before prescribing GLP‑1s.
-            <strong>Do not</strong> use SCR to verify BMI/biometrics or Weight‑Related Co‑Morbidities (WRCM).
-          </div>
-
-          <div class="scr-flow">
-            <div class="scr-flow-card green">
-              <div class="scr-flow-top">
-                <span class="scr-chip green">Step 1</span>
-                <span class="scr-flow-title">Eligibility first</span>
+        <div class="protocol-tab-content" data-tab-content="workflow">
+          <div class="protocol-card">
+            <div class="protocol-title">
+              <div class="icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 11l3 3L22 4" />
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
+                </svg>
               </div>
-              <div class="scr-flow-text">Confirm ID + weight verification + questionnaire eligibility <strong>before</strong> SCR.</div>
+              SCR Workflow & Steps
             </div>
-            <div class="scr-flow-card blue">
-              <div class="scr-flow-top">
-                <span class="scr-chip blue">Step 2</span>
-                <span class="scr-flow-title">Scraping tool</span>
-              </div>
-              <div class="scr-flow-text">Pass → prescribe (no need to open SCR). Flagged → open SCR. No person found → follow SCR unavailable guidance.</div>
-            </div>
-            <div class="scr-flow-card orange">
-              <div class="scr-flow-top">
-                <span class="scr-chip orange">Step 3</span>
-                <span class="scr-flow-title">Decision</span>
-              </div>
-              <div class="scr-flow-text">Absolute contraindication → reject. Needs more info → email patient (one email with all questions) + hold.</div>
-            </div>
-            <div class="scr-flow-card purple">
-              <div class="scr-flow-top">
-                <span class="scr-chip purple">Step 4</span>
-                <span class="scr-flow-title">Document</span>
-              </div>
-              <div class="scr-flow-text">Use consistent notes (examples below). Wrongful access → PSI.</div>
-            </div>
+            <div class="protocol-text">Follow these steps when reviewing patient records:</div>
+            <ol class="protocol-ol">
+              <li>Open patient SCR in the system</li>
+              <li>Review medical history for contraindications</li>
+              <li>Check repeat medications</li>
+              <li>Check acute medications (last 3 months)</li>
+              <li>Review consultation answers</li>
+              <li>Make prescribing decision based on protocol</li>
+            </ol>
           </div>
         </div>
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 11l3 3L22 4"/>
-                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-              </svg>
-            </div>
-            When to check SCR (and in what order)
-          </div>
-          <ul class="protocol-list">
-            <li><strong>New patients:</strong> after ID + weight verification and questionnaire eligibility checks, proceed to SCR pathway.</li>
-            <li><strong>Repeat patients (when eligible for SCR checks):</strong> still confirm eligibility (ID/BMI), then review SCR, then complete usual clinical checks (dose/type, gaps, tags).</li>
-            <li><strong>One email rule:</strong> if anything needs clarification (SCR + PUE/dose issues + tags), send <strong>one single email</strong> containing <strong>every question</strong> needed to decide.</li>
-          </ul>
-          <div class="info-card red" style="margin-top: 12px;">
-            <div class="info-card-title">Wrongful SCR access = incident</div>
-            <div class="info-card-text">Entering SCR <strong>before</strong> ID + weight verification is an incident → complete a PSI. Accidental wrong-patient SCR access is also a PSI.</div>
-          </div>
-          <div class="info-card blue" style="margin-top: 12px;">
-            <div class="info-card-title">Repeat rejections</div>
-            <div class="info-card-text">If a <strong>repeat</strong> order is rejected based on SCR information, complete a PSI using "Patient provided incorrect information - SCR confirmed".</div>
-          </div>
-        </div>
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-              </svg>
-            </div>
-            Scraping tool outcomes (what to do)
-          </div>
-          <div class="scr-outcomes">
-            <div class="scr-outcome-card green">
-              <div class="scr-outcome-title"><span class="scr-chip green">PASS</span> No keyword match</div>
-              <div class="scr-outcome-text">Valid for 6 months. <strong>Prescribe without opening SCR.</strong> Document "SCR pass".</div>
-            </div>
-            <div class="scr-outcome-card orange">
-              <div class="scr-outcome-title"><span class="scr-chip orange">FLAGGED</span> Keyword match</div>
-              <div class="scr-outcome-text"><strong>Open SCR</strong> to determine: absolute contraindication vs needs more information.</div>
-            </div>
-            <div class="scr-outcome-card purple">
-              <div class="scr-outcome-title"><span class="scr-chip purple">NO RECORD</span> No person found</div>
-              <div class="scr-outcome-text">Follow SCR unavailable guidance: document, proceed per questionnaire. <strong>Do not</strong> hold or email purely due to missing SCR.</div>
-            </div>
-          </div>
-        </div>
-
-        </div>
-        <!-- End Tab 1 -->
-
-        <!-- Tab 2: Checking SCR -->
         <div class="protocol-tab-content" data-tab-content="checking">
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon orange">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2l9 4v6c0 5-3.8 9.7-9 10-5.2-.3-9-5-9-10V6l9-4z"/>
-                <path d="M12 8v4"/>
-                <path d="M12 16h.01"/>
-              </svg>
+          <div class="protocol-card">
+            <div class="protocol-title">
+              <div class="icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M9 11l3 3L22 4" />
+                </svg>
+              </div>
+              How to Check SCR
             </div>
-            Permission to view SCR
+            <div class="protocol-text">Key areas to review in the SCR:</div>
+            <ul class="protocol-list">
+              <li><strong>Medical History:</strong> Look for contraindicated conditions</li>
+              <li><strong>Repeat Medications:</strong> Check for insulin, oral diabetic meds, narrow therapeutic index medications</li>
+              <li><strong>Acute Medications:</strong> Review last 3 months for time-sensitive contraindications</li>
+              <li><strong>Surgery History:</strong> Check dates for bariatric surgery, cholecystectomy</li>
+              <li><strong>Specialist Letters:</strong> Review any cardiology, oncology, or other specialist correspondence</li>
+            </ul>
           </div>
-          <div class="protocol-text">If a patient has not granted permission to view SCR (legacy orders placed before permission was mandatory):</div>
-          <ul class="protocol-list">
-            <li>Email the patient using <a href="#macro-11" onclick="navigateToMacro(11); return false;" class="tag blue">Macro 11: SCR Permission</a>.</li>
-            <li>If permission is granted over email: document permission + link to Zendesk ticket, then proceed to check SCR on NHS site.</li>
-            <li>If permission is not granted: <strong>reject</strong> the order.</li>
-          </ul>
         </div>
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon blue">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="16" rx="2"/>
-                <path d="M8 8h8M8 12h8M8 16h8"/>
-              </svg>
+        <div class="protocol-tab-content active" data-tab-content="absolute">
+            <div class="protocol-text" style="margin-bottom: 16px;"><strong>Absolute Contraindications:</strong> These conditions require immediate rejection. Do not email patient.</div>
+            <div class="scr-tabbed-conditions">
+              <div class="scr-tabs">
+                <button class="scr-tab active" data-condition="pancreatitis">🔴 Pancreatitis</button>
+                <button class="scr-tab" data-condition="eating">🍽️ Eating Disorders</button>
+                <button class="scr-tab" data-condition="diabetes">💉 Type 1 Diabetes</button>
+                <button class="scr-tab" data-condition="cirrhosis">🫀 Liver Cirrhosis</button>
+                <button class="scr-tab" data-condition="transplant">🏥 Liver Transplant</button>
+                <button class="scr-tab" data-condition="endocrine">⚕️ Endocrine Disorders</button>
+                <button class="scr-tab" data-condition="colitis">🩺 Ulcerative Colitis</button>
+                <button class="scr-tab" data-condition="crohn">🩺 Crohn's Disease</button>
+                <button class="scr-tab" data-condition="gastroparesis">🫃 Gastroparesis</button>
+                <button class="scr-tab" data-condition="men2">⚠️ MEN2</button>
+                <button class="scr-tab" data-condition="medullary">🎗️ Medullary Thyroid Cancer</button>
+                <button class="scr-tab" data-condition="thyroid">🦋 Thyroid Disease</button>
+              </div>
+              <div class="scr-tab-content active" data-condition-content="pancreatitis">
+                <div class="scr-condition-title">🔴 Pancreatitis <span class="scr-condition-desc">Acute or chronic pancreatic insufficiency</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s increase risk of pancreatitis. Absolute contraindication for patient safety.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>History of acute pancreatitis</li><li>Chronic pancreatitis diagnosis</li><li>Pancreatic insufficiency</li><li>Elevated amylase/lipase in recent bloods</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="eating">
+                <div class="scr-condition-title">🍽️ Eating Disorders <span class="scr-condition-desc">Anorexia • Bulimia • BED • ARFID</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> Weight loss medications contraindicated in eating disorders. Risk of psychological harm and worsening condition.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>History of anorexia nervosa</li><li>Bulimia nervosa</li><li>Binge Eating Disorder (BED)</li><li>ARFID (Avoidant/Restrictive Food Intake Disorder)</li><li>Eating disorder services involvement</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="diabetes">
+                <div class="scr-condition-title">💉 Type 1 Diabetes <span class="scr-condition-desc">Insulin-dependent diabetes mellitus</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> Type 1 diabetes requires specialist diabetes management. GLP-1s are not licensed for Type 1.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Type 1 Diabetes Mellitus diagnosis</li><li>IDDM (Insulin Dependent Diabetes Mellitus)</li><li>Diabetes diagnosed in childhood/young age</li><li>Diabetic ketoacidosis (DKA) history</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="cirrhosis">
+                <div class="scr-condition-title">🫀 Liver Cirrhosis</div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> Severe liver disease is absolute contraindication due to metabolism concerns and disease severity.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Liver cirrhosis diagnosis</li><li>Decompensated liver disease</li><li>Hepatology letters</li><li>Abnormal LFTs with cirrhosis</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="transplant">
+                <div class="scr-condition-title">🏥 Liver Transplant</div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> Post-transplant patients require specialist oversight. Complex medication interactions with immunosuppressants.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>History of liver transplant</li><li>Transplant surgery records</li><li>Immunosuppressant medications</li><li>Hepatology/transplant clinic letters</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="endocrine">
+                <div class="scr-condition-title">⚕️ Endocrine Disorders <span class="scr-condition-desc">Acromegaly • Cushing's • Addison's • CAH</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> Complex hormonal disorders affecting metabolism. Require specialist endocrinologist management.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Acromegaly (excess growth hormone)</li><li>Cushing's syndrome/disease</li><li>Addison's disease (adrenal insufficiency)</li><li>Congenital Adrenal Hyperplasia (CAH)</li><li>Endocrinology clinic involvement</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="colitis">
+                <div class="scr-condition-title">🩺 Ulcerative Colitis</div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s can cause GI side effects including diarrhea. Risk of exacerbating inflammatory bowel disease.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Ulcerative colitis diagnosis</li><li>IBD (Inflammatory Bowel Disease)</li><li>Gastroenterology letters</li><li>Immunosuppressant/biologic medications for UC</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="crohn">
+                <div class="scr-condition-title">🩺 Crohn's Disease</div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s can cause GI side effects. Risk of exacerbating inflammatory bowel disease.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Crohn's disease diagnosis</li><li>IBD (Inflammatory Bowel Disease)</li><li>Gastroenterology letters</li><li>Immunosuppressant/biologic medications for Crohn's</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="gastroparesis">
+                <div class="scr-condition-title">🫃 Gastroparesis <span class="scr-condition-desc">Delayed gastric emptying</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s delay gastric emptying as mechanism of action. Will severely worsen gastroparesis symptoms.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Gastroparesis diagnosis</li><li>Delayed gastric emptying</li><li>Gastric emptying study results</li><li>Pro-motility medications (e.g., metoclopramide)</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="men2">
+                <div class="scr-condition-title">⚠️ MEN2 <span class="scr-condition-desc">Multiple Endocrine Neoplasia type 2</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> MEN2 associated with medullary thyroid cancer. GLP-1s have black box warning for thyroid C-cell tumors.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>MEN2A or MEN2B diagnosis</li><li>Family history of MEN2</li><li>RET gene mutation</li><li>Medullary thyroid cancer</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="medullary">
+                <div class="scr-condition-title">🎗️ Medullary Thyroid Cancer</div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s have black box warning against use in patients with medullary thyroid cancer or family history.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Medullary thyroid carcinoma diagnosis</li><li>Family history of medullary thyroid cancer</li><li>Elevated calcitonin levels</li><li>Thyroidectomy for medullary cancer</li></ul></div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="thyroid">
+                <div class="scr-condition-title">🦋 Thyroid Disease <span class="scr-condition-desc">ONLY for Nevolat prescriptions</span></div>
+                <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT</span> for Nevolat ONLY<br><span class="decision-prescribe">PRESCRIBE</span> Wegovy or Mounjaro is acceptable</div>
+                <div class="scr-condition-row"><strong>Rationale:</strong> Nevolat specifically contraindicated in thyroid disease. Wegovy and Mounjaro can be prescribed.</div>
+                <div class="scr-condition-row"><strong>What to check in SCR:</strong> <ul class="protocol-list"><li>Hypothyroidism (under/overactive thyroid)</li><li>Hyperthyroidism</li><li>Thyroid nodules</li><li>Levothyroxine or other thyroid medications</li></ul></div>
+                <div class="scr-condition-row"><strong>Important:</strong> Check which specific medication the patient is requesting!</div>
+              </div>
             </div>
-            If flagged: how to enter & review SCR
+        </div>
+        <div class="protocol-tab-content" data-tab-content="table2">
+            <div class="protocol-text" style="margin-bottom: 16px;"><strong>Table 2:</strong> When timing information is needed, use appropriate macro. Reject when timing falls within contraindication window.</div>
+            <div class="scr-tabbed-conditions">
+              <div class="scr-tabs">
+                <button class="scr-tab active" data-condition="bariatric">🏥 Bariatric Surgery</button>
+                <button class="scr-tab" data-condition="cholecystectomy">🏥 Cholecystectomy</button>
+                <button class="scr-tab" data-condition="insulin">💉 Insulin</button>
+                <button class="scr-tab" data-condition="oral">💊 Oral Diabetic Meds</button>
+                <button class="scr-tab" data-condition="narrow">⚠️ Narrow Therapeutic Index Meds</button>
+                <button class="scr-tab" data-condition="orlistat">💊 Orlistat</button>
+              </div>
+              <div class="scr-tab-content active" data-condition-content="bariatric">
+                <div class="scr-condition-title">🏥 Bariatric Surgery <span class="scr-condition-desc">RYGB • Sleeve • Gastric Band • BPD/DS • Mini Bypass • Gastric balloon</span></div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for surgery date</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="cholecystectomy">
+                <div class="scr-condition-title">🏥 Cholecystectomy <span class="scr-condition-desc">(gallbladder removal)</span></div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for surgery date</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="insulin">
+                <div class="scr-condition-title">💉 Insulin</div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="oral">
+                <div class="scr-condition-title">💊 Oral Diabetic Meds <span class="scr-condition-desc">Sulfonylureas • SGLT2 inhibitors • DPP-4 inhibitors • Thiazolidinediones</span></div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="narrow">
+                <div class="scr-condition-title">⚠️ Narrow Therapeutic Index Meds <span class="scr-condition-desc">Amiodarone • Carbamazepine • Ciclosporin • Clozapine • Digoxin • Lithium • Warfarin • Others</span></div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="orlistat">
+                <div class="scr-condition-title">💊 Orlistat <span class="scr-condition-desc">Alli • Xenical</span></div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;1 month</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for recent Orlistat</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;1 month<br><em style="color: var(--text-muted); font-size: 0.9em;">Concurrent use contraindicated</em></div>
+              </div>
+            </div>
+        </div>
+        <div class="protocol-tab-content" data-tab-content="table3">
+            <div class="protocol-text" style="margin-bottom: 16px;"><strong>Table 3:</strong> When clinical details are needed to make a prescribing decision.</div>
+            <div class="scr-tabbed-conditions">
+              <div class="scr-tabs">
+                <button class="scr-tab active" data-condition="cholelithiasis">🩺 Cholelithiasis</button>
+                <button class="scr-tab" data-condition="cholecystitis">🩺 Cholecystitis</button>
+                <button class="scr-tab" data-condition="heartfailure">❤️ Heart Failure</button>
+                <button class="scr-tab" data-condition="ckd">🫘 Chronic Kidney Disease</button>
+              </div>
+              <div class="scr-tab-content active" data-condition-content="cholelithiasis">
+                <div class="scr-condition-title">🩺 Cholelithiasis <span class="scr-condition-desc">(gallstones)</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for cholecystectomy evidence</li><li>If no evidence → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Ask if patient had cholecystectomy (gallbladder removal surgery)</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if no cholecystectomy<br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="cholecystitis">
+                <div class="scr-condition-title">🩺 Cholecystitis <span class="scr-condition-desc">(gallbladder inflammation)</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for cholecystectomy evidence</li><li>If no evidence → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Ask if patient had cholecystectomy (gallbladder removal surgery)</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if no cholecystectomy<br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="heartfailure">
+                <div class="scr-condition-title">❤️ Heart Failure (HF)</div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-4" onclick="navigateToMacro(4); return false;" class="tag blue">Macro 4</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for HF stage</li><li>If stage unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Request latest cardiology letter stating:<br>• HF stage, OR<br>• Confirmation if fit for GLP-1</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if Stage IV<br><span class="decision-prescribe">PRESCRIBE</span> if Stage I, II, or III</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="ckd">
+                <div class="scr-condition-title">🫘 Chronic Kidney Disease (CKD)</div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-5" onclick="navigateToMacro(5); return false;" class="tag blue">Macro 5</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for CKD stage or eGFR</li><li>If stage/eGFR unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Request:<br>• Most recent eGFR result, AND/OR<br>• Latest specialist letter with CKD details</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if eGFR &lt;30 or Stage 4/5<br><span class="decision-prescribe">PRESCRIBE</span> if eGFR ≥30 and Stage 1-3</div>
+              </div>
+            </div>
+        </div>
+        <div class="protocol-tab-content" data-tab-content="table4">
+            <div class="protocol-text" style="margin-bottom: 16px;"><strong>Table 4:</strong> Patient assessment conditions requiring careful evaluation.</div>
+            <div class="scr-tabbed-conditions">
+              <div class="scr-tabs">
+                <button class="scr-tab active" data-condition="cancer">🎗️ Cancer</button>
+                <button class="scr-tab" data-condition="pregnancy">🤰 Pregnancy</button>
+                <button class="scr-tab" data-condition="dementia">🧠 Dementia</button>
+                <button class="scr-tab" data-condition="malabsorption">🩺 Malabsorption</button>
+                <button class="scr-tab" data-condition="depression">😔 Depression/Anxiety</button>
+                <button class="scr-tab" data-condition="suicidal">⚠️ Suicidal Ideation</button>
+                <button class="scr-tab" data-condition="alcohol">🍺 Alcohol Abuse</button>
+              </div>
+              <div class="scr-tab-content active" data-condition-content="cancer">
+                <div class="scr-condition-title">🎗️ Cancer <span class="scr-condition-desc">(excluding MEN2 or medullary thyroid cancer)</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-3" onclick="navigateToMacro(3); return false;" class="tag blue">Macro 3</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for cancer diagnosis and treatment status</li><li>Look for oncology discharge letters</li><li>If unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Ask about:<br>• Cancer diagnosis details<br>• Current/awaiting treatment status<br>• Remission status<br>• Oncology discharge letter</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if currently on treatment or not discharged<br><span class="decision-prescribe">PRESCRIBE</span> if in remission and discharged from oncology</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="pregnancy">
+                <div class="scr-condition-title">🤰 Pregnancy <span class="scr-condition-desc">Including breastfeeding and trying to conceive</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-6" onclick="navigateToMacro(6); return false;" class="tag blue">Macro 6</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check consultation answers for pregnancy status</li><li>If unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Confirm if patient is:<br>• Currently pregnant<br>• Breastfeeding<br>• Trying to conceive</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if pregnant, breastfeeding, or trying to conceive<br><span class="decision-prescribe">PRESCRIBE</span> only if none of the above apply</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="dementia">
+                <div class="scr-condition-title">🧠 Dementia</div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-7" onclick="navigateToMacro(7); return false;" class="tag blue">Macro 7</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for dementia diagnosis</li><li>Assess home safety concerns</li><li>If unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Assess:<br>• Ability to self-administer medication safely<br>• Home support available<br>• Capacity to consent</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if safety concerns or lack of capacity<br><span class="decision-prescribe">PRESCRIBE</span> if patient can safely self-administer with support</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="malabsorption">
+                <div class="scr-condition-title">🩺 Malabsorption Syndrome</div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-8" onclick="navigateToMacro(8); return false;" class="tag blue">Macro 8</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for formal malabsorption diagnosis</li><li>If unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Confirm formal diagnosis of malabsorption syndrome</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if formal diagnosis confirmed</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="depression">
+                <div class="scr-condition-title">😔 Depression/Anxiety</div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">if acutely unwell OR new antidepressant</strong></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for recent mental health episodes</li><li>Check for new antidepressant prescriptions</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if acutely unwell &lt;3 months or new antidepressant &lt;3 months<br><span class="decision-prescribe">PRESCRIBE</span> if stable &gt;3 months</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="suicidal">
+                <div class="scr-condition-title">⚠️ Suicidal Ideation</div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for mental health crisis history</li><li>Check consultation answers carefully</li><li>If any concern → <strong>REJECT immediately</strong></li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if suicidal ideation &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> only if &gt;12 months and fully stable</div>
+              </div>
+              <div class="scr-tab-content" data-condition-content="alcohol">
+                <div class="scr-condition-title">🍺 Alcohol Abuse</div>
+                <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span> <strong style="color:var(--danger);">if in recovery OR current dependence</strong></div>
+                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-10" onclick="navigateToMacro(10); return false;" class="tag blue">Macro 10</a></div>
+                <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for alcohol dependence diagnosis</li><li>Look for addiction services involvement</li><li>If current dependence → <strong>REJECT immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if current dependence or in recovery &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if in recovery &gt;12 months and stable</div>
+              </div>
+            </div>
+        </div>
+        <div class="protocol-tab-content" data-tab-content="escalation">
+          <div class="protocol-card">
+            <div class="protocol-title">
+              <div class="icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="4" y="4" width="16" height="16" rx="4"/>
+                  <path d="M8 10h8M8 14h8"/>
+                </svg>
+              </div>
+              Escalations (when and how)
+            </div>
+            <div class="protocol-text"><strong>Escalate when:</strong></div>
+            <ul class="protocol-list">
+              <li>You gathered further information using macros but are still unsure of the prescribing decision.</li>
+              <li>You see SCR information and aren't sure if it's a contraindication to GLP-1s.</li>
+              <li>You received an email response but aren't sure if it indicates a contraindication.</li>
+            </ul>
+            <div class="protocol-text"><strong>Actions:</strong></div>
+            <ol class="protocol-ol">
+              <li>Add a note to the customer's account.</li>
+              <li>Create a Jira escalation ticket using option “SCR query”.</li>
+              <li>Change tag from “prescriber review” to “escalated”.</li>
+            </ol>
           </div>
-          <div class="scr-two-col">
-            <div>
-              <div class="protocol-section-title">Accessing SCR</div>
-              <ol class="protocol-ol">
-                <li>Open SCR via NHS Spine Services (or “open NHS site” button in interface).</li>
-                <li>Login with HeliosX email + password.</li>
-                <li>Enter the 6-digit verification code (Authenticator app).</li>
-                <li>Select the appropriate role, then Continue to Find patient.</li>
-              </ol>
+        </div>
+        <div class="protocol-tab-content" data-tab-content="rejecting">
+          <div class="protocol-card">
+            <div class="protocol-title">
+              <div class="icon red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18"/>
+                  <path d="M6 6l12 12"/>
+                </svg>
+              </div>
+              Rejecting prescriptions (especially repeat patients)
             </div>
-            <div>
-              <div class="protocol-section-title">Searching & reviewing</div>
-              <ol class="protocol-ol">
-                <li>Use “Advanced” search.</li>
-                <li>Enter Gender, First name, Last name, DOB (single date).</li>
-                <li>Find patient → verify demographics (address if multiple matches).</li>
-                <li>Enter record → Clinical tab → confirm permission to view.</li>
-                <li>Review: Acute meds, Repeat meds, Diagnoses, Problems/Issues.</li>
-              </ol>
-            </div>
+            <div class="protocol-text">If rejecting a repeat patient after several months of prescribing, use <a href="#macro-12" onclick="navigateToMacro(12); return false;" class="tag blue">Macro 12: Rejection for Repeat Patients</a>. If patients reply unhappy, senior pharmacists may call using these principles:</div>
+            <ul class="protocol-list">
+              <li><strong>Lead with empathy</strong> (“I can hear you are frustrated”).</li>
+              <li><strong>Explain through safety</strong> (protection not restriction).</li>
+              <li>Keep it simple, direct, reassuring (not defensive).</li>
+              <li>Offer a path forward (signpost GP/alternatives).</li>
+              <li>Maintain boundaries calmly; no exceptions if unsafe.</li>
+            </ul>
           </div>
-
-          <details class="accordion">
-            <summary>SCR not available / limited — what to do</summary>
-            <div class="accordion-body">
-              <div class="table-wrapper">
-                <table class="protocol-table">
-                  <tr><th style="width: 35%;">Scenario</th><th>Prescriber action</th></tr>
-                <tr><td><strong>SCR available</strong></td><td>Proceed with SCR review, document outcome, and act accordingly.</td></tr>
-                <tr><td><strong>SCR not available</strong></td><td>Document “SCR unavailable”. Proceed based on questionnaire/standard SOP. <strong>Do not</strong> hold the order. <strong>Do not</strong> email patient purely due to missing SCR.</td></tr>
-                <tr><td><strong>SCR available but limited</strong></td><td>Document “SCR checked but limited”. Proceed per standard SOP. Do not hold unless specific information is required about a condition/medication.</td></tr>
-              </table>
-              <div class="protocol-text" style="margin-top: 10px;">Common reasons: recently registered NHS patient, mismatched demographics, outside England (Wales/Scotland/NI), opted out/limited, GP practice not fully enabled, not registered with GP, enhanced privacy.</div>
-            </div>
-          </details>
         </div>
-
-        </div>
-        <!-- End Tab 2 -->
-
-        <!-- Tab 3: Outcomes & Actions -->
-        <div class="protocol-tab-content" data-tab-content="outcomes">
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-                <path d="M12 9v4"/>
-                <path d="M12 17h.01"/>
-              </svg>
-            </div>
-            Decision-making (flagged SCR)
-          </div>
-          <div class="protocol-text">If the scraping tool flags a keyword, open SCR and decide between: <strong>absolute contraindication</strong> (reject) vs <strong>needs further information</strong> (email + hold) vs <strong>escalate</strong> if uncertain.</div>
-
-          <details class="accordion">
-            <summary>Absolute contraindications — reject immediately</summary>
-            <div class="accordion-body">
-              <div class="protocol-text"><strong>Table 1:</strong> If any of these conditions are present, <strong>reject the prescription immediately</strong>. No further information needed.</div>
-              <div class="table-wrapper">
-                <table class="protocol-table">
-                <tr><th>Condition</th><th>Action</th></tr>
-                <tr><td><strong>🫀 Pancreatitis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Including acute or chronic pancreatic insufficiency</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🍽️ Eating Disorders</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">• Anorexia nervosa<br>• Bulimia nervosa<br>• Binge Eating Disorder (BED)<br>• Avoidant/Restrictive Food Intake Disorder (ARFID)</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>💉 Type 1 Diabetes</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Aka Insulin-dependent diabetes mellitus (IDDM)</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🏥 Liver Cirrhosis</strong></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🏥 Liver Transplant</strong></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🔬 Endocrine Disorders</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Acromegaly, Cushing's, Addison's, congenital adrenal hyperplasia</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🩺 Ulcerative Colitis</strong></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🩺 Crohn's Disease</strong></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🫃 Gastroparesis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">Delayed gastric emptying</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🧬 Multiple Endocrine Neoplasia type 2 (MEN2)</strong></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🎗️ Medullary Thyroid Cancer</strong></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>💊 Oral Diabetic Medication</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">On repeat medication list — See detailed list below</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>⚠️ Medication with Narrow Therapeutic Index</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">On repeat medication list — See detailed list below</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>💉 Insulin</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">On repeat medication list</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-                <tr><td><strong>🦋 Thyroid Disease</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">For <strong>Nevolat</strong> prescriptions ONLY</span></td><td><span class="decision-reject">REJECT</span></td></tr>
-              </table>
-              </div>
-
-              <div class="protocol-section-title" style="margin-top: 20px;">Oral diabetic medications (reject if on repeat list)</div>
-              <div class="scr-two-col">
-                <div>
-                  <strong>Sulfonylureas:</strong>
-                  <ul class="protocol-list">
-                    <li>Diamicron [gliclazide]</li>
-                    <li>Daonil [glibenclamide]</li>
-                    <li>Rastin [tolbutamide]</li>
-                  </ul>
-                  <strong>SGLT2 inhibitors:</strong>
-                  <ul class="protocol-list">
-                    <li>Jardiance [empagliflozin]</li>
-                    <li>Forxiga [dapagliflozin]</li>
-                    <li>Invokana [canagliflozin]</li>
-                  </ul>
-                </div>
-                <div>
-                  <strong>DPP-4 inhibitors:</strong>
-                  <ul class="protocol-list">
-                    <li>Januvia [sitagliptin]</li>
-                    <li>Galvus [vildagliptin]</li>
-                    <li>Trajenta [linagliptin]</li>
-                  </ul>
-                  <strong>Thiazolidinediones:</strong>
-                  <ul class="protocol-list">
-                    <li>Actos [pioglitazone]</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div class="protocol-section-title" style="margin-top: 20px;">Narrow Therapeutic Index medications (reject if on repeat list)</div>
-              <div class="scr-two-col">
-                <div>
-                  <ul class="protocol-list">
-                    <li>Amiodarone</li>
-                    <li>Carbamazepine</li>
-                    <li>Ciclosporin</li>
-                    <li>Clozapine</li>
-                    <li>Digoxin</li>
-                    <li>Fenfluramine</li>
-                    <li>Lithium</li>
-                  </ul>
-                </div>
-                <div>
-                  <ul class="protocol-list">
-                    <li>Mycophenolate mofetil</li>
-                    <li><strong>Oral</strong> methotrexate</li>
-                    <li>Phenobarbital</li>
-                    <li>Phenytoin</li>
-                    <li>Somatrogon</li>
-                    <li>Tacrolimus</li>
-                    <li>Theophylline</li>
-                    <li>Warfarin</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </details>
-
-          <details class="accordion">
-            <summary>Table 2: Time-sensitive conditions — workflow with macros</summary>
-            <div class="accordion-body">
-              <div class="protocol-text"><strong>Table 2:</strong> When timing information is needed, use appropriate macro. Reject when timing falls within contraindication window.</div>
-              <div class="scr-tabbed-conditions">
-                <div class="scr-tabs">
-                  <button class="scr-tab active" data-tab="bariatric">🏥 Bariatric Surgery</button>
-                  <button class="scr-tab" data-tab="cholecystectomy">🏥 Cholecystectomy</button>
-                  <button class="scr-tab" data-tab="insulin">💉 Insulin</button>
-                  <button class="scr-tab" data-tab="oral">💊 Oral Diabetic Meds</button>
-                  <button class="scr-tab" data-tab="narrow">⚠️ Narrow Therapeutic Index Meds</button>
-                  <button class="scr-tab" data-tab="orlistat">💊 Orlistat</button>
-                </div>
-                <div class="scr-tab-content active" data-tab-content="bariatric">
-                  <div class="scr-condition-title">🏥 Bariatric Surgery <span class="scr-condition-desc">RYGB • Sleeve • Gastric Band • BPD/DS • Mini Bypass • Gastric balloon</span></div>
-                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
-                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
-                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for surgery date</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
-                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</div>
-                </div>
-                <div class="scr-tab-content" data-tab-content="cholecystectomy">
-                  <div class="scr-condition-title">🏥 Cholecystectomy <span class="scr-condition-desc">(gallbladder removal)</span></div>
-                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;12 months</span></div>
-                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
-                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for surgery date</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
-                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months<br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</div>
-                </div>
-                <div class="scr-tab-content" data-tab-content="insulin">
-                  <div class="scr-condition-title">💉 Insulin</div>
-                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
-                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
-                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
-                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
-                </div>
-                <div class="scr-tab-content" data-tab-content="oral">
-                  <div class="scr-condition-title">💊 Oral Diabetic Meds <span class="scr-condition-desc">Sulfonylureas • SGLT2 inhibitors • DPP-4 inhibitors • Thiazolidinediones</span></div>
-                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
-                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
-                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
-                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
-                </div>
-                <div class="scr-tab-content" data-tab-content="narrow">
-                  <div class="scr-condition-title">⚠️ Narrow Therapeutic Index Meds <span class="scr-condition-desc">Amiodarone • Carbamazepine • Ciclosporin • Clozapine • Digoxin • Lithium • Warfarin • Others</span></div>
-                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;3 months</span> <strong style="color:var(--danger);">OR</strong> <span style="font-weight:700;color:var(--danger);">On repeat list</span></div>
-                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
-                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check acute meds (last 3 months)</li><li>Check repeat medication list</li><li>If on repeat list → <strong>reject immediately</strong></li><li>If timing unclear → hold + email</li></ul></div>
-                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if prescribed within 3 months or on repeat list</div>
-                </div>
-                <div class="scr-tab-content" data-tab-content="orlistat">
-                  <div class="scr-condition-title">💊 Orlistat <span class="scr-condition-desc">Alli • Xenical</span></div>
-                  <div class="scr-condition-row"><strong>Timeframe:</strong> <span style="font-weight:700;color:var(--danger);font-size:14px;">&lt;1 month</span></div>
-                  <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-1" class="tag blue">Macro 1</a></div>
-                  <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for recent Orlistat</li><li>If timing unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
-                  <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if &lt;1 month<br><em style="color: var(--text-muted); font-size: 0.9em;">Concurrent use contraindicated</em></div>
-                </div>
-              </div>
-              <div class="info-card warning" style="margin-top: 12px;">
-                <div class="info-card-title">Transfer edge case</div>
-                <div class="info-card-text">If GLP‑1 is flagged for a transfer patient with PUE within the last month, follow up using main SOP (macro “PUE &lt;2 Weeks Old”) rather than rejecting.</div>
-              </div>
-            </div>
-          </details>
-
-          <details class="accordion">
-            <summary>Table 3: Clinical details needed — macros & decision pathway</summary>
-            <div class="accordion-body">
-              <div class="protocol-text"><strong>Table 3:</strong> When clinical details are needed to make a prescribing decision.</div>
-              <div class="table-wrapper decision-table-wide">
-                <table class="protocol-table">
-                <tr>
-                  <th>Condition</th>
-                  <th>Macro</th>
-                  <th>Before Emailing</th>
-                  <th>Information to Request</th>
-                  <th>After Patient Response</th>
-                </tr>
-                <tr>
-                  <td><strong>🩺 Cholelithiasis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(gallstones)</span></td>
-                  <td><a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></td>
-                  <td><div class="checklist-item">Check SCR for cholecystectomy evidence</div><div class="checklist-item">If no evidence → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Ask if patient had cholecystectomy (gallbladder removal surgery)</td>
-                  <td><span class="decision-reject">REJECT</span> if no cholecystectomy<br><br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</td>
-                </tr>
-                <tr>
-                  <td><strong>🩺 Cholecystitis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(gallbladder inflammation)</span></td>
-                  <td><a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></td>
-                  <td><div class="checklist-item">Check SCR for cholecystectomy evidence</div><div class="checklist-item">If no evidence → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Ask if patient had cholecystectomy (gallbladder removal surgery)</td>
-                  <td><span class="decision-reject">REJECT</span> if no cholecystectomy<br><br><span class="decision-prescribe">PRESCRIBE</span> if cholecystectomy confirmed</td>
-                </tr>
-                <tr>
-                  <td><strong>❤️ Heart Failure (HF)</strong></td>
-                  <td><a href="#macro-4" onclick="navigateToMacro(4); return false;" class="tag blue">Macro 4</a></td>
-                  <td><div class="checklist-item">Check SCR for HF stage</div><div class="checklist-item">If stage unclear → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Request latest cardiology letter stating:<br>• HF stage, OR<br>• Confirmation if fit for GLP-1</td>
-                  <td><span class="decision-reject">REJECT</span> if Stage IV<br><br><span class="decision-prescribe">PRESCRIBE</span> if Stage I, II, or III</td>
-                </tr>
-                <tr>
-                  <td><strong>🫘 Chronic Kidney Disease (CKD)</strong></td>
-                  <td><a href="#macro-5" onclick="navigateToMacro(5); return false;" class="tag blue">Macro 5</a></td>
-                  <td><div class="checklist-item">Check SCR for eGFR or CKD stage</div><div class="checklist-item">If eGFR/stage unclear → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Request:<br>• Most recent eGFR result, OR<br>• Latest specialist letter with CKD details</td>
-                  <td><span class="decision-reject">REJECT</span> if eGFR &lt;30 or Stage 4/5<br><br><span class="decision-prescribe">PRESCRIBE</span> if eGFR ≥30 or Stage 1/2/3</td>
-                </tr>
-              </table>
-              </div>
-            </div>
-          </details>
-
-          <details class="accordion">
-            <summary>Conditions requiring patient assessment (Macros 3 / 6 / 7 / 8 / 9 / 10)</summary>
-            <div class="accordion-body">
-              <div class="protocol-text"><strong>Table 4:</strong> Additional conditions that require gathering information from the patient to determine safety and prescribing decision.</div>
-              <div class="table-wrapper decision-table-wide">
-                <table class="protocol-table">
-                <tr><th>Condition</th><th>Macro</th><th>Before Emailing</th><th>Information to Request</th><th>After Patient Response</th></tr>
-                <tr>
-                  <td><strong>🎗️ Any Cancer Diagnosis</strong><br><span style="font-size: 0.85em; color: var(--text-muted); font-style: italic;">(excluding MEN2 or medullary thyroid cancer)</span></td>
-                  <td><a href="#macro-3" onclick="navigateToMacro(3); return false;" class="tag blue">Macro 3</a></td>
-                  <td><div class="checklist-item">Check SCR for cancer type and timeline</div><div class="checklist-item">Always require patient input</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Ask if:<br>• Currently under oncology care?<br>• Cancer in remission?<br>• Request discharge/latest oncology letter</td>
-                  <td><span class="decision-reject">REJECT</span> if active cancer/undergoing treatment<br><br><span class="decision-clinical">CLINICAL DECISION</span> if in remission (review oncology letter)</td>
-                </tr>
-                <tr>
-                  <td><strong>🤰 Pregnancy</strong></td>
-                  <td><a href="#macro-6" onclick="navigateToMacro(6); return false;" class="tag blue">Macro 6</a></td>
-                  <td><div class="checklist-item">Always require confirmation</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Ask if currently:<br>• Pregnant?<br>• Breastfeeding?<br>• Trying to conceive?</td>
-                  <td><span class="decision-reject">REJECT</span> if pregnant, breastfeeding, or trying to conceive<br><br><span class="decision-prescribe">PRESCRIBE</span> if none of the above</td>
-                </tr>
-                <tr>
-                  <td><strong>🧠 Dementia / Cognitive Impairment</strong></td>
-                  <td><a href="#macro-7" onclick="navigateToMacro(7); return false;" class="tag blue">Macro 7</a></td>
-                  <td><div class="checklist-item">Always require patient/carer input</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Ask:<br>• Safe to use medication at home?<br>• Support available?<br>• Ability to self-administer?</td>
-                  <td><span class="decision-clinical">CLINICAL DECISION</span> based on:<br>• Patient's ability to take medication safely<br>• Support network around patient</td>
-                </tr>
-                <tr>
-                  <td><strong>🫃 Chronic Malabsorption</strong></td>
-                  <td><a href="#macro-8" onclick="navigateToMacro(8); return false;" class="tag blue">Macro 8</a></td>
-                  <td><div class="checklist-item">Always require confirmation</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Ask if patient has formal diagnosis of chronic malabsorption</td>
-                  <td><span class="decision-reject">REJECT</span> if formal diagnosis confirmed<br><br><span class="decision-prescribe">PRESCRIBE</span> if no formal diagnosis</td>
-                </tr>
-                <tr>
-                  <td><strong>😔 Depression or Anxiety</strong><br><br><span style="font-size: 0.85em; color: var(--danger); font-weight: 600;">⚠️ Contraindication: acutely mentally unwell</span></td>
-                  <td><a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></td>
-                  <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">Check antidepressant start/dose change dates</div><div class="checklist-item">If &lt;3 months → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Request confirmation of:<br>• When condition added to SCR<br>• Any new antidepressants or dose changes in last 3 months</td>
-                  <td><span class="decision-reject">REJECT</span> if entry &lt;3 months old OR new antidepressant/dose increase in last 3 months<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥3 months</td>
-                </tr>
-                <tr>
-                  <td><strong>⚠️ Active Suicidal Ideation</strong></td>
-                  <td><a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></td>
-                  <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">If &lt;12 months → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Request confirmation of when suicidal ideation was added to SCR</td>
-                  <td><span class="decision-reject">REJECT</span> if &lt;12 months<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months</td>
-                </tr>
-                <tr>
-                  <td><strong>🍺 Current Alcohol Abuse or Dependence</strong></td>
-                  <td><a href="#macro-10" onclick="navigateToMacro(10); return false;" class="tag blue">Macro 10</a></td>
-                  <td><div class="checklist-item">Check SCR entry date</div><div class="checklist-item">If &lt;12 months or "current" → hold + email</div><div class="checklist-item">Add tag: <span class="tag orange">Pending Customer Response</span></div></td>
-                  <td>Request confirmation of:<br>• When alcohol abuse was added to SCR<br>• Current alcohol use status</td>
-                  <td><span class="decision-reject">REJECT</span> if &lt;12 months or current abuse<br><br><span class="decision-prescribe">PRESCRIBE</span> if ≥12 months and no current abuse</td>
-                </tr>
-              </table>
-              </div>
-
-              <div class="protocol-section-title" style="margin-top: 20px;">Cancer assessment (<a href="#macro-3" onclick="navigateToMacro(3); return false;" style="color: var(--accent);">Macro 3</a>)</div>
-              <div class="protocol-text">For any cancer diagnosis (excluding MEN2 or medullary thyroid cancer), ask the patient:</div>
-              <ul class="protocol-list">
-                <li>Are they under a specialist / currently undergoing treatment from an oncology team?</li>
-                <li>Is the cancer in remission? Have they been discharged from oncology?</li>
-                <li>Ask for discharge letter / latest oncology letter.</li>
-              </ul>
-            </div>
-          </details>
-        </div>
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon purple">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
-                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-              </svg>
-            </div>
-            Escalations (when and how)
-          </div>
-          <div class="protocol-text"><strong>Escalate when:</strong></div>
-          <ul class="protocol-list">
-            <li>You gathered further information using macros but are still unsure of the prescribing decision.</li>
-            <li>You see SCR information and aren’t sure if it’s a contraindication to GLP‑1s.</li>
-            <li>You received an email response but aren’t sure if it indicates a contraindication.</li>
-          </ul>
-          <div class="protocol-text"><strong>Actions:</strong></div>
-          <ol class="protocol-ol">
-            <li>Add a note to the customer’s account.</li>
-            <li>Create a Jira escalation ticket using option “SCR query”.</li>
-            <li>Change tag from “prescriber review” to “escalated”.</li>
-          </ol>
-        </div>
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon red">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M18 6L6 18"/>
-                <path d="M6 6l12 12"/>
-              </svg>
-            </div>
-            Rejecting prescriptions (especially repeat patients)
-          </div>
-          <div class="protocol-text">If rejecting a repeat patient after several months of prescribing, use <a href="#macro-12" onclick="navigateToMacro(12); return false;" class="tag blue">Macro 12: Rejection for Repeat Patients</a>. If patients reply unhappy, senior pharmacists may call using these principles:</div>
-          <ul class="protocol-list">
-            <li><strong>Lead with empathy</strong> (“I can hear you are frustrated”).</li>
-            <li><strong>Explain through safety</strong> (protection not restriction).</li>
-            <li>Keep it simple, direct, reassuring (not defensive).</li>
-            <li>Offer a path forward (signpost GP/alternatives).</li>
-            <li>Maintain boundaries calmly; no exceptions if unsafe.</li>
-          </ul>
-        </div>
-
-        </div>
-        <!-- End Tab 3 -->
-
-        <!-- Tab 4: Documentation -->
         <div class="protocol-tab-content" data-tab-content="documentation">
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon green">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M9 11l3 3L22 4"/>
-                <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-              </svg>
+          <div class="protocol-card">
+            <div class="protocol-title">
+              <div class="icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" />
+                </svg>
+              </div>
+              Documentation Requirements
             </div>
-            Documentation — copy-ready examples
+            <div class="protocol-text"><strong>Document all decisions:</strong></div>
+            <ul class="protocol-list">
+              <li>Add clear notes to patient account for every decision</li>
+              <li>Record which macros were sent and when</li>
+              <li>Note key information from patient responses</li>
+              <li>Document reason for approval or rejection</li>
+              <li>Update tags appropriately throughout the process</li>
+            </ul>
+            <div class="protocol-text" style="margin-top: 16px;"><strong>Common tags:</strong></div>
+            <ul class="protocol-list">
+              <li><span class="tag orange">Pending Customer Response</span> - Awaiting patient reply to macro</li>
+              <li><span class="tag purple">Escalated</span> - Referred to senior pharmacist</li>
+              <li><span class="tag blue">Prescriber Review</span> - Active review in progress</li>
+              <li><span class="tag green">Approved</span> - Prescription approved</li>
+              <li><span class="tag red">Rejected</span> - Prescription rejected</li>
+            </ul>
           </div>
-
-          <div class="scr-copy-row"><div class="scr-copy-title">SCR pass (scraping tool)</div><button class="btn btn-secondary copy-btn" data-copy-target="scr-doc-pass">Copy</button></div>
-          <pre id="scr-doc-pass" class="macro-box">SCR pass - no contraindications to GLP1s\n\nPatient ID and Weight verification photo reviewed, eligible for medication according to information provided and no contraindications flagged by scrapping tool. Prescription issued.</pre>
-
-          <div class="scr-copy-row"><div class="scr-copy-title">Flagged, then clear on SCR</div><button class="btn btn-secondary copy-btn" data-copy-target="scr-doc-clear">Copy</button></div>
-          <pre id="scr-doc-clear" class="macro-box">SCR checked - no contraindications to GLP1s\n\nPatient ID and Weight verification photo reviewed, eligible for medication according to information provided and no contraindications found on SCR consultation. Prescription issued.</pre>
-
-          <div class="scr-copy-row"><div class="scr-copy-title">Absolute contraindication</div><button class="btn btn-secondary copy-btn" data-copy-target="scr-doc-abs">Copy</button></div>
-          <pre id="scr-doc-abs" class="macro-box">SCR checked [reason for contra-indication] [date noted in SCR]\n\nPatient ID and Weight verification photo reviewed, not eligible for medication according to information found on SCR consultation. Contraindication found - [e.g. history of pancreatitis].</pre>
-
-          <div class="scr-copy-row"><div class="scr-copy-title">Further information needed</div><button class="btn btn-secondary copy-btn" data-copy-target="scr-doc-more">Copy</button></div>
-          <pre id="scr-doc-more" class="macro-box">SCR checked - further information needed - email sent [add zendesk link]\n\nTag changed from “prescriber review” to “awaiting customer response”.</pre>
-
-          <div class="scr-copy-row"><div class="scr-copy-title">SCR unavailable / limited</div><button class="btn btn-secondary copy-btn" data-copy-target="scr-doc-unavail">Copy</button></div>
-          <pre id="scr-doc-unavail" class="macro-box">SCR unavailable\n\nProceed according to standard prescription SOP. No hold/email purely for missing SCR.</pre>
-          <pre class="macro-box" style="margin-top: 10px;">SCR checked but limited - no contraindications to GLP1 found\n\nProceed according to standard prescription SOP. Hold only if specific information is required about a condition/medication.</pre>
         </div>
-
-        <div class="protocol-card">
-          <div class="protocol-title">
-            <div class="icon orange">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2l9 4v6c0 5-3.8 9.7-9 10-5.2-.3-9-5-9-10V6l9-4z"/>
-              </svg>
-            </div>
-            Email templates (Macros)
-          </div>
-          <div class="protocol-text">Use these when additional information is required or when permission/rejection messaging is needed.</div>
-          ${this.getSCRMacroAccordions()}
-        </div>
-
-        </div>
-        <!-- End Tab 4 -->
-
       </div>
     `;
   },
@@ -4054,34 +3902,48 @@ const ContentManager = {
           </svg>
           Treatment Gaps
         </button>
-        <button class="protocol-tab" data-tab="additional">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-          </svg>
-          Additional Pens
-        </button>
-      </div>
-
-      <!-- Tab 1: Titration Schedules -->
-      <div class="protocol-tab-content active" data-tab-content="schedules">
-      <div class="protocol-card">
-        <div class="protocol-title">
-          <div class="icon blue">
+          <button class="protocol-tab" data-tab="workflow">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 20V10M18 20V4M6 20v-4"/>
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
             </svg>
-          </div>
-          Correct Titration
-        </div>
-        <div class="protocol-text">
-          <strong>For patients on 2nd+ order:</strong> Check that patients are titrating up doses as expected.
-        </div>
-        <div class="protocol-text">
-          Titration schedules differ by medication:
-        </div>
-        <div class="table-wrapper">
-          <table class="dose-table">
-            <tr>
+            Workflow & Steps
+          </button>
+          <button class="protocol-tab" data-tab="checking">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="16" rx="2"/>
+              <path d="M8 8h8M8 12h8M8 16h8"/>
+            </svg>
+            Checking SCR
+          </button>
+          <button class="protocol-tab" data-tab="decision">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <path d="M12 9v4"/>
+              <path d="M12 17h.01"/>
+            </svg>
+            Decision Making
+          </button>
+          <button class="protocol-tab" data-tab="escalation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            Escalation
+          </button>
+          <button class="protocol-tab" data-tab="rejecting">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 6L6 18"/>
+              <path d="M6 6l12 12"/>
+            </svg>
+            Rejecting Prescription
+          </button>
+          <button class="protocol-tab" data-tab="documentation">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            Documentation
+          </button>
               <th>Medication</th>
               <th>Titration Schedule</th>
             </tr>
@@ -9387,8 +9249,26 @@ Proceed according to standard prescription SOP. Hold only if specific informatio
           if (activeContent) {
             activeContent.classList.add("active");
           }
+
+          // Reinitialize condition tabs for SCR protocol when switching main tabs
+          if (pageId === "proto-scr") {
+            setTimeout(() => {
+              if (window.initConditionTabs) {
+                window.initConditionTabs();
+              }
+            }, 10);
+          }
         });
       });
+
+      // Initialize condition tabs for SCR protocol on page load
+      if (pageId === "proto-scr") {
+        setTimeout(() => {
+          if (window.initConditionTabs) {
+            window.initConditionTabs();
+          }
+        }, 10);
+      }
     }
 
     // Handle macros page main tabs (email-macros vs doc-notes) and sub-tabs
@@ -9571,6 +9451,36 @@ const ChecklistManager = {
 // Initialize Application
 // ============================================
 document.addEventListener("DOMContentLoaded", () => {
+    // Add event listener for sidebar toggle button with chevron direction
+    const navbarToggleBtn = document.getElementById("navbarToggleBtn");
+    const navbarToggleIcon = document.getElementById("navbarToggleIcon");
+    const sidebar = document.getElementById("sidebar") || document.querySelector(".sidebar");
+    const mainContent = document.getElementById("mainContent") || document.querySelector(".main");
+    let sidebarCollapsed = false;
+    function setChevronDirection(collapsed) {
+      if (!navbarToggleIcon) return;
+      if (collapsed) {
+        // right chevron
+        navbarToggleIcon.innerHTML = '<polyline points="9 18 15 12 9 6" />';
+      } else {
+        // left chevron
+        navbarToggleIcon.innerHTML = '<polyline points="15 18 9 12 15 6" />';
+      }
+    }
+    if (navbarToggleBtn && sidebar && mainContent) {
+      navbarToggleBtn.addEventListener("click", function() {
+        sidebarCollapsed = !sidebarCollapsed;
+        if (sidebarCollapsed) {
+          sidebar.classList.add("collapsed");
+          mainContent.classList.add("expanded");
+        } else {
+          sidebar.classList.remove("collapsed");
+          mainContent.classList.remove("expanded");
+        }
+        setChevronDirection(sidebarCollapsed);
+      });
+      setChevronDirection(sidebarCollapsed);
+    }
   // Load saved state
   Utils.loadState();
 
