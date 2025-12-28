@@ -958,6 +958,14 @@ const SearchManager = {
         keywords: ["cancer", "malignancy", "oncology", "tumor", "carcinoma", "neoplasm"],
       },
       {
+        title: "Breast Cancer",
+        context: "Requires clarification NOT rejection - hormone therapy allowed (<a href='#macro-31' onclick='navigateToMacro(31); return false;' style='color: var(--accent);'>Macro 31</a>)",
+        page: "contraindications",
+        sectionId: "cancer-assessment",
+        category: "Patient Assessment",
+        keywords: ["breast cancer", "breast", "tamoxifen", "zoladex", "hormone therapy", "breast carcinoma", "mastectomy"],
+      },
+      {
         title: "Dementia / Cognitive Impairment",
         context: "Assess safety at home and ability to use medication (<a href='#macro-7' onclick='navigateToMacro(7); return false;' style='color: var(--accent);'>Macro 7</a>)",
         page: "contraindications",
@@ -1417,18 +1425,87 @@ const SearchManager = {
     if (this.pendingNavigation && this.pendingNavigation.pageId === pageId) {
       const { sectionId } = this.pendingNavigation;
       if (sectionId) {
+        // First, open the tabs to reveal the content
         setTimeout(() => {
-          const section = document.getElementById(sectionId);
-          if (section) {
-            section.scrollIntoView({ behavior: "smooth", block: "start" });
-            section.style.animation = "highlight-pulse 2s ease-in-out";
-            setTimeout(() => {
-              section.style.animation = "";
-            }, 2000);
-          }
-        }, 80);
+          this.openTabsForSection(sectionId);
+
+          // Then, wait for tabs to render before scrolling and highlighting
+          setTimeout(() => {
+            let section = document.getElementById(sectionId);
+
+            // If section not found by ID, try to find the tab content itself
+            if (!section) {
+              section = document.querySelector(`[data-condition-content="${sectionId}"], [data-tab-content="${sectionId}"]`);
+            }
+
+            if (section) {
+              section.scrollIntoView({ behavior: "smooth", block: "start" });
+              section.style.animation = "highlight-pulse 2s ease-in-out";
+              setTimeout(() => {
+                section.style.animation = "";
+              }, 2000);
+            }
+          }, 300); // Wait 300ms after opening tabs for them to fully render
+        }, 150);
       }
       this.pendingNavigation = null;
+    }
+  },
+
+  // Auto-open protocol tabs and nested condition tabs to reveal a section
+  openTabsForSection(sectionId) {
+    let section = document.getElementById(sectionId);
+
+    // If section not found by ID, or if found but not inside any tabs,
+    // try to find it by searching for elements with data-condition-content or text content
+    if (!section || !section.closest('[data-tab-content], [data-condition-content]')) {
+      // Try to find a tab content with matching data attribute
+      const possibleTab = document.querySelector(`[data-condition-content="${sectionId}"], [data-tab-content="${sectionId}"]`);
+      if (possibleTab) {
+        section = possibleTab;
+      }
+    }
+
+    if (!section) return;
+
+    // Find if section is inside a protocol-tab-content (main tab)
+    const mainTabContent = section.closest('.protocol-tab-content[data-tab-content]');
+    if (mainTabContent) {
+      const mainTabId = mainTabContent.dataset.tabContent;
+      const mainTabContainer = mainTabContent.parentElement;
+      const mainTab = mainTabContainer ? mainTabContainer.querySelector(`.protocol-tab[data-tab="${mainTabId}"]`) : null;
+
+      if (mainTab && !mainTab.classList.contains('active')) {
+        // Switch to the correct main tab
+        const tabsContainer = mainTab.parentElement;
+        if (tabsContainer) {
+          tabsContainer.querySelectorAll('.protocol-tab').forEach(t => t.classList.remove('active'));
+          mainTabContainer.querySelectorAll('.protocol-tab-content').forEach(c => c.classList.remove('active'));
+
+          mainTab.classList.add('active');
+          mainTabContent.classList.add('active');
+        }
+      }
+    }
+
+    // Find if section is inside a nested scr-tab-content (condition tab)
+    const conditionTabContent = section.closest('.scr-tab-content[data-condition-content]');
+    if (conditionTabContent) {
+      const conditionId = conditionTabContent.dataset.conditionContent;
+      const conditionTabsContainer = conditionTabContent.closest('.scr-tabbed-conditions');
+
+      if (conditionTabsContainer) {
+        const conditionTab = conditionTabsContainer.querySelector(`.scr-tab[data-condition="${conditionId}"]`);
+
+        if (conditionTab && !conditionTab.classList.contains('active')) {
+          // Switch to the correct condition tab
+          conditionTabsContainer.querySelectorAll('.scr-tab').forEach(t => t.classList.remove('active'));
+          conditionTabsContainer.querySelectorAll('.scr-tab-content').forEach(c => c.classList.remove('active'));
+
+          conditionTab.classList.add('active');
+          conditionTabContent.classList.add('active');
+        }
+      }
     }
   },
 
@@ -2932,6 +3009,45 @@ const ContentManager = {
           <button class="protocol-tab" data-tab="rejecting">Rejecting Prescription</button>
           <button class="protocol-tab" data-tab="documentation">Documentation</button>
         </div>
+
+        <!-- CRITICAL: Nevolat Thyroid/Liver Exclusion Warning Banner -->
+        <div class="info-card red" style="margin: 20px 0; border: 3px solid var(--danger); background: rgba(239, 68, 68, 0.1);">
+          <div class="info-card-title" style="font-size: 18px; font-weight: 700;">🚨 CRITICAL: Nevolat Thyroid & Liver Disease Exclusion</div>
+          <div class="info-card-text" style="font-size: 15px;">
+            <strong style="display: block; margin-bottom: 8px;">Patients with ANY thyroid disease OR liver disease/impairment CANNOT receive Nevolat.</strong>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(239, 68, 68, 0.3);">
+              <div style="padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 6px; border: 1px solid rgba(16, 185, 129, 0.3);">
+                <strong style="color: var(--success);">✅ These patients CAN receive:</strong>
+                <ul style="margin-top: 6px; margin-left: 20px;">
+                  <li>Mounjaro (tirzepatide)</li>
+                  <li>Wegovy (semaglutide)</li>
+                </ul>
+              </div>
+              <div style="padding: 10px; background: rgba(239, 68, 68, 0.15); border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.4);">
+                <strong style="color: var(--danger);">❌ These patients CANNOT receive:</strong>
+                <ul style="margin-top: 6px; margin-left: 20px;">
+                  <li>Nevolat (liraglutide)</li>
+                </ul>
+              </div>
+            </div>
+
+            <div style="margin-top: 12px; padding: 10px; background: var(--bg-elevated); border-radius: 6px;">
+              <strong>Action if patient ordered Nevolat:</strong>
+              <ol style="margin-top: 6px; margin-left: 20px;">
+                <li>REJECT the Nevolat order immediately</li>
+                <li>Use <a href="#macro-28" onclick="navigateToMacro(28); return false;" class="tag red" style="margin: 0 4px;">Macro 28</a> to explain rejection</li>
+                <li>Inform patient they CAN use Mounjaro or Wegovy</li>
+                <li>Patient must place new order with correct medication</li>
+              </ol>
+            </div>
+
+            <div style="margin-top: 8px; padding: 8px; background: rgba(245, 158, 11, 0.1); border-radius: 4px; border-left: 3px solid var(--warning);">
+              <strong>⚠️ Note:</strong> CTP (Choose Treatment Page) automatically hides Nevolat for patients who answered "Yes" to thyroid/liver question. If patient somehow ordered Nevolat anyway, this is an error that must be corrected.
+            </div>
+          </div>
+        </div>
+
         <div class="protocol-tab-content" data-tab-content="workflow">
           <div class="protocol-card">
             <div class="protocol-title">
@@ -3175,10 +3291,11 @@ const ContentManager = {
               </div>
               <div class="scr-tab-content active" data-condition-content="cancer">
                 <div class="scr-condition-title">🎗️ Cancer <span class="scr-condition-desc">(excluding MEN2 or medullary thyroid cancer)</span></div>
-                <div class="scr-condition-row"><strong>Macro:</strong> <a href="#macro-3" onclick="navigateToMacro(3); return false;" class="tag blue">Macro 3</a></div>
+                <div class="scr-condition-row"><strong>Macros:</strong> <a href="#macro-3" onclick="navigateToMacro(3); return false;" class="tag blue">Macro 3 - General Cancer</a> | <a href="#macro-31" onclick="navigateToMacro(31); return false;" class="tag blue">Macro 31 - Breast Cancer</a></div>
+                <div class="scr-condition-row"><strong>⚕️ Important - Breast Cancer:</strong> History requires clarification, NOT automatic rejection. Email patient to confirm current status before making decision.</div>
                 <div class="scr-condition-row"><strong>Before Emailing:</strong> <ul class="protocol-list"><li>Check SCR for cancer diagnosis and treatment status</li><li>Look for oncology discharge letters</li><li>If unclear → hold + email</li><li>Add tag: <span class="tag orange">Pending Customer Response</span></li></ul></div>
-                <div class="scr-condition-row"><strong>Information to Request:</strong> Ask about:<br>• Cancer diagnosis details<br>• Current/awaiting treatment status<br>• Remission status<br>• Oncology discharge letter</div>
-                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if currently on treatment or not discharged<br><span class="decision-prescribe">PRESCRIBE</span> if in remission and discharged from oncology</div>
+                <div class="scr-condition-row"><strong>Information to Request:</strong> Ask about:<br>• Cancer diagnosis details<br>• Current/awaiting treatment status<br>• Remission status<br>• Oncology team involvement<br>• <strong>For breast cancer:</strong> Hormone therapy only (e.g., tamoxifen, Zoladex)?</div>
+                <div class="scr-condition-row"><strong>After Patient Response:</strong> <span class="decision-reject">REJECT</span> if currently on active treatment or under oncology care<br><span class="decision-prescribe">PRESCRIBE</span> if in remission, discharged from oncology, or on hormone therapy only with no active treatment</div>
               </div>
               <div class="scr-tab-content" data-condition-content="pregnancy">
                 <div class="scr-condition-title">🤰 Pregnancy <span class="scr-condition-desc">Including breastfeeding and trying to conceive</span></div>
@@ -4981,9 +5098,9 @@ const ContentManager = {
         <!-- Tab 1: Absolute Contraindications -->
         <div class="protocol-tab-content active" data-tab-content="absolute">
 
-        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">Absolute Contraindications</h2>
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px;">Absolute Contraindications</h2>
 
-        <div class="info-card red" style="margin-bottom: 20px;">
+        <div class="info-card red" style="margin-bottom: 24px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
               <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
@@ -4995,190 +5112,211 @@ const ContentManager = {
           </div>
         </div>
 
-        <div class="protocol-card" id="pancreatitis-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <strong>Pancreatitis</strong>
+        <!-- Nested Condition Tabs -->
+        <div class="scr-tabbed-conditions">
+          <div class="scr-tabs">
+            <button class="scr-tab active" data-condition="pancreatitis">🔴 Pancreatitis</button>
+            <button class="scr-tab" data-condition="eating-disorders">🍽️ Eating Disorders</button>
+            <button class="scr-tab" data-condition="diabetes-t1">💉 Type 1 Diabetes</button>
+            <button class="scr-tab" data-condition="liver">🫀 Liver Conditions</button>
+            <button class="scr-tab" data-condition="endocrine">⚕️ Endocrine Disorders</button>
+            <button class="scr-tab" data-condition="gi">🩺 GI Conditions</button>
+            <button class="scr-tab" data-condition="thyroid-cancer">🎗️ Thyroid & Cancer</button>
+            <button class="scr-tab" data-condition="medications">💊 Medications</button>
+            <button class="scr-tab" data-condition="kidney">🫘 Kidney Disease</button>
+            <button class="scr-tab" data-condition="cardiac">❤️ Cardiac Conditions</button>
           </div>
-          <ul class="protocol-list">
-            <li><strong>Pancreatitis</strong> — including acute or chronic pancreatic insufficiency</li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
 
-        <div class="protocol-card" id="eating-disorders-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9z"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            <strong>Eating Disorders</strong>
+          <!-- Pancreatitis Tab -->
+          <div class="scr-tab-content active" data-condition-content="pancreatitis">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🔴 Pancreatitis</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Includes:</strong> Pancreatitis, acute pancreatic insufficiency, chronic pancreatic insufficiency</div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s have black box warning for increased risk of pancreatitis.</div>
           </div>
-          <ul class="protocol-list">
-            <li><strong>Anorexia nervosa</strong></li>
-            <li><strong>Bulimia nervosa</strong></li>
-            <li><strong>Binge Eating Disorder (BED)</strong></li>
-            <li><strong>Avoidant/Restrictive Food Intake Disorder (ARFID)</strong></li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
 
-        <div class="protocol-card" id="diabetes-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="9" y1="15" x2="15" y2="15"/>
-            </svg>
-            <strong>Type 1 Diabetes</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Type 1 diabetes</strong> (Insulin-dependent diabetes mellitus - IDDM)</li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
-
-        <div class="protocol-card" id="liver-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-            <strong>Liver Conditions</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Liver cirrhosis</strong></li>
-            <li><strong>Liver transplant</strong></li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
-
-        <div class="protocol-card" id="endocrine-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            <strong>Endocrine Disorders</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Acromegaly</strong> (Growth hormone disorder)</li>
-            <li><strong>Cushing's syndrome</strong></li>
-            <li><strong>Addison's disease</strong> (Adrenal insufficiency)</li>
-            <li><strong>Congenital Adrenal Hyperplasia</strong></li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
-
-        <div class="protocol-card" id="gastrointestinal-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-              <circle cx="12" cy="10" r="3"/>
-            </svg>
-            <strong>Gastrointestinal Conditions</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Ulcerative Colitis</strong></li>
-            <li><strong>Crohn's disease</strong></li>
-            <li><strong>Gastroparesis</strong> (delayed gastric emptying)</li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
-
-        <div class="protocol-card" id="thyroid-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 8v4M12 16h.01"/>
-            </svg>
-            <strong>Thyroid & Cancer</strong>
-          </div>
-          <ul class="protocol-list">
-            <li><strong>Multiple Endocrine Neoplasia type 2 (MEN2)</strong></li>
-            <li><strong>Medullary Thyroid cancer</strong></li>
-            <li><strong>Thyroid disease</strong> — for Nevolat prescriptions ONLY</li>
-          </ul>
-          <div class="tag red" style="margin-top: 8px;">REJECT</div>
-        </div>
-
-        <div class="protocol-card" id="medications-contraindication">
-          <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--danger); flex-shrink: 0;">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-              <path d="M12 9v4M12 17h.01"/>
-            </svg>
-            <strong>Medications on Repeat List</strong>
-          </div>
-          <div class="protocol-text" style="margin-bottom: 12px;">
-            <strong class="tag red">REJECT</strong> if any of the following are on <strong>repeat medication list</strong>:
-          </div>
-          
-          <div class="protocol-section-title" style="margin-top: 16px; color: var(--danger);">Insulin:</div>
-          <ul class="protocol-list">
-            <li>Any insulin on repeat medication list</li>
-          </ul>
-          
-          <div class="protocol-section-title" style="margin-top: 16px; color: var(--danger);">Oral Diabetic Medications:</div>
-          <div class="scr-two-col">
-            <div>
-              <strong style="color: var(--warning);">Sulfonylureas:</strong>
+          <!-- Eating Disorders Tab -->
+          <div class="scr-tab-content" data-condition-content="eating-disorders">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🍽️ Eating Disorders</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Conditions:</strong>
               <ul class="protocol-list">
-                <li>Diamicron [gliclazide]</li>
-                <li>Daonil [glibenclamide]</li>
-                <li>Rastin [tolbutamide]</li>
-              </ul>
-              <strong style="color: var(--warning);">SGLT2 inhibitors:</strong>
-              <ul class="protocol-list">
-                <li>Jardiance [empagliflozin]</li>
-                <li>Forxiga [dapagliflozin]</li>
-                <li>Invokana [canagliflozin]</li>
+                <li>Anorexia nervosa</li>
+                <li>Bulimia nervosa</li>
+                <li>Binge Eating Disorder (BED)</li>
+                <li>Avoidant/Restrictive Food Intake Disorder (ARFID)</li>
               </ul>
             </div>
-            <div>
-              <strong style="color: var(--warning);">DPP-4 inhibitors:</strong>
+            <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s suppress appetite and can worsen eating disorder pathology.</div>
+          </div>
+
+          <!-- Type 1 Diabetes Tab -->
+          <div class="scr-tab-content" data-condition-content="diabetes-t1">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">💉 Type 1 Diabetes</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Also known as:</strong> Insulin-dependent diabetes mellitus (IDDM)</div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s are not licensed for Type 1 diabetes treatment. Risk of diabetic ketoacidosis.</div>
+          </div>
+
+          <!-- Liver Conditions Tab -->
+          <div class="scr-tab-content" data-condition-content="liver">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🫀 Liver Conditions</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Conditions:</strong>
               <ul class="protocol-list">
-                <li>Januvia [sitagliptin]</li>
-                <li>Galvus [vildagliptin]</li>
-                <li>Trajenta [linagliptin]</li>
+                <li><strong>Liver cirrhosis</strong></li>
+                <li><strong>Liver transplant</strong></li>
+                <li><strong>Severe hepatic impairment</strong></li>
               </ul>
-              <strong style="color: var(--warning);">Thiazolidinediones:</strong>
+            </div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> Severe liver impairment affects drug metabolism and safety.</div>
+          </div>
+
+          <!-- Endocrine Disorders Tab -->
+          <div class="scr-tab-content" data-condition-content="endocrine">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">⚕️ Endocrine Disorders</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Conditions:</strong>
               <ul class="protocol-list">
-                <li>Actos [pioglitazone]</li>
+                <li><strong>Acromegaly</strong> (Growth hormone disorder)</li>
+                <li><strong>Cushing's syndrome</strong></li>
+                <li><strong>Addison's disease</strong> (Adrenal insufficiency)</li>
+                <li><strong>Congenital Adrenal Hyperplasia</strong></li>
+                <li><strong>Overactive thyroid</strong> awaiting radioactive iodine or surgery</li>
               </ul>
+            </div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> These hormonal disorders can cause secondary obesity requiring specialist management.</div>
+          </div>
+
+          <!-- GI Conditions Tab -->
+          <div class="scr-tab-content" data-condition-content="gi">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🩺 GI Conditions</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Conditions:</strong>
+              <ul class="protocol-list">
+                <li><strong>Ulcerative Colitis</strong></li>
+                <li><strong>Crohn's disease</strong></li>
+                <li><strong>Gastroparesis</strong> (delayed gastric emptying)</li>
+                <li><strong>Chronic malabsorption syndrome</strong></li>
+              </ul>
+            </div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s delay gastric emptying which can worsen these conditions.</div>
+          </div>
+
+          <!-- Thyroid & Cancer Tab -->
+          <div class="scr-tab-content" data-condition-content="thyroid-cancer">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🎗️ Thyroid & Cancer</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Conditions:</strong>
+              <ul class="protocol-list">
+                <li><strong>Multiple Endocrine Neoplasia type 2 (MEN2)</strong></li>
+                <li><strong>Medullary Thyroid cancer</strong> (personal or family history)</li>
+                <li><strong>Thyroid disease</strong> — for <strong>Nevolat prescriptions ONLY</strong></li>
+                <li><strong>Any form of cancer</strong> currently being treated by specialist</li>
+              </ul>
+            </div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> GLP-1s have black box warning against use with medullary thyroid cancer or MEN2.</div>
+          </div>
+
+          <!-- Medications Tab -->
+          <div class="scr-tab-content" data-condition-content="medications">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">💊 Contraindicated Medications</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT</span> if on <strong>repeat medication list</strong></div>
+
+            <div style="margin-top: 16px;">
+              <div class="protocol-section-title" style="color: var(--danger);">Insulin:</div>
+              <ul class="protocol-list">
+                <li>Any insulin on repeat medication list</li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="protocol-section-title" style="color: var(--danger);">Oral Diabetic Medications:</div>
+              <div class="scr-two-col">
+                <div>
+                  <strong style="color: var(--warning);">Sulfonylureas:</strong>
+                  <ul class="protocol-list">
+                    <li>Diamicron [gliclazide]</li>
+                    <li>Daonil [glibenclamide]</li>
+                    <li>Rastin [tolbutamide]</li>
+                  </ul>
+                  <strong style="color: var(--warning);">SGLT2 inhibitors:</strong>
+                  <ul class="protocol-list">
+                    <li>Jardiance [empagliflozin]</li>
+                    <li>Forxiga [dapagliflozin]</li>
+                    <li>Invokana [canagliflozin]</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong style="color: var(--warning);">DPP-4 inhibitors:</strong>
+                  <ul class="protocol-list">
+                    <li>Januvia [sitagliptin]</li>
+                    <li>Galvus [vildagliptin]</li>
+                    <li>Trajenta [linagliptin]</li>
+                  </ul>
+                  <strong style="color: var(--warning);">Thiazolidinediones:</strong>
+                  <ul class="protocol-list">
+                    <li>Actos [pioglitazone]</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="protocol-section-title" style="color: var(--danger);">Narrow Therapeutic Index Medications:</div>
+              <div class="scr-two-col">
+                <div>
+                  <ul class="protocol-list">
+                    <li>Amiodarone</li>
+                    <li>Carbamazepine</li>
+                    <li>Ciclosporin</li>
+                    <li>Clozapine</li>
+                    <li>Digoxin</li>
+                    <li>Fenfluramine</li>
+                    <li>Lithium</li>
+                    <li>Mycophenolate mofetil</li>
+                  </ul>
+                </div>
+                <div>
+                  <ul class="protocol-list">
+                    <li>Oral methotrexate</li>
+                    <li>Phenobarbital</li>
+                    <li>Phenytoin</li>
+                    <li>Somatrogon</li>
+                    <li>Tacrolimus</li>
+                    <li>Theophylline</li>
+                    <li>Warfarin</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <div class="protocol-section-title" style="margin-top: 16px; color: var(--danger);">Narrow Therapeutic Index Medications:</div>
-          <div class="scr-two-col">
-            <div>
-              <ul class="protocol-list">
-                <li>Amiodarone</li>
-                <li>Carbamazepine</li>
-                <li>Ciclosporin</li>
-                <li>Clozapine</li>
-                <li>Digoxin</li>
-                <li>Fenfluramine</li>
-                <li>Lithium</li>
-                <li>Mycophenolate mofetil</li>
-              </ul>
-            </div>
-            <div>
-              <ul class="protocol-list">
-                <li>Oral methotrexate</li>
-                <li>Phenobarbital</li>
-                <li>Phenytoin</li>
-                <li>Somatrogon</li>
-                <li>Tacrolimus</li>
-                <li>Theophylline</li>
-                <li>Warfarin</li>
-              </ul>
-            </div>
+
+          <!-- Kidney Disease Tab -->
+          <div class="scr-tab-content" data-condition-content="kidney">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">🫘 Kidney Disease</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Condition:</strong> Chronic kidney disease with eGFR less than 30ml/min (severe/Stage 4-5)</div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> Severe renal impairment affects drug clearance and increases risk of adverse effects.</div>
+            <div class="scr-condition-row"><strong>If needed:</strong> Request eGFR result using <a href="#macro-5" onclick="navigateToMacro(5); return false;" class="tag blue">Macro 5</a></div>
           </div>
+
+          <!-- Cardiac Conditions Tab -->
+          <div class="scr-tab-content" data-condition-content="cardiac">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">❤️ Cardiac Conditions</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span></div>
+            <div class="scr-condition-row"><strong>Conditions:</strong>
+              <ul class="protocol-list">
+                <li><strong>Heart failure</strong> with shortness of breath at rest (Stage IV)</li>
+                <li><strong>Active retinopathy</strong></li>
+              </ul>
+            </div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> Severe heart failure increases risk of adverse cardiovascular events.</div>
+            <div class="scr-condition-row"><strong>If needed:</strong> Request cardiology letter using <a href="#macro-4" onclick="navigateToMacro(4); return false;" class="tag blue">Macro 4</a></div>
+          </div>
+
         </div>
+        <!-- End scr-tabbed-conditions -->
 
         </div>
         <!-- End Tab 1 -->
@@ -5186,21 +5324,486 @@ const ContentManager = {
         <!-- Tab 2: Time-Sensitive Conditions -->
         <div class="protocol-tab-content" data-tab-content="time-sensitive">
 
-        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid var(--border);">Time-Sensitive Conditions</h2>
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px;">Time-Sensitive Conditions</h2>
 
-        <div class="info-card orange" style="margin-bottom: 20px;">
+        <div class="info-card orange" style="margin-bottom: 24px;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
               <circle cx="12" cy="12" r="10"/>
               <path d="M12 6v6l4 2"/>
             </svg>
             <div>
-              <strong>Timing Matters:</strong> If timing information is missing, email patient using <strong>Macro 1</strong>. Reject when timing falls within contraindication window.
+              <strong>Timing Matters:</strong> If timing information is missing, email patient using <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a>. Reject when timing falls within contraindication window.
             </div>
           </div>
         </div>
 
-        <div class="protocol-card" id="bariatric-surgery">
+        <!-- Nested Condition Tabs -->
+        <div class="scr-tabbed-conditions">
+          <div class="scr-tabs">
+            <button class="scr-tab active" data-condition="bariatric">🔪 Bariatric Surgery</button>
+            <button class="scr-tab" data-condition="gallbladder">🫀 Gallbladder Removal</button>
+            <button class="scr-tab" data-condition="diabetic-meds">💊 Diabetic Medications</button>
+            <button class="scr-tab" data-condition="nti-meds">⚠️ NTI Medications</button>
+            <button class="scr-tab" data-condition="orlistat">💊 Orlistat</button>
+          </div>
+
+          <!-- Bariatric Surgery Tab -->
+          <div class="scr-tab-content active" data-condition-content="bariatric">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">🔪 Bariatric Surgery</h3>
+            <div class="scr-condition-row"><strong>Time Restriction:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months post-surgery</div>
+            <div class="scr-condition-row"><strong>Safe to Prescribe:</strong> If surgery was ≥12 months ago (1 year or more)</div>
+            <div class="scr-condition-row"><strong>Surgery Types:</strong>
+              <ul class="protocol-list">
+                <li>Roux-en-Y Gastric Bypass (RYGB)</li>
+                <li>Sleeve Gastrectomy</li>
+                <li>Adjustable Gastric Band (Lap-Band)</li>
+                <li>Biliopancreatic Diversion with Duodenal Switch (BPD/DS)</li>
+                <li>Mini Gastric Bypass (OAGB)</li>
+                <li>Endoscopic Bariatric Procedures (gastric balloon)</li>
+              </ul>
+            </div>
+            <div class="scr-condition-row"><strong>If timing unknown:</strong> Email using <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+          </div>
+
+          <!-- Gallbladder Removal Tab -->
+          <div class="scr-tab-content" data-condition-content="gallbladder">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">🫀 Cholecystectomy (Gallbladder Removal)</h3>
+            <div class="scr-condition-row"><strong>Time Restriction:</strong> <span class="decision-reject">REJECT</span> if &lt;12 months post-surgery</div>
+            <div class="scr-condition-row"><strong>Safe to Prescribe:</strong> If surgery was ≥12 months ago (1 year or more)</div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> Increased risk of gallstones with GLP-1s. 12-month recovery period needed.</div>
+            <div class="scr-condition-row"><strong>If timing unknown:</strong> Email using <a href="#macro-1" onclick="navigateToMacro(1); return false;" class="tag blue">Macro 1</a></div>
+          </div>
+
+          <!-- Diabetic Medications Tab -->
+          <div class="scr-tab-content" data-condition-content="diabetic-meds">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">💊 Insulin or Oral Diabetic Medications</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT</span> if EITHER condition applies:</div>
+            <div class="scr-condition-row">
+              <ul class="protocol-list">
+                <li>Prescribed within last <strong>3 months as acute</strong></li>
+                <li><strong>OR</strong> present on <strong>repeat medication list</strong></li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="protocol-section-title" style="color: var(--danger);">Oral Diabetic Medications:</div>
+              <div class="scr-two-col">
+                <div>
+                  <strong style="color: var(--warning);">Sulfonylureas:</strong>
+                  <ul class="protocol-list">
+                    <li>Diamicron [gliclazide]</li>
+                    <li>Daonil [glibenclamide]</li>
+                    <li>Rastin [tolbutamide]</li>
+                  </ul>
+                  <strong style="color: var(--warning);">SGLT2 inhibitors:</strong>
+                  <ul class="protocol-list">
+                    <li>Jardiance [empagliflozin]</li>
+                    <li>Forxiga [dapagliflozin]</li>
+                    <li>Invokana [canagliflozin]</li>
+                  </ul>
+                </div>
+                <div>
+                  <strong style="color: var(--warning);">DPP-4 inhibitors:</strong>
+                  <ul class="protocol-list">
+                    <li>Januvia [sitagliptin]</li>
+                    <li>Galvus [vildagliptin]</li>
+                    <li>Trajenta [linagliptin]</li>
+                  </ul>
+                  <strong style="color: var(--warning);">Thiazolidinediones:</strong>
+                  <ul class="protocol-list">
+                    <li>Actos [pioglitazone]</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- NTI Medications Tab -->
+          <div class="scr-tab-content" data-condition-content="nti-meds">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">⚠️ Narrow Therapeutic Index Medications</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT</span> if EITHER condition applies:</div>
+            <div class="scr-condition-row">
+              <ul class="protocol-list">
+                <li>Prescribed within last <strong>3 months as acute</strong></li>
+                <li><strong>OR</strong> present on <strong>repeat medication list</strong></li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="protocol-section-title" style="color: var(--danger);">NTI Medications List:</div>
+              <div class="scr-two-col">
+                <div>
+                  <ul class="protocol-list">
+                    <li>Amiodarone</li>
+                    <li>Carbamazepine</li>
+                    <li>Ciclosporin</li>
+                    <li>Clozapine</li>
+                    <li>Digoxin</li>
+                    <li>Fenfluramine</li>
+                    <li>Lithium</li>
+                    <li>Mycophenolate mofetil</li>
+                  </ul>
+                </div>
+                <div>
+                  <ul class="protocol-list">
+                    <li>Oral methotrexate</li>
+                    <li>Phenobarbital</li>
+                    <li>Phenytoin</li>
+                    <li>Somatrogon</li>
+                    <li>Tacrolimus</li>
+                    <li>Theophylline</li>
+                    <li>Warfarin</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div class="scr-condition-row" style="margin-top: 16px;"><strong>Rationale:</strong> GLP-1s delay gastric emptying, which can affect absorption and blood levels of these medications.</div>
+          </div>
+
+          <!-- Orlistat Tab -->
+          <div class="scr-tab-content" data-condition-content="orlistat">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">💊 Orlistat (Alli / Xenical)</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT</span> if GLP prescribed &lt;1 month after stopping Orlistat</div>
+            <div class="scr-condition-row"><strong>Requirement:</strong> Patient must be off Orlistat for at least 1 month before starting GLP-1</div>
+            <div class="scr-condition-row"><strong>Rationale:</strong> Concurrent use is contraindicated.</div>
+
+            <div class="info-card warning" style="margin-top: 16px;">
+              <div class="info-card-title">⚠️ Edge Case: Transfer Patients with Recent PUE</div>
+              <div class="info-card-text">Transfer patients will have PUE for the past month. In these cases, <strong>follow up with email</strong> rather than rejecting. Use <a href="#macro-16" onclick="navigateToMacro(16); return false;" style="color: var(--accent);">Macro 16: PUE 2 Weeks Old</a></div>
+            </div>
+          </div>
+
+        </div>
+        <!-- End scr-tabbed-conditions -->
+
+        </div>
+        <!-- End Tab 2 -->
+
+        <!-- Tab 3: Clinical Details Required -->
+        <div class="protocol-tab-content" data-tab-content="clinical-details">
+
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px;">Clinical Details Required</h2>
+
+        <div class="info-card blue" style="margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
+              <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            <div>
+              <strong>Missing Information:</strong> Email patient to gather required information before making a decision.
+            </div>
+          </div>
+        </div>
+
+        <!-- Nested Condition Tabs -->
+        <div class="scr-tabbed-conditions">
+          <div class="scr-tabs">
+            <button class="scr-tab active" data-condition="gallstones">🫀 Gallstones</button>
+            <button class="scr-tab" data-condition="heart-failure">❤️ Heart Failure</button>
+            <button class="scr-tab" data-condition="ckd">🫘 Chronic Kidney Disease</button>
+          </div>
+
+          <!-- Gallstones Tab -->
+          <div class="scr-tab-content active" data-condition-content="gallstones">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">🫀 Cholelithiasis (Gallstones) or Cholecystitis</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> If no evidence of cholecystectomy → <strong>Hold order</strong></div>
+            <div class="scr-condition-row"><strong>Email patient:</strong> <a href="#macro-2" onclick="navigateToMacro(2); return false;" class="tag blue">Macro 2</a></div>
+            <div class="scr-condition-row"><strong>Question to ask:</strong> "Have you had your gallbladder removed? If yes, when?"</div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">Patient confirms <strong>NO cholecystectomy</strong> (gallbladder still present)</div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">Cholecystectomy confirmed by patient (even if not visible on SCR)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Heart Failure Tab -->
+          <div class="scr-tab-content" data-condition-content="heart-failure">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">❤️ Heart Failure (HF)</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> If no information on stage → <strong>Email patient</strong></div>
+            <div class="scr-condition-row"><strong>Email patient:</strong> <a href="#macro-4" onclick="navigateToMacro(4); return false;" class="tag blue">Macro 4</a></div>
+            <div class="scr-condition-row"><strong>Request:</strong> Last letter from cardiologist stating stage OR fitness for GLP-1</div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">Patient confirms <strong>Stage IV heart failure</strong> (shortness of breath at rest)</div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">Stage I, II, or III confirmed</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CKD Tab -->
+          <div class="scr-tab-content" data-condition-content="ckd">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">🫘 Chronic Kidney Disease (CKD)</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> If no eGFR information → <strong>Email patient</strong></div>
+            <div class="scr-condition-row"><strong>Email patient:</strong> <a href="#macro-5" onclick="navigateToMacro(5); return false;" class="tag blue">Macro 5</a></div>
+            <div class="scr-condition-row"><strong>Request:</strong> Most recent eGFR result</div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">eGFR <strong>&lt;30 ml/min</strong> (Stage 4-5 / Severe CKD)</div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">eGFR ≥30 ml/min (Stage 1-3)</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- End scr-tabbed-conditions -->
+
+        </div>
+        <!-- End Tab 3 -->
+
+        <!-- Tab 4: Patient Assessment Required -->
+        <div class="protocol-tab-content" data-tab-content="patient-assessment">
+
+        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 20px;">Patient Assessment Required</h2>
+
+        <div class="info-card purple" style="margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px; flex-shrink: 0;">
+              <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+              <circle cx="8.5" cy="7" r="4"/>
+              <path d="M20 8v6M23 11h-6"/>
+            </svg>
+            <div>
+              <strong>Clinical Judgment:</strong> These conditions require individual assessment. Email patient for details and use clinical judgment to determine safety.
+            </div>
+          </div>
+        </div>
+
+        <!-- Nested Condition Tabs -->
+        <div class="scr-tabbed-conditions">
+          <div class="scr-tabs">
+            <button class="scr-tab active" data-condition="cancer">🎗️ Cancer</button>
+            <button class="scr-tab" data-condition="pregnancy">🤰 Pregnancy</button>
+            <button class="scr-tab" data-condition="dementia">🧠 Dementia</button>
+            <button class="scr-tab" data-condition="malabsorption">🩺 Malabsorption</button>
+            <button class="scr-tab" data-condition="mental-health">💭 Mental Health</button>
+            <button class="scr-tab" data-condition="suicidal">⚠️ Suicidal Ideation</button>
+            <button class="scr-tab" data-condition="alcohol">🍺 Alcohol</button>
+          </div>
+
+          <!-- Cancer Tab -->
+          <div class="scr-tab-content active" data-condition-content="cancer">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--accent);">🎗️ Cancer Diagnosis</h3>
+            <div class="scr-condition-row"><strong>Exclusion:</strong> Medullary thyroid cancer and MEN2 are <strong>absolute contraindications</strong></div>
+            <div class="scr-condition-row"><strong>For general cancer:</strong> Email patient using <a href="#macro-3" onclick="navigateToMacro(3); return false;" class="tag blue">Macro 3</a></div>
+            <div class="scr-condition-row"><strong>For breast cancer specifically:</strong> Email patient using <a href="#macro-31" onclick="navigateToMacro(31); return false;" class="tag blue">Macro 31</a></div>
+            <div class="scr-condition-row"><strong>Information needed:</strong>
+              <ul class="protocol-list">
+                <li>Treatment status (active, in remission, cured)</li>
+                <li>Remission status and duration</li>
+                <li>Oncology team discharge status</li>
+                <li><strong>For breast cancer:</strong> Whether on hormone therapy only (e.g., tamoxifen, Zoladex)</li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card blue">
+                <div class="info-card-title">⚕️ Breast Cancer - Special Consideration</div>
+                <div class="info-card-text">Breast cancer history requires clarification, not automatic rejection. Email patient to confirm current cancer status before making decision.</div>
+              </div>
+              <div class="info-card red" style="margin-top: 8px;">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">
+                  <ul class="protocol-list">
+                    <li>Currently under oncology care</li>
+                    <li>Receiving active cancer treatment (chemotherapy, radiotherapy, targeted therapy)</li>
+                    <li>Recent recurrence or spread of cancer</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">
+                  <ul class="protocol-list">
+                    <li>Cancer in remission and discharged from oncology team</li>
+                    <li>On long-term hormone therapy only (tamoxifen/Zoladex) with no active treatment</li>
+                    <li>No recent recurrence or current oncology involvement</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pregnancy Tab -->
+          <div class="scr-tab-content" data-condition-content="pregnancy">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--accent);">🤰 Pregnancy, Breastfeeding & Conception</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> Email patient using <a href="#macro-6" onclick="navigateToMacro(6); return false;" class="tag blue">Macro 6</a></div>
+            <div class="scr-condition-row"><strong>Questions to ask:</strong>
+              <ul class="protocol-list">
+                <li>Are you currently pregnant?</li>
+                <li>Are you breastfeeding?</li>
+                <li>Are you trying to conceive?</li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">
+                  <ul class="protocol-list">
+                    <li>Currently pregnant</li>
+                    <li>Breastfeeding</li>
+                    <li>Planning pregnancy within 3 months</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">Patient confirms none of the above apply</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dementia Tab -->
+          <div class="scr-tab-content" data-condition-content="dementia">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--accent);">🧠 Dementia / Cognitive Impairment</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> Email patient using <a href="#macro-7" onclick="navigateToMacro(7); return false;" class="tag blue">Macro 7</a></div>
+            <div class="scr-condition-row"><strong>Assessment needed:</strong>
+              <ul class="protocol-list">
+                <li>How they manage at home day-to-day</li>
+                <li>Whether they have help or support at home</li>
+                <li>Ability to safely use injectable medication</li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">Patient unable to safely self-administer medication or lacks adequate support</div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">Patient has adequate support and can safely use medication</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Malabsorption Tab -->
+          <div class="scr-tab-content" data-condition-content="malabsorption">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--accent);">🩺 Chronic Malabsorption</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> Email patient using <a href="#macro-8" onclick="navigateToMacro(8); return false;" class="tag blue">Macro 8</a></div>
+            <div class="scr-condition-row"><strong>Request:</strong> Evidence of formal diagnosis OR letter from specialist</div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">Patient provides evidence of formal chronic malabsorption syndrome diagnosis</div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">No formal diagnosis confirmed (may be historical/resolved)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mental Health Tab -->
+          <div class="scr-tab-content" data-condition-content="mental-health">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--accent);">💭 Depression or Anxiety</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> Email patient using <a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a></div>
+            <div class="scr-condition-row"><strong>Assessment questions:</strong>
+              <ul class="protocol-list">
+                <li>How has your mood been recently?</li>
+                <li>Has your mood changed in past few weeks/months?</li>
+                <li>Any thoughts of self-harm?</li>
+                <li>Any thoughts of ending your life?</li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">
+                  <ul class="protocol-list">
+                    <li>Acutely unwell &lt;3 months</li>
+                    <li>Started new antidepressant recently</li>
+                    <li>Active thoughts of self-harm or suicide</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card warning" style="margin-top: 8px;">
+                <div class="info-card-title">⚠️ Crisis Support</div>
+                <div class="info-card-text">If patient reports active suicidal ideation, direct them to GP or crisis services (Samaritans: 116 123)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Suicidal Ideation Tab -->
+          <div class="scr-tab-content" data-condition-content="suicidal">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--danger);">⚠️ Active Suicidal Ideation</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> <span class="decision-reject">REJECT IMMEDIATELY</span> if mentioned in last 12 months</div>
+            <div class="scr-condition-row"><strong>Email patient:</strong> <a href="#macro-9" onclick="navigateToMacro(9); return false;" class="tag blue">Macro 9</a> (if need to assess)</div>
+            <div class="scr-condition-row"><strong>Safety:</strong> Direct patient to immediate support:
+              <ul class="protocol-list">
+                <li>Contact GP immediately</li>
+                <li>Local crisis services</li>
+                <li>Samaritans: 116 123 (UK)</li>
+                <li>Emergency services: 999 (if immediate danger)</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Alcohol Tab -->
+          <div class="scr-tab-content" data-condition-content="alcohol">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: var(--warning);">🍺 Alcohol Abuse or Dependence</h3>
+            <div class="scr-condition-row"><strong>Action:</strong> Email patient using <a href="#macro-10" onclick="navigateToMacro(10); return false;" class="tag blue">Macro 10</a></div>
+            <div class="scr-condition-row"><strong>CAGE Screening Questions:</strong>
+              <ul class="protocol-list">
+                <li>How much are you currently drinking?</li>
+                <li>Have you felt you ought to <strong>Cut down</strong>?</li>
+                <li>Do you get <strong>Annoyed</strong> by criticism of your drinking?</li>
+                <li>Do you feel <strong>Guilty</strong> about drinking?</li>
+                <li>Do you need an <strong>Eye-opener</strong> (morning drink)?</li>
+              </ul>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <div class="info-card red">
+                <div class="info-card-title">REJECT if:</div>
+                <div class="info-card-text">
+                  <ul class="protocol-list">
+                    <li>Current alcohol abuse or dependence</li>
+                    <li>Alcohol abuse mentioned in last 12 months</li>
+                    <li>In treatment/rehabilitation</li>
+                  </ul>
+                </div>
+              </div>
+              <div class="info-card green" style="margin-top: 8px;">
+                <div class="info-card-title">PRESCRIBE if:</div>
+                <div class="info-card-text">Historical alcohol issues (>12 months ago) and currently stable</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- End scr-tabbed-conditions -->
+
+        </div>
+        <!-- End Tab 4 -->
+
+      </div>
+    `;
+  },
+
+  getDosageProtocolCards() {
+    return `
+      <div class="protocol-card" id="bariatric-surgery">
           <div class="protocol-title" style="display: flex; align-items: center; gap: 8px;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--warning); flex-shrink: 0;">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -7190,28 +7793,56 @@ MedExpress Clinical Team</pre>
                   Copy
                 </button>
               </div>
-              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+              <pre class="macro-text">Subject: Your tailored Nevolat guidance
 
-Thank you for choosing Nevolat for your weight loss journey.
+Hi &lt;&lt;Patient First Name&gt;&gt;,
 
-Here is your titration schedule for Nevolat:
+We hope you're well and thank you for trusting MedExpress with your weight loss journey.
 
-Week 1-4: 0.25mg once weekly
-Week 5-8: 0.5mg once weekly
-Week 9-12: 1mg once weekly
-Week 13-16: 1.7mg once weekly
-Week 17+: 2.4mg once weekly (maintenance dose)
+Your prescription for Nevolat has now been issued and being sent to our dispensary for dispatch!
 
-Important tips:
-• Take your injection on the same day each week
+We'd like to make sure you have everything you need to start safely and confidently.
+
+Section 1: Your Dose
+
+The dose of Nevolat you receive depends on the volume of liquid injected. During the first 4 weeks of treatment, you will increase the dose of Nevolat each week by increasing the volume of liquid you inject.
+
+IMPORTANT: Nevolat is injected ONCE DAILY (not weekly like Wegovy/Mounjaro)
+
+Your Weekly Titration Schedule:
+
+Week 1: 0.6mg per day (inject EVERY DAY for 7 days)
+Week 2: 1.2mg per day (inject EVERY DAY for 7 days)
+Week 3: 1.8mg per day (inject EVERY DAY for 7 days)
+  Note: If you cannot select your full dose on your pen, it does not contain enough medication. Use your next pen and select the dose from there.
+Week 4: 2.4mg per day (inject EVERY DAY for 7 days)
+  Note: You will need to start using the 3rd pen in your pack this week.
+Week 5 and onwards: 3mg per day (MAINTENANCE DOSE)
+  Continue to use this dose steadily throughout your treatment.
+  If you ordered a 3 pen starter pack, your 3rd pen will run out in week 5 and you will need to order more pens.
+
+Section 2: How to Use Your Nevolat Pen
+
+You can find clear video guides and written instructions on the official Nevolat website:
+https://liraglutide.co.uk/nevolat-patient/taking-nevolat/how-to-prepare-your-pen
+
+On this page you will find short videos and information covering:
+• How to prepare and use your pen correctly
+• How to store it safely
+• What to do if you miss a dose
+
+Critical Reminders:
+• Inject ONCE DAILY at the same time each day
+• Dose depends on volume of liquid injected (see pen dial)
+• Do NOT exceed 3.0mg once daily
 • Rotate injection sites (thigh, abdomen, upper arm)
-• Store your medication in the refrigerator
-• If you miss a dose, take it as soon as you remember if within 5 days of the missed dose
-• Common side effects include nausea - this usually improves over time
+• If you miss a dose and it's within 12 hours, take it as soon as possible; otherwise, skip it and continue the next day
 
-If you have any questions about your treatment, please don't hesitate to contact us.
+If you have any questions or would like to discuss your treatment further, please contact our support team.
 
-Kind regards,
+Thank you for your continued trust in our service. We're here to make your GLP-1 journey as smooth and safe as possible.
+
+Warm regards,
 MedExpress Clinical Team</pre>
             </div>
           </div>
@@ -7247,22 +7878,197 @@ MedExpress Clinical Team</pre>
                   Copy
                 </button>
               </div>
+              <pre class="macro-text">Subject: Your tailored Nevolat guidance
+
+Hi &lt;&lt;Patient First Name&gt;&gt;,
+
+We hope you're well.
+
+Your prescription for Nevolat has now been issued and being sent to our dispensary for dispatch!
+
+We'd like to make sure you have everything you need to start safely and confidently.
+
+Section 1: Your Dose
+
+As you are able to tolerate GLP1s, we are pleased to inform you that you do not need to start on the lowest dose of Nevolat.
+
+Please set your Nevolat pen to the following dose: &lt;&lt;INSERT PATIENT-SPECIFIC DOSE&gt;&gt;
+
+This dose matches your previous treatment step, so you can continue your weight loss journey without interruption.
+
+If you experience any new or unexpected side effects, please contact us or your clinician promptly.
+
+A week after you have been on this dose, please increase your dose to the next dose in 0.6mg increments.
+
+For example, if you are now on 1.8mg, on your next week of Nevolat increase to 2.4mg and the following week to 3mg, until you reach 3mg (maximum dose).
+
+Section 2: How to Use Your Nevolat Pen
+
+You can find clear video guides and written instructions on the official Nevolat website:
+https://liraglutide.co.uk/nevolat-patient/taking-nevolat/how-to-prepare-your-pen
+
+On this page you will find short videos and information covering:
+• How to prepare and use your pen correctly
+• How to store it safely
+• What to do if you miss a dose
+
+Section 3: Switching to Nevolat
+
+It's really important to make sure that you are not taking 2 GLP-1 medications at the same time. Because you are switching from a weekly injection to a DAILY injection, please make sure you do not start your Nevolat pen until you are due to take your next weekly injection. Then, you can transition smoothly to injecting Nevolat daily safely.
+
+Critical Reminders:
+• Nevolat is injected ONCE DAILY (not weekly like Wegovy/Mounjaro)
+• Start first Nevolat dose when your next weekly injection would be due
+• Do NOT take both medications together
+• Do NOT exceed 3.0mg once daily
+
+If you have any questions or would like to discuss your treatment further, please contact our support team.
+
+Thank you for your continued trust in our service. We're here to make your GLP-1 journey as smooth and safe as possible.
+
+Warm regards,
+MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 27 - Nevolat Maintenance Dose -->
+        <div class="macro-card" id="macro-27">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 27</span>
+              <span class="macro-name">Nevolat Maintenance Dose (3mg)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag teal">Nevolat</span>
+              <span class="tag green">Maintenance</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient on Nevolat has reached the maintenance dose of 3mg daily.
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
               <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
 
-Thank you for your order. We can see you are switching to Nevolat from [Wegovy/Mounjaro].
+Congratulations on reaching your Nevolat maintenance dose!
 
-Based on your previous dose, we recommend starting Nevolat at [RECOMMENDED DOSE].
+You are now on the maximum dose of Nevolat: 3mg once daily.
 
-Important information for switching:
-• Take your first Nevolat dose on the day your next [Wegovy/Mounjaro] dose would have been due
-• Do not take both medications together
-• You may experience some difference in side effects as your body adjusts to the new medication
-• Continue with your regular weekly injection schedule
+Important reminders:
+• Continue injecting 3mg EVERY DAY at the same time
+• Do NOT exceed 3.0mg once daily
+• Rotate injection sites (thigh, abdomen, upper arm)
+• Continue monitoring your weight and side effects
 
-If you have any questions or experience any concerning side effects, please contact us.
+This is your maintenance dose - you should stay at 3mg daily unless advised otherwise by your clinician.
+
+You can find clear video guides and written instructions on the official Nevolat website:
+https://liraglutide.co.uk/nevolat-patient/taking-nevolat/how-to-prepare-your-pen
+
+If you have any questions or concerns, please contact us.
 
 Kind regards,
 MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 28 - Thyroid/Liver Disease Rejection for Nevolat -->
+        <div class="macro-card" id="macro-28">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 28</span>
+              <span class="macro-name">Rejection: Thyroid/Liver Disease (Nevolat Contraindication)</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag red">Rejection</span>
+              <span class="tag teal">Nevolat</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Rejecting Nevolat order due to thyroid or liver disease. Patient CAN use Mounjaro or Wegovy instead.
+            </div>
+            <div class="macro-info-box">
+              <div class="info-title">🚨 CRITICAL SAFETY INFORMATION</div>
+              <p>Nevolat (liraglutide) is specifically contraindicated for patients with ANY thyroid disease or liver disease/impairment. This is a medication-specific restriction that does NOT apply to Mounjaro (tirzepatide) or Wegovy (semaglutide).</p>
+              <p><strong>Patient CAN still use GLP-1 medications</strong> - just not Nevolat. Offer Mounjaro or Wegovy as alternatives.</p>
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your order with MedExpress.
+
+After reviewing your medical history, we regret to inform you that we cannot prescribe Nevolat at this time.
+
+Our records show you have &lt;&lt;thyroid disease/liver disease/liver impairment&gt;&gt;. Nevolat (liraglutide) is specifically contraindicated for patients with thyroid or liver conditions.
+
+GOOD NEWS: You CAN still use GLP-1 medications for weight loss!
+
+We can prescribe either:
+• Mounjaro (tirzepatide), OR
+• Wegovy (semaglutide)
+
+These medications are equally effective for weight loss and do NOT have the same thyroid/liver restriction.
+
+What to do next:
+1. Place a new order on our website
+2. Select either Mounjaro or Wegovy from the Choose Treatment Page
+3. Choose the appropriate starter dose for your situation
+4. Your order will be reviewed and processed normally
+
+If you have any questions about which medication to choose, or need help placing a new order, please don't hesitate to contact our Customer Support team on 0208 123 0508 or reply to this email.
+
+We look forward to supporting you on your weight loss journey with the right medication for your needs.
+
+Kind regards,
+MedExpress Clinical Team</pre>
+            </div>
+            <div class="macro-decision-guide">
+              <div class="decision-section reject">
+                <div class="decision-title">❌ REJECT Nevolat if patient has:</div>
+                <ul>
+                  <li>ANY thyroid disease (hypothyroidism, hyperthyroidism, thyroid nodules, etc.)</li>
+                  <li>ANY liver disease or liver impairment</li>
+                  <li>Taking levothyroxine or other thyroid medications</li>
+                  <li>History of thyroid/liver conditions even if currently managed</li>
+                </ul>
+              </div>
+              <div class="decision-section approve">
+                <div class="decision-title">✅ Patient CAN receive:</div>
+                <ul>
+                  <li>Mounjaro (tirzepatide) - NO thyroid/liver restriction</li>
+                  <li>Wegovy (semaglutide) - NO thyroid/liver restriction</li>
+                  <li>Direct patient to place new order with correct medication</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -7482,6 +8288,92 @@ Your order will be placed on hold whilst we await your response.
 
 Kind Regards,
 MedExpress Clinical Team</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Macro 31 - Breast Cancer History -->
+        <div class="macro-card" id="macro-31">
+          <div class="macro-header" onclick="this.parentElement.classList.toggle('expanded')">
+            <div class="macro-title">
+              <span class="macro-number">Macro 31</span>
+              <span class="macro-name">Breast Cancer History Clarification</span>
+            </div>
+            <div class="macro-tags">
+              <span class="tag purple">Cancer</span>
+              <span class="tag blue">Clarification</span>
+            </div>
+            <svg class="macro-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="macro-content">
+            <div class="macro-description">
+              <strong>Use when:</strong> Patient has breast cancer history in their SCR. This requires further information, NOT automatic rejection. Email patient to confirm current cancer status and treatment details before prescribing.
+            </div>
+            <div class="macro-info-box">
+              <div class="info-title">📋 What the SOP Requires</div>
+              <p>The SOP flags "any cancer diagnosis (excluding MEN2 or medullary thyroid cancer)" as a condition requiring clarification on whether the cancer is active and if oncology is still involved.</p>
+              <p><strong>GLP-1 may be prescribed if:</strong></p>
+              <ul>
+                <li>Cancer is in remission</li>
+                <li>Patient is NOT on active chemotherapy/radiotherapy or under current oncology care</li>
+                <li>Patient remains on hormone therapy only (e.g., tamoxifen until 2027) - this is permitted</li>
+              </ul>
+            </div>
+            <div class="macro-template">
+              <div class="macro-template-header">
+                <span>Email Template</span>
+                <button class="copy-btn" onclick="copyMacro(this)">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                  </svg>
+                  Copy
+                </button>
+              </div>
+              <pre class="macro-text">Subject: Follow-Up on Your Breast Cancer Medical History
+
+Dear &lt;&lt;Patient Name&gt;&gt;,
+
+Thank you for your recent order with MedExpress. We have reviewed your medical history and would like to clarify some information regarding your breast cancer diagnosis before we can proceed with your prescription.
+
+Could you please confirm the following:
+
+1. Are you currently under the care of an oncology team for your breast cancer?
+
+2. Are you receiving any active cancer treatments now or planned soon? (e.g., chemotherapy, radiotherapy, targeted therapy)
+
+3. Are you on long-term hormone therapy only (e.g., tamoxifen, Zoladex)? If so, has there been any recent recurrence or spread of the cancer?
+
+Please note that being on long-term hormone therapy alone does not prevent us from prescribing GLP-1 medication, as long as you are not receiving active cancer treatment and are not currently under oncology care.
+
+Your response will help us ensure that this medication is safe and appropriate for you.
+
+Thank you for choosing MedExpress to support you on your weight loss journey. We look forward to hearing from you soon.
+
+Kind regards,
+&lt;&lt;Your Name&gt;&gt;
+&lt;&lt;Your Role&gt;&gt;
+MedExpress Clinical Team</pre>
+            </div>
+            <div class="macro-decision-guide">
+              <div class="decision-section reject">
+                <div class="decision-title">❌ REJECT if patient confirms:</div>
+                <ul>
+                  <li>Currently under oncology care</li>
+                  <li>Receiving active cancer treatment (chemotherapy, radiotherapy, targeted therapy)</li>
+                  <li>Recent recurrence or spread of cancer</li>
+                </ul>
+              </div>
+              <div class="decision-section approve">
+                <div class="decision-title">✅ PRESCRIBE if patient confirms:</div>
+                <ul>
+                  <li>Cancer is in remission and discharged from oncology team</li>
+                  <li>On long-term hormone therapy only (tamoxifen/Zoladex) with no active treatment</li>
+                  <li>No recent recurrence or current oncology involvement</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -9250,8 +10142,8 @@ Proceed according to standard prescription SOP. Hold only if specific informatio
             activeContent.classList.add("active");
           }
 
-          // Reinitialize condition tabs for SCR protocol when switching main tabs
-          if (pageId === "proto-scr") {
+          // Reinitialize condition tabs when switching main tabs
+          if (pageId === "proto-scr" || pageId === "contraindications") {
             setTimeout(() => {
               if (window.initConditionTabs) {
                 window.initConditionTabs();
@@ -9261,8 +10153,8 @@ Proceed according to standard prescription SOP. Hold only if specific informatio
         });
       });
 
-      // Initialize condition tabs for SCR protocol on page load
-      if (pageId === "proto-scr") {
+      // Initialize condition tabs on page load
+      if (pageId === "proto-scr" || pageId === "contraindications") {
         setTimeout(() => {
           if (window.initConditionTabs) {
             window.initConditionTabs();
